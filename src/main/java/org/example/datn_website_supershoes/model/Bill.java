@@ -1,8 +1,16 @@
-package org.example.datn_website_supershoes.modle;
+package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,17 +26,23 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Bill extends BaseEntity{
+public class Bill extends BaseEntity {
+
     @Column
     private String nameCustomer;
+
     @Column
     private String phoneNumber;
+
     @Column
     private String address;
+
     @Column
     private String note;
+
     @Column
     private Integer type;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     private Date deliveryDate;
@@ -36,34 +50,45 @@ public class Bill extends BaseEntity{
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     private Date receiveDate;
+
     @Column
     private BigDecimal totalMerchandise;
+
     @Column
     private BigDecimal moneyShip;
+
     @Column
     private BigDecimal priceDiscount;
+
     @Column
     private BigDecimal totalAmount;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_voucher", referencedColumnName = "id")
     private Voucher voucher;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_customer", referencedColumnName = "id")
     private Account customer;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_employees", referencedColumnName = "id")
     private Account employees;
+
     @OneToOne
     private Guest guest;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "bill")
     private List<PayBill> payBills;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "bill")
     private List<BillHistory> billHistories;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "bill")
     private List<BillDetail> billDetails;

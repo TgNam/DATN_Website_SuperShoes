@@ -1,9 +1,9 @@
-package org.example.datn_website_supershoes.modle;
+package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,17 +13,17 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "Cart")
+@Table(name = "Size")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cart extends BaseEntity{
+public class Size extends BaseEntity {
 
-    @OneToOne
-    private Account account;
+    @Column
+    private String name;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "cart")
-    private List<CartDetail> cartDetails;
+    @OneToMany(mappedBy = "size")
+    private List<ProductDetail> productDetail;
 }

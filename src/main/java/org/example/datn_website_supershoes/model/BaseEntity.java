@@ -1,14 +1,22 @@
-package org.example.datn_website_supershoes.modle;
+package org.example.datn_website_supershoes.model;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.Date;
 
 @MappedSuperclass
 public class BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column
@@ -37,7 +45,7 @@ public class BaseEntity {
         this.updatedAt = new Date();
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
