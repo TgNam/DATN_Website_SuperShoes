@@ -1,8 +1,14 @@
-package org.example.datn_website_supershoes.modle;
+package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,35 +22,45 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product extends BaseEntity{
+public class Product extends BaseEntity {
+
     @Column
     private String name;
+
     @Column
     private String productCode;
+
     @Lob
-    @Column(name = "image",columnDefinition = "LONGBLOB")
+    @Column(name = "image", columnDefinition = "LONGBLOB")
     private byte[] imageByte;
+
     @Column
     private boolean gender;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "product")
     private List<ProductDetail> productDetails;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_brand", referencedColumnName = "id")
     private Brand brand;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_category", referencedColumnName = "id")
     private Category category;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_material", referencedColumnName = "id")
     private Material material;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_shoe_sole", referencedColumnName = "id")
     private ShoeSole shoeSole;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "product")
     private List<ProductFavorite> productFavorites;

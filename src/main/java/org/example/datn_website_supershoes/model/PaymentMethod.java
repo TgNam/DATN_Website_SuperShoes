@@ -1,4 +1,4 @@
-package org.example.datn_website_supershoes.modle;
+package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
@@ -13,15 +13,20 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "Brand")
+@Table(name = "PaymentMethod")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Brand extends  BaseEntity{
+public class PaymentMethod extends BaseEntity {
+
     @Column
-    private String name;
+    private String method_name;
+
+    @Column
+    private String note;
+
     @JsonManagedReference
-    @OneToMany(mappedBy = "brand")
-    private List<Product> products;
+    @OneToMany(mappedBy = "paymentMethod")
+    private List<PayBill> payBills;
 }

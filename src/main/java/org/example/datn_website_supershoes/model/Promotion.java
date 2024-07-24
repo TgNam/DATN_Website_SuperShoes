@@ -1,7 +1,12 @@
-package org.example.datn_website_supershoes.modle;
+package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,15 +21,20 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Promotion extends BaseEntity{
+public class Promotion extends BaseEntity {
+
     @Column
     private String codePromotion;
+
     @Column
     private String name;
+
     @Column
-    private double value;
+    private Double value;
+
     @Column
     private Integer type;
+
     @Column
     private String note;
 
