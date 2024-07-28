@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.VoucherRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +27,13 @@ public class VoucherService {
         return voucherRepository.findById(id);
     }
 
-    public Voucher updateVoucher(Long id) {
-        Voucher voucher = voucherRepository.findById(id).orElseThrow(() -> new RuntimeException("Voucher not found"));
+    public Voucher updateVoucher(Long id, Voucher voucherDetail) {
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voucher not found"));
+
+        // Loại trừ các thuộc tính không mong muốn
+        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
+        BeanUtils.copyProperties(voucherDetail, voucher, ignoredProperties);
         return voucherRepository.save(voucher);
     }
 

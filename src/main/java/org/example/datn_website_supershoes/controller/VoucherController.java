@@ -35,6 +35,7 @@ public class VoucherController {
         response.put("DT", listVouchers);
         response.put("EC", 0);
         response.put("EM", "GetAll list participants succeed");
+
         return ResponseEntity.ok(response);
     }
 
@@ -45,26 +46,28 @@ public class VoucherController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createVoucher(@RequestBody Voucher newVoucher) {
+    public ResponseEntity<Map<String, Object>> createVoucher(@RequestBody Voucher voucher) {
 
-        Voucher voucher = newVoucher;
         Voucher createdVoucher = voucherService.createVoucher(voucher);
+
         Map<String, Object> response = new HashMap<>();
         response.put("DT", createdVoucher);
         response.put("EC", 0);
-        response.put("EM", "Create a new participant succeed");
+        response.put("EM", "Voucher add successful");
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateVoucher(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> updateVoucher(@PathVariable Long id, @RequestBody Voucher voucher) {
 
-        Voucher updatedVoucher = voucherService.updateVoucher(id);
+        Voucher updatedVoucher = voucherService.updateVoucher(id, voucher);
+
         Map<String, Object> response = new HashMap<>();
         response.put("DT", updatedVoucher);
         response.put("EC", 0);
         response.put("EM", "Voucher update successful");
+
         return ResponseEntity.ok(response);
     }
 
