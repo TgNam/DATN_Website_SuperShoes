@@ -36,26 +36,27 @@ public class Account extends BaseEntity {
     @Column
     private Integer rewards;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "accountAddressReference")
     @OneToMany(mappedBy = "account")
     private List<Address> address;
 
     @OneToOne(mappedBy = "account")
     private Cart cart;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "accountProductFavoriteReference")
     @OneToMany(mappedBy = "account")
     private List<ProductFavorite> productFavorites;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "customerBillReference")
     @OneToMany(mappedBy = "customer")
     private List<Bill> customerBills;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "employeeBillReference")
     @OneToMany(mappedBy = "employees")
     private List<Bill> employeeBills;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "accountBillHistoryReference")
     @OneToMany(mappedBy = "account")
     private List<BillHistory> billHistories;
+
 }

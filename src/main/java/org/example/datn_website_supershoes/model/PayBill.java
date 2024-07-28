@@ -30,13 +30,14 @@ public class PayBill extends BaseEntity {
     @Column
     private String note;
 
-    @JsonBackReference
+    @JsonBackReference(value = "billPayBillReference")
     @ManyToOne
     @JoinColumn(name = "id_bill", referencedColumnName = "id")
     private Bill bill;
 
-    @JsonBackReference
+    @JsonBackReference(value = "paymentMethodPayBillReference")
     @ManyToOne
     @JoinColumn(name = "id_payment_method", referencedColumnName = "id")
     private PaymentMethod paymentMethod;
+
 }

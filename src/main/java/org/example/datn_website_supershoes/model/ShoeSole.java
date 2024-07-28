@@ -23,7 +23,8 @@ public class ShoeSole extends BaseEntity {
     @Column
     private String name;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "shoeSoleProductReference")
     @OneToMany(mappedBy = "shoeSole")
     private List<Product> products;
+
 }

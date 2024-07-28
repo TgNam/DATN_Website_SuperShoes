@@ -56,11 +56,11 @@ public class Voucher extends BaseEntity {
     @Column
     private Date endAt;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "accountVoucherReference")
     @OneToMany(mappedBy = "voucher")
     private List<AccountVoucher> accountVouchers;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "billReference")
     @OneToMany(mappedBy = "voucher")
     private List<Bill> bill;
 }

@@ -22,13 +22,14 @@ public class BillHistory extends BaseEntity {
     @Column
     private String note;
 
-    @JsonBackReference
+    @JsonBackReference(value = "billBillHistoryReference")
     @ManyToOne
-    @JoinColumn(name = "id_bill", referencedColumnName = "id")
+    @JoinColumn(name = "bill_id")
     private Bill bill;
 
-    @JsonBackReference
+    @JsonBackReference(value = "accountBillHistoryReference")
     @ManyToOne
-    @JoinColumn(name = "id_account", referencedColumnName = "id")
+    @JoinColumn(name = "account_id")
     private Account account;
+
 }

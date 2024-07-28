@@ -37,31 +37,32 @@ public class Product extends BaseEntity {
     @Column
     private boolean gender;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "productProductDetailReference")
     @OneToMany(mappedBy = "product")
     private List<ProductDetail> productDetails;
 
-    @JsonBackReference
+    @JsonBackReference(value = "brandProductReference")
     @ManyToOne
     @JoinColumn(name = "id_brand", referencedColumnName = "id")
     private Brand brand;
 
-    @JsonBackReference
+    @JsonBackReference(value = "categoryProductReference")
     @ManyToOne
     @JoinColumn(name = "id_category", referencedColumnName = "id")
     private Category category;
 
-    @JsonBackReference
+    @JsonBackReference(value = "materialProductReference")
     @ManyToOne
     @JoinColumn(name = "id_material", referencedColumnName = "id")
     private Material material;
 
-    @JsonBackReference
+    @JsonBackReference(value = "shoeSoleProductReference")
     @ManyToOne
     @JoinColumn(name = "id_shoe_sole", referencedColumnName = "id")
     private ShoeSole shoeSole;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "productProductFavoriteReference")
     @OneToMany(mappedBy = "product")
     private List<ProductFavorite> productFavorites;
+
 }

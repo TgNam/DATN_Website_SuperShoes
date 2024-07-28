@@ -26,7 +26,8 @@ public class PaymentMethod extends BaseEntity {
     @Column
     private String note;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "paymentMethodPayBillReference")
     @OneToMany(mappedBy = "paymentMethod")
     private List<PayBill> payBills;
+
 }
