@@ -29,8 +29,7 @@ public class VoucherController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllVouchers() {
-        List<Voucher> listVouchers = new ArrayList<>();
-        listVouchers = voucherService.getAllVouchers();
+        List<Voucher> listVouchers = voucherService.getAllVouchers();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", listVouchers);
         response.put("EC", 0);

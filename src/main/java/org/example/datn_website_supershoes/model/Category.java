@@ -23,7 +23,8 @@ public class Category extends BaseEntity {
     @Column
     private String name;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "categoryProductReference")
     @OneToMany(mappedBy = "category")
     private List<Product> products;
+
 }

@@ -23,7 +23,8 @@ public class Brand extends BaseEntity {
     @Column
     private String name;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "brandProductReference")
     @OneToMany(mappedBy = "brand")
     private List<Product> products;
+
 }

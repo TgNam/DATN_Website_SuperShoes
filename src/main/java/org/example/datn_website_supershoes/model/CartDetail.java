@@ -25,13 +25,14 @@ public class CartDetail extends BaseEntity {
     @Column
     private Integer quantity;
 
-    @JsonBackReference
+    @JsonBackReference(value = "cartDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_cart", referencedColumnName = "id")
     private Cart cart;
 
-    @JsonBackReference
+    @JsonBackReference(value = "productDetailCartDetailReference")
     @ManyToOne
-    @JoinColumn(name = "id_productDetail", referencedColumnName = "id")
+    @JoinColumn(name = "product_detail_id")
     private ProductDetail productDetail;
+
 }

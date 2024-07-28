@@ -26,7 +26,8 @@ public class Color extends BaseEntity {
     @Column
     private String codeColor;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "colorProductDetailReference")
     @OneToMany(mappedBy = "color")
     private List<ProductDetail> productDetail;
+
 }

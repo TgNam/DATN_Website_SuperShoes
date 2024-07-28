@@ -46,7 +46,8 @@ public class Promotion extends BaseEntity {
     @Column
     private Date endAt;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "promotionPromotionDetailReference")
     @OneToMany(mappedBy = "promotion")
     private List<PromotionDetail> promotionDetail;
+
 }

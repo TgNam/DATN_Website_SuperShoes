@@ -23,7 +23,8 @@ public class Cart extends BaseEntity {
     @OneToOne
     private Account account;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "cartDetailReference")
     @OneToMany(mappedBy = "cart")
     private List<CartDetail> cartDetails;
+
 }

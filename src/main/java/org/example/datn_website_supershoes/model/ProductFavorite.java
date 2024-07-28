@@ -18,13 +18,14 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProductFavorite extends BaseEntity {
 
-    @JsonBackReference
+    @JsonBackReference(value = "accountProductFavoriteReference")
     @ManyToOne
     @JoinColumn(name = "id_account", referencedColumnName = "id")
     private Account account;
 
-    @JsonBackReference
+    @JsonBackReference(value = "productProductFavoriteReference")
     @ManyToOne
     @JoinColumn(name = "id_product", referencedColumnName = "id")
     private Product product;
+
 }

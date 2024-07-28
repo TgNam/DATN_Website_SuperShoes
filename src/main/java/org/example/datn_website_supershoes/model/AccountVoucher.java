@@ -27,13 +27,14 @@ public class AccountVoucher extends BaseEntity {
     @Column
     private Date dateOfUse;
 
-    @JsonBackReference
+    @JsonBackReference(value = "accountReference")
     @ManyToOne
     @JoinColumn(name = "id_account", referencedColumnName = "id")
     private Account account;
 
-    @JsonBackReference
+    @JsonBackReference(value = "accountVoucherReference")
     @ManyToOne
-    @JoinColumn(name = "id_voucher", referencedColumnName = "id")
+    @JoinColumn(name = "voucher_id")
     private Voucher voucher;
+
 }

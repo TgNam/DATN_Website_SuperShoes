@@ -23,7 +23,8 @@ public class Material extends BaseEntity {
     @Column
     private String name;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "materialProductReference")
     @OneToMany(mappedBy = "material")
     private List<Product> products;
+
 }

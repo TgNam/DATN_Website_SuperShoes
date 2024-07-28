@@ -63,33 +63,34 @@ public class Bill extends BaseEntity {
     @Column
     private BigDecimal totalAmount;
 
-    @JsonBackReference
+    @OneToOne
+    @JoinColumn(name = "guest_id")
+    private Guest guest;
+
+    @JsonBackReference(value = "billReference")
     @ManyToOne
-    @JoinColumn(name = "id_voucher", referencedColumnName = "id")
+    @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
-    @JsonBackReference
+    @JsonBackReference(value = "customerBillReference")
     @ManyToOne
     @JoinColumn(name = "id_customer", referencedColumnName = "id")
     private Account customer;
 
-    @JsonBackReference
+    @JsonBackReference(value = "employeeBillReference")
     @ManyToOne
     @JoinColumn(name = "id_employees", referencedColumnName = "id")
     private Account employees;
 
-    @OneToOne
-    private Guest guest;
-
-    @JsonManagedReference
+    @JsonManagedReference(value = "billPayBillReference")
     @OneToMany(mappedBy = "bill")
     private List<PayBill> payBills;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "billBillHistoryReference")
     @OneToMany(mappedBy = "bill")
     private List<BillHistory> billHistories;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "billBillDetailReference")
     @OneToMany(mappedBy = "bill")
     private List<BillDetail> billDetails;
 }

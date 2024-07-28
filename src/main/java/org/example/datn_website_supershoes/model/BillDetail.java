@@ -30,13 +30,14 @@ public class BillDetail extends BaseEntity {
     @Column
     private String note;
 
-    @JsonBackReference
+    @JsonBackReference(value = "billBillDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_bill", referencedColumnName = "id")
     private Bill bill;
 
-    @JsonBackReference
+    @JsonBackReference(value = "productDetailBillDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_product_detail", referencedColumnName = "id")
     private ProductDetail productDetail;
+
 }

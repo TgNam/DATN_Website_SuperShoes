@@ -30,34 +30,35 @@ public class ProductDetail extends BaseEntity {
     @Column
     private BigDecimal price;
 
-    @JsonBackReference
+    @JsonBackReference(value = "productProductDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_product", referencedColumnName = "id")
     private Product product;
 
-    @JsonBackReference
+    @JsonBackReference(value = "sizeProductDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_size", referencedColumnName = "id")
     private Size size;
 
-    @JsonBackReference
+    @JsonBackReference(value = "colorProductDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_color", referencedColumnName = "id")
     private Color color;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "productDetailProductImageReference")
     @OneToMany(mappedBy = "productDetail")
     private List<ProductImage> productImage;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "productDetailPromotionDetailReference")
     @OneToMany(mappedBy = "productDetail")
     private List<PromotionDetail> promotionDetail;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "productDetailCartDetailReference")
     @OneToMany(mappedBy = "productDetail")
     private List<CartDetail> cartDetails;
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "productDetailBillDetailReference")
     @OneToMany(mappedBy = "productDetail")
     private List<BillDetail> billDetails;
+
 }
