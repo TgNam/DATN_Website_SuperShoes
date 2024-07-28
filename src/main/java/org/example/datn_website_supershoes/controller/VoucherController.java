@@ -47,7 +47,6 @@ public class VoucherController {
 
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createVoucher(@RequestBody Voucher voucher) {
-
         Voucher createdVoucher = voucherService.createVoucher(voucher);
 
         Map<String, Object> response = new HashMap<>();
@@ -60,7 +59,6 @@ public class VoucherController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> updateVoucher(@PathVariable Long id, @RequestBody Voucher voucher) {
-
         Voucher updatedVoucher = voucherService.updateVoucher(id, voucher);
 
         Map<String, Object> response = new HashMap<>();
