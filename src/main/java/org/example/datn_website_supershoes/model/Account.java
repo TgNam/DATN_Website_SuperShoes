@@ -1,15 +1,8 @@
 package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
@@ -19,6 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Account extends BaseEntity {
 
     @Column
@@ -37,26 +31,26 @@ public class Account extends BaseEntity {
     private Integer rewards;
 
     @JsonManagedReference(value = "accountAddressReference")
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> address;
 
     @OneToOne(mappedBy = "account")
     private Cart cart;
 
     @JsonManagedReference(value = "accountProductFavoriteReference")
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductFavorite> productFavorites;
 
     @JsonManagedReference(value = "customerBillReference")
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bill> customerBills;
 
     @JsonManagedReference(value = "employeeBillReference")
-    @OneToMany(mappedBy = "employees")
+    @OneToMany(mappedBy = "employees", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bill> employeeBills;
 
     @JsonManagedReference(value = "accountBillHistoryReference")
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillHistory> billHistories;
 
 }
