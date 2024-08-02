@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "Product")
 @Getter
@@ -61,6 +61,7 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "id_shoe_sole", referencedColumnName = "id")
     private ShoeSole shoeSole;
 
+    @JsonIgnore
     @JsonManagedReference(value = "productProductFavoriteReference")
     @OneToMany(mappedBy = "product")
     private List<ProductFavorite> productFavorites;

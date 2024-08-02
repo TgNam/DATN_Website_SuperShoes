@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "Brand")
 @Getter
@@ -23,6 +23,7 @@ public class Brand extends BaseEntity {
     @Column
     private String name;
 
+    @JsonIgnore
     @JsonManagedReference(value = "brandProductReference")
     @OneToMany(mappedBy = "brand")
     private List<Product> products;

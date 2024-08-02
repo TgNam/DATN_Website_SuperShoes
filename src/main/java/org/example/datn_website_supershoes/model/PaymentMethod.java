@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "PaymentMethod")
 @Getter
@@ -26,6 +26,7 @@ public class PaymentMethod extends BaseEntity {
     @Column
     private String note;
 
+    @JsonIgnore
     @JsonManagedReference(value = "paymentMethodPayBillReference")
     @OneToMany(mappedBy = "paymentMethod")
     private List<PayBill> payBills;

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "Cart")
 @Getter
@@ -23,6 +23,7 @@ public class Cart extends BaseEntity {
     @OneToOne
     private Account account;
 
+    @JsonIgnore
     @JsonManagedReference(value = "cartDetailReference")
     @OneToMany(mappedBy = "cart")
     private List<CartDetail> cartDetails;
