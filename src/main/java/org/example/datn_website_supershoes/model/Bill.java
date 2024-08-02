@@ -55,9 +55,6 @@ public class Bill extends BaseEntity {
     private BigDecimal totalMerchandise;
 
     @Column
-    private BigDecimal moneyShip;
-
-    @Column
     private BigDecimal priceDiscount;
 
     @Column
