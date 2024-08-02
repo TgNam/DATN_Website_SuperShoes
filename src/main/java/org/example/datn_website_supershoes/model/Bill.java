@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -79,14 +79,17 @@ public class Bill extends BaseEntity {
     @JoinColumn(name = "id_employees", referencedColumnName = "id")
     private Account employees;
 
+    @JsonIgnore
     @JsonManagedReference(value = "billPayBillReference")
     @OneToMany(mappedBy = "bill")
     private List<PayBill> payBills;
 
+    @JsonIgnore
     @JsonManagedReference(value = "billBillHistoryReference")
     @OneToMany(mappedBy = "bill")
     private List<BillHistory> billHistories;
 
+    @JsonIgnore
     @JsonManagedReference(value = "billBillDetailReference")
     @OneToMany(mappedBy = "bill")
     private List<BillDetail> billDetails;

@@ -45,7 +45,6 @@ public class AccountService {
     public List<Account> getAllAccountActive(){
         return accountRepository.findAllByStatus(Status.ACTIVE.toString());
     }
-
     public Account  convertAccountRequestDTO(AccountRequest accountRequest){
         Account account = Account.builder()
                 .name(accountRequest.getName())

@@ -15,7 +15,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "Voucher")
 @Getter
@@ -56,10 +56,12 @@ public class Voucher extends BaseEntity {
     @Column
     private Date endAt;
 
+    @JsonIgnore
     @JsonManagedReference(value = "accountVoucherReference")
     @OneToMany(mappedBy = "voucher")
     private List<AccountVoucher> accountVouchers;
 
+    @JsonIgnore
     @JsonManagedReference(value = "billReference")
     @OneToMany(mappedBy = "voucher")
     private List<Bill> bill;

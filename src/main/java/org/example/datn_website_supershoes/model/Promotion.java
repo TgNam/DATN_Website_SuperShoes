@@ -14,7 +14,7 @@ import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "Promotion")
 @Getter
@@ -46,6 +46,7 @@ public class Promotion extends BaseEntity {
     @Column
     private Date endAt;
 
+    @JsonIgnore
     @JsonManagedReference(value = "promotionPromotionDetailReference")
     @OneToMany(mappedBy = "promotion")
     private List<PromotionDetail> promotionDetail;
