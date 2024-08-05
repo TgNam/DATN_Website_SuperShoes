@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.ProductRequest;
 import org.example.datn_website_supershoes.model.Cart;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.repository.ProductRepository;
@@ -19,8 +21,8 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public List<Product> getAllProduct(){
-        return productRepository.findAll();
+    public List<ProductRequest> getAllProduct(){
+        return productRepository.findProductRequestsByStatus(Status.ACTIVE.toString());
     }
     public Optional<Product> getProductById(Long id){
         return productRepository.findById(id);
