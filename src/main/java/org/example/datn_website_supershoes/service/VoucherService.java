@@ -17,12 +17,12 @@ public class VoucherService {
     private VoucherRepository voucherRepository;
 
     public List<Voucher> getActiveVouchers() {
-        return voucherRepository.findAllByStatus(Status.ACTIVE.toString());
+        return voucherRepository.findAllByStatus(Status.ONGOING.toString());
     }
 
     public Voucher createVoucher(VoucherRequest voucherRequest) {
         Voucher voucher = convertVoucherRequestDTO(voucherRequest);
-        voucher.setStatus(Status.ACTIVE.toString());
+        voucher.setStatus(Status.ONGOING.toString());
         return voucherRepository.save(voucher);
     }
 
@@ -38,7 +38,7 @@ public class VoucherService {
     public void deleteVoucher(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
-        voucher.setStatus(Status.INACTIVE.toString());
+        voucher.setStatus(Status.ENDING_SOON.toString());
         voucherRepository.save(voucher);
     }
 

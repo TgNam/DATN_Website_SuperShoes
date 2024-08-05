@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.request.ProductRequest;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class ProductController {
     private ProductService productService;
     @GetMapping
     public ResponseEntity<Map<String,Object>> getAllProduct(){
-        List<Product> productList =productService.getAllProduct();
+        List<ProductRequest> productList =productService.getAllProduct();
         Map<String,Object>response = new HashMap<>();
         response.put("DT",productList);
         response.put("EC",0);
