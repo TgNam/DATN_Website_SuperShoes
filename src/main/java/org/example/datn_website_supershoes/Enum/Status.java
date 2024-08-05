@@ -17,5 +17,4 @@ public enum Status {
     COMPLETED,
     CANCELLED,
     PENDING_PAYMENT,
-
 }
