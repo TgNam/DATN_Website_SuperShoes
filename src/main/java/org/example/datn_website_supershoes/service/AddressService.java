@@ -31,9 +31,7 @@ public class AddressService {
     }
     public Address updateAddress(Long id, AddressRequest addressRequest){
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> {
-                    throw new RuntimeException("Address not found!");
-                });
+                .orElseThrow(() -> new RuntimeException("Address not found!"));
         address.setAddress(addressRequest.getAddress());
         address.setName(addressRequest.getName());
         address.setPhoneNumber(addressRequest.getPhoneNumber());

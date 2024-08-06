@@ -5,6 +5,8 @@ import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,8 +18,7 @@ public class AccountService {
     @Autowired
     AccountRepository accountRepository;
 
-    @Autowired
-    PasswordEncoderService passwordEncoderService;
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public Account createAccount(AccountRequest accountRequest){
             Optional<Account> accountOP = accountRepository.findByEmail(accountRequest.getEmail());
@@ -45,11 +46,12 @@ public class AccountService {
     public List<Account> getAllAccountActive(){
         return accountRepository.findAllByStatus(Status.ACTIVE.toString());
     }
+
     public Account  convertAccountRequestDTO(AccountRequest accountRequest){
         Account account = Account.builder()
                 .name(accountRequest.getName())
                 .email(accountRequest.getEmail())
-                .password(passwordEncoderService.encodedPassword(accountRequest.getPassword()))
+                .password(passwordEncoder.encode(accountRequest.getPassword()))
                 .role(accountRequest.getRole())
                 .build();
         account.setStatus(Status.ACTIVE.toString());
