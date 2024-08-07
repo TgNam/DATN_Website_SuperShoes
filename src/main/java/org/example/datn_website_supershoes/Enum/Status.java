@@ -5,16 +5,6 @@ public enum Status {
     INACTIVE,
     SUSPENDED,
     CLOSED,
-    //Giảm giá, voucher
-    UPCOMING,
     ONGOING,
-    FINISHED,
-    ENDING_SOON,
-    //Bill
-    PENDING,
-    CONFIRMED,
-    SHIPPED,
-    COMPLETED,
-    CANCELLED,
-    PENDING_PAYMENT,
+    ENDING_SOON
 }

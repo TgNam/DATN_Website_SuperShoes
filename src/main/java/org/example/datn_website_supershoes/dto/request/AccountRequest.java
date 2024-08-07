@@ -17,5 +17,4 @@ public class AccountRequest {
     private String password;
 
     private String role;
-
 }
