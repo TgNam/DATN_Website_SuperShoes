@@ -3,7 +3,6 @@ package org.example.datn_website_supershoes.controller;
 import jakarta.validation.constraints.NotNull;
 import org.example.datn_website_supershoes.dto.request.AccountVoucherRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.AccountVoucher;
 import org.example.datn_website_supershoes.service.AccountVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/account-voucher")
@@ -25,6 +26,16 @@ public class AccountVoucherController {
 
     @Autowired
     private AccountVoucherService accountVoucherService;
+
+    @GetMapping()
+    public ResponseEntity<Map<String, Object>> getAllAccountVouchers() {
+        List<AccountVoucherRequest> accountVoucherList = accountVoucherService.getAllAccountVouchers();
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", accountVoucherList);
+        response.put("EC", 0);
+        response.put("EM", "Get all account voucher succeed");
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> createAccountVoucher(@RequestBody @NotNull AccountVoucherRequest accountVoucherRequest) {
@@ -77,10 +88,5 @@ public class AccountVoucherController {
                             .build()
                     );
         }
-    }
-
-    @GetMapping("/list-account-voucher")
-    public List<AccountVoucher> getAllAccountVouchers() {
-        return accountVoucherService.getAllAccountVouchers();
     }
 }
