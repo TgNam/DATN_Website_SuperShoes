@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/billDetail")
+@RequestMapping("/bill-detail")
 public class BillDetailController {
 
     @Autowired
@@ -28,7 +29,7 @@ public class BillDetailController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllBillDetails() {
-        List<BillDetail> listBillDetails = billDetailService.getAllBillDetails();
+        List<BillDetailResponse> listBillDetails = billDetailService.getAllBillDetails();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", listBillDetails);
         response.put("EC", 0);
