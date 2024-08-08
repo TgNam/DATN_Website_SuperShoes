@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.repository.BillDetailRepository;
 import org.springframework.beans.BeanUtils;
@@ -19,8 +21,8 @@ public class BillDetailService {
         return billDetailRepository.save(billDetail);
     }
 
-    public List<BillDetail> getAllBillDetails() {
-        return billDetailRepository.findAll();
+    public List<BillDetailResponse> getAllBillDetails() {
+        return billDetailRepository.listBillResponeByStatus(Status.ACTIVE.toString());
     }
 
     public Optional<BillDetail> getBillDetailById(Long id) {

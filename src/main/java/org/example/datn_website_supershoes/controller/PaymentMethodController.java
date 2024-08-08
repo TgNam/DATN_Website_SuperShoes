@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.response.PaymentMethodResponse;
 import org.example.datn_website_supershoes.model.PaymentMethod;
 import org.example.datn_website_supershoes.service.PaymentMethodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/paymentMethod")
+@RequestMapping("/payment-method")
 public class PaymentMethodController {
 
     @Autowired
@@ -28,7 +29,7 @@ public class PaymentMethodController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllPaymentMethods() {
-        List<PaymentMethod> listPaymentMethods = paymentMethodService.getAllPaymentMethods();
+        List<PaymentMethodResponse> listPaymentMethods = paymentMethodService.getAllPaymentMethods();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", listPaymentMethods);
         response.put("EC", 0);

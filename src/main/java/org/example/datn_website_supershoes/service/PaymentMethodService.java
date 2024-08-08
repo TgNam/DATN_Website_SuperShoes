@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.PaymentMethodResponse;
 import org.example.datn_website_supershoes.model.PaymentMethod;
 import org.example.datn_website_supershoes.repository.PaymentMethodRepository;
 import org.springframework.beans.BeanUtils;
@@ -19,8 +21,8 @@ public class PaymentMethodService {
         return paymentMethodRepository.save(paymentMethod);
     }
 
-    public List<PaymentMethod> getAllPaymentMethods() {
-        return paymentMethodRepository.findAll();
+    public List<PaymentMethodResponse> getAllPaymentMethods() {
+        return paymentMethodRepository.listPaymentMethodResponseByStatus(Status.ACTIVE.toString());
     }
 
     public Optional<PaymentMethod> getPaymentMethodById(Long id) {

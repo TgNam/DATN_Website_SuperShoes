@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.PayBillResponse;
 import org.example.datn_website_supershoes.model.PayBill;
 import org.example.datn_website_supershoes.repository.PayBillRepository;
 import org.springframework.beans.BeanUtils;
@@ -19,8 +21,8 @@ public class PayBillService {
         return payBillRepository.save(payBill);
     }
 
-    public List<PayBill> getAllPayBills() {
-        return payBillRepository.findAll();
+    public List<PayBillResponse> getAllPayBills() {
+        return payBillRepository.listPayBillResponeByStatus(Status.ACTIVE.toString());
     }
 
     public Optional<PayBill> getPayBillById(Long id) {
