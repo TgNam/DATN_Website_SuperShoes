@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.service.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class BillController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllBills() {
-        List<Bill> listBills = billService.getAllBills();
+        List<BillResponse> listBills = billService.getAllBills();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", listBills);
         response.put("EC", 0);
