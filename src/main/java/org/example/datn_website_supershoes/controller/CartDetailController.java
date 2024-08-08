@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.response.CartDetailResponse;
 import org.example.datn_website_supershoes.model.CartDetail;
 import org.example.datn_website_supershoes.service.CartDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class CartDetailController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllCartDetails() {
-        List<CartDetail> listCartDetails = cartDetailService.getAllCartDetails();
+        List<CartDetailResponse> listCartDetails = cartDetailService.getAllCartDetails();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", listCartDetails);
         response.put("EC", 0);
