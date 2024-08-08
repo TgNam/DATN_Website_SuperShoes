@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,6 +24,7 @@ public class Size extends BaseEntity {
     @Column
     private String name;
 
+    @JsonIgnore
     @JsonManagedReference(value = "sizeProductDetailReference")
     @OneToMany(mappedBy = "size")
     private List<ProductDetail> productDetail;

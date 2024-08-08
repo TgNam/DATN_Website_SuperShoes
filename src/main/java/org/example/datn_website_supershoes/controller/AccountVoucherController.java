@@ -1,6 +1,9 @@
 package org.example.datn_website_supershoes.controller;
 
-import org.example.datn_website_supershoes.model.AccountVoucher;
+import jakarta.validation.constraints.NotNull;
+import org.example.datn_website_supershoes.dto.request.AccountVoucherRequest;
+import org.example.datn_website_supershoes.dto.response.AccountVoucherResponse;
+import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.service.AccountVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/account-voucher")
@@ -26,53 +28,66 @@ public class AccountVoucherController {
     @Autowired
     private AccountVoucherService accountVoucherService;
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllAccountVoucher() {
-        List<AccountVoucher> listAccountVouchers = accountVoucherService.getAllAccountVouchers();
+    @GetMapping()
+    public ResponseEntity<Map<String, Object>> getAllAccountVouchers() {
+        List<AccountVoucherResponse> accountVoucherList = accountVoucherService.getAllAccountVouchers();
         Map<String, Object> response = new HashMap<>();
-        response.put("DT", listAccountVouchers);
+        response.put("DT", accountVoucherList);
         response.put("EC", 0);
-        response.put("EM", "Get all account vouchers succeed");
-
+        response.put("EM", "Get all account voucher succeed");
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<AccountVoucher> getAccountVoucherById(@PathVariable Long id) {
-        Optional<AccountVoucher> accountVoucher = accountVoucherService.getAccountVoucherById(id);
-        return accountVoucher.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createAccountVoucher(@RequestBody AccountVoucher accountVoucher) {
-        AccountVoucher createdAccountVoucher = accountVoucherService.createAccountVoucher(accountVoucher);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdAccountVoucher);
-        response.put("EC", 0);
-        response.put("EM", "AccountVoucher add successful");
-
-        return ResponseEntity.ok(response);
+    @PostMapping("/create")
+    public ResponseEntity<?> createAccountVoucher(@RequestBody @NotNull AccountVoucherRequest accountVoucherRequest) {
+        try {
+            return ResponseEntity.ok(accountVoucherService.createAccountVoucher(accountVoucherRequest));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateAccountVoucher(
-            @PathVariable Long id, @RequestBody AccountVoucher accountVoucher) {
-        AccountVoucher updatedAccountVoucher = accountVoucherService.updateAccountVoucher(id, accountVoucher);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedAccountVoucher);
-        response.put("EC", 0);
-        response.put("EM", "AccountVoucher update successful");
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> updateAccountVoucher(@PathVariable("id") long id,
+                                                  @RequestBody AccountVoucherRequest accountVoucherRequest) {
+        try {
+            return ResponseEntity.ok(accountVoucherService.updateAccountVoucher(id, accountVoucherRequest));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteAccountVoucher(@PathVariable Long id) {
+    public ResponseEntity<?> deleteAccountVoucher(@PathVariable("id") Long id) {
         try {
             accountVoucherService.deleteAccountVoucher(id);
-            return ResponseEntity.status(HttpStatus.OK).body("AccountVoucher deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting account voucher");
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(Response.builder()
+                            .status(HttpStatus.OK.toString())
+                            .mess("Delete success")
+                            .build()
+                    );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
     }
 }

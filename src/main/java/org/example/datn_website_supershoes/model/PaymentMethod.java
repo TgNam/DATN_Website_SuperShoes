@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +27,7 @@ public class PaymentMethod extends BaseEntity {
     @Column
     private String note;
 
+    @JsonIgnore
     @JsonManagedReference(value = "paymentMethodPayBillReference")
     @OneToMany(mappedBy = "paymentMethod")
     private List<PayBill> payBills;

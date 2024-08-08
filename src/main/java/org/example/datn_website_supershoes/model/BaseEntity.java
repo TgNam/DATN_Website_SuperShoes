@@ -9,6 +9,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
 import java.util.Date;
 
 @MappedSuperclass
@@ -31,6 +32,7 @@ public class BaseEntity {
 
     @Column
     private String updatedBy;
+
     @Column
     private String status;
 

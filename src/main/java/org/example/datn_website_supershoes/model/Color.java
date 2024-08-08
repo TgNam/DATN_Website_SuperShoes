@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +27,7 @@ public class Color extends BaseEntity {
     @Column
     private String codeColor;
 
+    @JsonIgnore
     @JsonManagedReference(value = "colorProductDetailReference")
     @OneToMany(mappedBy = "color")
     private List<ProductDetail> productDetail;

@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,6 +47,7 @@ public class Promotion extends BaseEntity {
     @Column
     private Date endAt;
 
+    @JsonIgnore
     @JsonManagedReference(value = "promotionPromotionDetailReference")
     @OneToMany(mappedBy = "promotion")
     private List<PromotionDetail> promotionDetail;

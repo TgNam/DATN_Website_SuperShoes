@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,6 +62,7 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "id_shoe_sole", referencedColumnName = "id")
     private ShoeSole shoeSole;
 
+    @JsonIgnore
     @JsonManagedReference(value = "productProductFavoriteReference")
     @OneToMany(mappedBy = "product")
     private List<ProductFavorite> productFavorites;

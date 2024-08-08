@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -23,8 +24,8 @@ public class Cart extends BaseEntity {
     @OneToOne
     private Account account;
 
+    @JsonIgnore
     @JsonManagedReference(value = "cartDetailReference")
     @OneToMany(mappedBy = "cart")
     private List<CartDetail> cartDetails;
-
 }

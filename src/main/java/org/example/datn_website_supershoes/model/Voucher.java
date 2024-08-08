@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +24,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Voucher extends BaseEntity {
 
     @Column
@@ -56,10 +59,12 @@ public class Voucher extends BaseEntity {
     @Column
     private Date endAt;
 
+    @JsonIgnore
     @JsonManagedReference(value = "accountVoucherReference")
     @OneToMany(mappedBy = "voucher")
     private List<AccountVoucher> accountVouchers;
 
+    @JsonIgnore
     @JsonManagedReference(value = "billReference")
     @OneToMany(mappedBy = "voucher")
     private List<Bill> bill;

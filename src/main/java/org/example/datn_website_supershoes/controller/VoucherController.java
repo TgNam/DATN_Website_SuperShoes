@@ -1,6 +1,9 @@
 package org.example.datn_website_supershoes.controller;
 
-import org.example.datn_website_supershoes.model.Voucher;
+import jakarta.validation.constraints.NotNull;
+import org.example.datn_website_supershoes.dto.request.VoucherRequest;
+import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.service.VoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,11 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/voucher")
@@ -27,54 +26,61 @@ public class VoucherController {
     @Autowired
     private VoucherService voucherService;
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllVouchers() {
-        List<Voucher> listVouchers = voucherService.getAllVouchers();
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", listVouchers);
-        response.put("EC", 0);
-        response.put("EM", "GetAll list participants succeed");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<Voucher> getVoucherById(@PathVariable Long id) {
-        Optional<Voucher> voucher = voucherService.getVoucherById(id);
-        return voucher.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createVoucher(@RequestBody Voucher voucher) {
-        Voucher createdVoucher = voucherService.createVoucher(voucher);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdVoucher);
-        response.put("EC", 0);
-        response.put("EM", "Voucher add successful");
-
-        return ResponseEntity.ok(response);
+    @PostMapping("/create")
+    public ResponseEntity<?> createVoucher(@RequestBody @NotNull VoucherRequest voucherRequest) {
+        try {
+            return ResponseEntity.ok(voucherService.createVoucher(voucherRequest));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateVoucher(@PathVariable Long id, @RequestBody Voucher voucher) {
-        Voucher updatedVoucher = voucherService.updateVoucher(id, voucher);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedVoucher);
-        response.put("EC", 0);
-        response.put("EM", "Voucher update successful");
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> updateVoucher(@PathVariable("id") long id,
+                                           @RequestBody VoucherRequest voucherRequest) {
+        try {
+            return ResponseEntity.ok(voucherService.updateVoucher(id, voucherRequest));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteVoucher(@PathVariable Long id) {
+    public ResponseEntity<?> deleteVoucher(@PathVariable("id") Long id) {
         try {
             voucherService.deleteVoucher(id);
-            return ResponseEntity.status(HttpStatus.OK).body("Voucher deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting voucher");
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(Response.builder()
+                            .status(HttpStatus.OK.toString())
+                            .mess("Delete success")
+                            .build()
+                    );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
+    }
+
+    @GetMapping("/list-voucher")
+    public List<VoucherResponse> getAllVouchers() {
+        return voucherService.getActiveVouchers();
     }
 }
