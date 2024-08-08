@@ -1,7 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
-import org.example.datn_website_supershoes.dto.request.ProductRequest;
+import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.repository.ProductRepository;
 import org.springframework.beans.BeanUtils;
@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Service
 public class ProductService {
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -20,7 +21,7 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public List<ProductRequest> getAllProduct(){
+    public List<ProductResponse> getAllProduct(){
         return productRepository.findProductRequestsByStatus(Status.ACTIVE.toString());
     }
 

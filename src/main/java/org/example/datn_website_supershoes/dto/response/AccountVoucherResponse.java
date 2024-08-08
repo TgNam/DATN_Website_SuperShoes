@@ -1,4 +1,4 @@
-package org.example.datn_website_supershoes.dto.request;
+package org.example.datn_website_supershoes.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AccountVoucherRequest {
+public class AccountVoucherResponse {
 
     private Long id;
 
@@ -21,7 +21,12 @@ public class AccountVoucherRequest {
 
     private Long idAccount;
 
+    private String nameAccount;
+
     private Long idVoucher;
 
+    private String nameVoucher;
+
     private String status;
+
 }

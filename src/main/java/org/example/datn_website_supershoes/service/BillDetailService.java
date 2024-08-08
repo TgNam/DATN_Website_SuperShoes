@@ -34,7 +34,6 @@ public class BillDetailService {
         String[] ignoredProperties = {"id", "createdAt", "createdBy"};
         BeanUtils.copyProperties(billDetail, existingBillDetail, ignoredProperties);
 
-        // Update associations if needed
         if (billDetail.getBill() != null) {
             existingBillDetail.setBill(billDetail.getBill());
         }

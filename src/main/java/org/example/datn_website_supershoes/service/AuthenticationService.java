@@ -15,6 +15,7 @@ public class AuthenticationService {
 
     @Autowired
     AccountRepository accountRepository;
+
     @Autowired
     AuthenticationManager authenticationManager;
 

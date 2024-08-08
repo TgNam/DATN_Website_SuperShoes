@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.AccountVoucherRequest;
+import org.example.datn_website_supershoes.dto.response.AccountVoucherResponse;
 import org.example.datn_website_supershoes.model.AccountVoucher;
 import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,8 @@ public class AccountVoucherService {
     @Autowired
     private AccountVoucherRepository accountVoucherRepository;
 
-    public List<AccountVoucherRequest> getAllAccountVouchers() {
-        return accountVoucherRepository.findAccountVoucherRequestsByStatus(Status.ACTIVE.toString());
+    public List<AccountVoucherResponse> getAllAccountVouchers() {
+        return accountVoucherRepository.listAccountVoucherResponsesByStatus(Status.ACTIVE.toString());
     }
 
     public AccountVoucher createAccountVoucher(AccountVoucherRequest accountVoucherRequest) {

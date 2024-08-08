@@ -15,15 +15,16 @@ public class ProductDetailService {
     private ProductDetailRepository productDetailRepository;
 
 
-    public ProductDetail createProductDetail(ProductDetail productDetail){
+    public ProductDetail createProductDetail(ProductDetail productDetail) {
 
         return productDetailRepository.save(productDetail);
     }
 
-    public List<ProductDetail> getAllProductDetail(){
+    public List<ProductDetail> getAllProductDetail() {
         return productDetailRepository.findAll();
     }
-    public Optional<ProductDetail> getProductByIdDetail(Long id){
+
+    public Optional<ProductDetail> getProductByIdDetail(Long id) {
         return productDetailRepository.findById(id);
     }
 
@@ -59,7 +60,8 @@ public class ProductDetailService {
 
         return productDetailRepository.save(productDetail);
     }
-    public void deleteProductDetail(Long id){
+
+    public void deleteProductDetail(Long id) {
         productDetailRepository.deleteById(id);
     }
 }

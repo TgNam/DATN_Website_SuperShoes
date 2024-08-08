@@ -7,7 +7,14 @@ import org.example.datn_website_supershoes.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/address")
@@ -18,10 +25,10 @@ public class AddressRestAPI {
 
     @PostMapping("/add/{accountId}")
     public ResponseEntity<?> addAddForAccount(@PathVariable("accountId") Long accountId,
-                                              @RequestBody @NotNull AddressRequest addressRequest){
+                                              @RequestBody @NotNull AddressRequest addressRequest) {
         try {
-            return ResponseEntity.ok().body(addressService.createAddress(accountId,addressRequest));
-        }catch (RuntimeException e){
+            return ResponseEntity.ok().body(addressService.createAddress(accountId, addressRequest));
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
@@ -31,17 +38,18 @@ public class AddressRestAPI {
                     );
         }
     }
+
     @GetMapping("/get-addresses")
-    public ResponseEntity<?> getAddresses(){
+    public ResponseEntity<?> getAddresses() {
         return ResponseEntity.ok().body(addressService.getAllAddressActive());
     }
 
     @PutMapping("/update/{addressId}")
     public ResponseEntity<?> updateAddress(@PathVariable("addressId") Long addressId,
-                                              @RequestBody @NotNull AddressRequest addressRequest){
+                                           @RequestBody @NotNull AddressRequest addressRequest) {
         try {
-            return ResponseEntity.ok().body(addressService.updateAddress(addressId,addressRequest));
-        }catch (RuntimeException e){
+            return ResponseEntity.ok().body(addressService.updateAddress(addressId, addressRequest));
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
@@ -51,8 +59,9 @@ public class AddressRestAPI {
                     );
         }
     }
+
     @DeleteMapping("/delete/{addressId}")
-    public ResponseEntity<?> deleteAddress(@PathVariable("addressId") Long addressId){
+    public ResponseEntity<?> deleteAddress(@PathVariable("addressId") Long addressId) {
         try {
             addressService.deleteAddress(addressId);
             return ResponseEntity.ok()
@@ -63,7 +72,7 @@ public class AddressRestAPI {
                                     .build()
 
                     );
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()

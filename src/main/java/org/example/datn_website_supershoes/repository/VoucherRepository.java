@@ -1,14 +1,21 @@
 package org.example.datn_website_supershoes.repository;
 
+import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-@Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
-    List<Voucher> findAllByStatus(String status);
+    @Query("""
+            SELECT new org.example.datn_website_supershoes.dto.response.VoucherResponse(
+            v.id, v.codeVoucher, v.name, v.note, v.value, v.quantity, v.maximumDiscount, v.type,
+            v.minBillValue, v.startAt, v.endAt, v.status)
+            FROM Voucher v WHERE v.status = :status
+            """)
+    List<VoucherResponse> listVoucherResponseByStatus(@Param("status") String status);
 
 }
