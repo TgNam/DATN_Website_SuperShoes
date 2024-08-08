@@ -2,7 +2,6 @@ package org.example.datn_website_supershoes.controller.REST;
 
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.dto.token.TokenResponse;
 import org.example.datn_website_supershoes.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,10 +19,10 @@ public class AuthenticationRestAPI {
     AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginHandle(@RequestBody AccountRequest accountRequest){
+    public ResponseEntity<?> loginHandle(@RequestBody AccountRequest accountRequest) {
         try {
             return new ResponseEntity<>(authenticationService.authentication(accountRequest), HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()

@@ -31,11 +31,9 @@ public class PromotionService {
         Promotion existingPromotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promotion not found"));
 
-        // Copy properties excluding certain fields
         String[] ignoredProperties = {"id", "createdAt", "createdBy"};
         BeanUtils.copyProperties(promotion, existingPromotion, ignoredProperties);
 
-        // Handle other potential fields manually if necessary
         if (promotion.getCodePromotion() != null) {
             existingPromotion.setCodePromotion(promotion.getCodePromotion());
         }
@@ -57,9 +55,7 @@ public class PromotionService {
         if (promotion.getEndAt() != null) {
             existingPromotion.setEndAt(promotion.getEndAt());
         }
-        // Do not update the promotionDetail list if not intended
 
-        // Save the updated promotion
         return promotionRepository.save(existingPromotion);
     }
 

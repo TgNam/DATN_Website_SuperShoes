@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.constraints.NotNull;
 import org.example.datn_website_supershoes.dto.request.AccountVoucherRequest;
+import org.example.datn_website_supershoes.dto.response.AccountVoucherResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.service.AccountVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class AccountVoucherController {
 
     @GetMapping()
     public ResponseEntity<Map<String, Object>> getAllAccountVouchers() {
-        List<AccountVoucherRequest> accountVoucherList = accountVoucherService.getAllAccountVouchers();
+        List<AccountVoucherResponse> accountVoucherList = accountVoucherService.getAllAccountVouchers();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", accountVoucherList);
         response.put("EC", 0);

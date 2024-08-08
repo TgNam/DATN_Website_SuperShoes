@@ -9,11 +9,12 @@ public class PasswordEncoderService {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public String encodedPassword(String rawPassword){
+    public String encodedPassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
-    public boolean matches(String rawPassword, String encodedPassword){
-        return passwordEncoder.matches(rawPassword,encodedPassword);
+
+    public boolean matches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
 }
