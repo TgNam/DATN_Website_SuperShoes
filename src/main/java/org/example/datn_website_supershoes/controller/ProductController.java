@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.controller;
 
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Product;
+import org.example.datn_website_supershoes.repository.ProductRepository;
 import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,8 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+    private ProductRepository productRepository;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllProduct() {
@@ -72,6 +75,17 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting product");
+        }
+    }
+
+    @GetMapping("/detailByStatus/")
+    public ResponseEntity<List<ProductResponse>> getProductByStatus(@PathVariable String status) {
+        List<ProductResponse> product = productRepository.findProductRequestsByStatus(status);
+//        return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (product.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(product);
         }
     }
 }

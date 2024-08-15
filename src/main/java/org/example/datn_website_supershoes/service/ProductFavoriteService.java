@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.ProductFavoriteRespone;
 import org.example.datn_website_supershoes.model.ProductFavorite;
 import org.example.datn_website_supershoes.repository.ProductFavoriteRepository;
 import org.springframework.beans.BeanUtils;
@@ -18,8 +20,8 @@ public class ProductFavoriteService {
         return productFavoriteRepository.save(productFavorite);
     }
 
-    public List<ProductFavorite> getAllProductFavorite() {
-        return productFavoriteRepository.findAll();
+    public List<ProductFavoriteRespone> getAllProductFavorite() {
+        return productFavoriteRepository.findProductFavoriteRequestsByStatus(Status.ACTIVE.toString());
     }
 
     public Optional<ProductFavorite> getProductFavoriteById(Long id) {

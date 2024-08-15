@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.springframework.beans.BeanUtils;
@@ -20,8 +22,8 @@ public class ProductDetailService {
         return productDetailRepository.save(productDetail);
     }
 
-    public List<ProductDetail> getAllProductDetail() {
-        return productDetailRepository.findAll();
+    public List<ProductDetailResponse> getAllProductDetail() {
+        return productDetailRepository.findProductDetailRequestsByStatus(Status.ACTIVE.toString());
     }
 
     public Optional<ProductDetail> getProductByIdDetail(Long id) {
