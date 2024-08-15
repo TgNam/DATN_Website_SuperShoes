@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.model.Color;
+import org.example.datn_website_supershoes.repository.ColorRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ColorRepository {
+public class ColorService {
 
     @Autowired
     private ColorRepository colorRepository;
@@ -34,8 +35,8 @@ public class ColorRepository {
         BeanUtils.copyProperties(brand, existingbrand, ignoredProperties);
 
         // Update associations if needed
-        if (brand.getProducts() != null) {
-            existingbrand.setProducts(brand.getProducts());
+        if (brand.getProductDetail() != null) {
+            existingbrand.setProductDetail(brand.getProductDetail());
         }
 
         return colorRepository.save(existingbrand);

@@ -5,31 +5,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductDetailResponse {
+public class ProductFavoriteRespone {
 
     private Long id;
 
-    private int quantity;
+    private Long idAccount;
 
-    private BigDecimal price;
+    private String nameAccount;
 
     private Long idProduct;
 
     private String nameProduct;
 
-    private Long idSize;
-
-    private String nameSize;
-
-    private Long idColor;
-
-    private String nameColor;
-
     private String status;
+
 }

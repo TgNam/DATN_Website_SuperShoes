@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.response.ProductFavoriteRespone;
 import org.example.datn_website_supershoes.model.ProductFavorite;
 import org.example.datn_website_supershoes.service.ProductFavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class ProductFavoriteController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllProductFavorite() {
-        List<ProductFavorite> productFavoriteList = productFavoriteService.getAllProductFavorite();
+        List<ProductFavoriteRespone> productFavoriteList = productFavoriteService.getAllProductFavorite();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", productFavoriteList);
         response.put("EC", 0);
