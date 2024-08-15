@@ -10,13 +10,14 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Data
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class VoucherRequest {
+
+    private Long id;
 
     private String codeVoucher;
 
@@ -37,4 +38,6 @@ public class VoucherRequest {
     private Date startAt;
 
     private Date endAt;
+
+    private String status;
 }

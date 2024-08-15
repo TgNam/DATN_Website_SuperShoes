@@ -1,11 +1,19 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.response.PaymentMethodResponse;
 import org.example.datn_website_supershoes.model.PaymentMethod;
 import org.example.datn_website_supershoes.service.PaymentMethodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/paymentMethod")
+@RequestMapping("/payment-method")
 public class PaymentMethodController {
 
     @Autowired
@@ -21,7 +29,7 @@ public class PaymentMethodController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllPaymentMethods() {
-        List<PaymentMethod> listPaymentMethods = paymentMethodService.getAllPaymentMethods();
+        List<PaymentMethodResponse> listPaymentMethods = paymentMethodService.getAllPaymentMethods();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", listPaymentMethods);
         response.put("EC", 0);

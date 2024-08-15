@@ -3,7 +3,7 @@ package org.example.datn_website_supershoes.controller;
 import jakarta.validation.constraints.NotNull;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.Voucher;
+import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.service.VoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -80,7 +80,7 @@ public class VoucherController {
     }
 
     @GetMapping("/list-voucher")
-    public List<Voucher> getAllVouchers() {
+    public List<VoucherResponse> getAllVouchers() {
         return voucherService.getActiveVouchers();
     }
 }

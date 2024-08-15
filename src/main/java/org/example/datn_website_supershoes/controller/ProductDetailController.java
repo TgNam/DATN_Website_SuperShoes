@@ -1,6 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
-import org.example.datn_website_supershoes.model.Product;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.service.ProductDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,34 +25,37 @@ import java.util.Optional;
 public class ProductDetailController {
     @Autowired
     private ProductDetailService productDetailService;
+
     @GetMapping
-    public ResponseEntity<Map<String,Object>> getAllProductDetail(){
-        List<ProductDetail> productDetailList =productDetailService.getAllProductDetail();
-        Map<String,Object>response = new HashMap<>();
-        response.put("DT",productDetailList);
-        response.put("EC",0);
+    public ResponseEntity<Map<String, Object>> getAllProductDetail() {
+        List<ProductDetailResponse> productDetailList = productDetailService.getAllProductDetail();
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", productDetailList);
+        response.put("EC", 0);
         response.put("EM", "Get all productDetails succeed");
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/detail/{id}")
-    public ResponseEntity<ProductDetail> getProductById(@PathVariable Long id){
-        Optional<ProductDetail> productDetail =productDetailService.getProductByIdDetail(id);
+    public ResponseEntity<ProductDetail> getProductById(@PathVariable Long id) {
+        Optional<ProductDetail> productDetail = productDetailService.getProductByIdDetail(id);
         return productDetail.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
     @PostMapping("/add")
-    public ResponseEntity<Map<String,Object>> createProductDetail(@RequestBody ProductDetail productDetail){
+    public ResponseEntity<Map<String, Object>> createProductDetail(@RequestBody ProductDetail productDetail) {
         ProductDetail createdProduct = productDetailService.createProductDetail(productDetail);
-        Map<String,Object>response = new HashMap<>();
-        response.put("DT",createdProduct);
-        response.put("EC",0);
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", createdProduct);
+        response.put("EC", 0);
         response.put("EM", "ProductDetail added successfully");
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String,Object>> updateProductDetail(@PathVariable Long id,@RequestBody ProductDetail productDetail){
-        ProductDetail updateProductDetail = productDetailService.updateProductDetail(id,productDetail);
+    public ResponseEntity<Map<String, Object>> updateProductDetail(@PathVariable Long id, @RequestBody ProductDetail productDetail) {
+        ProductDetail updateProductDetail = productDetailService.updateProductDetail(id, productDetail);
         Map<String, Object> response = new HashMap<>();
         response.put("DT", updateProductDetail);
         response.put("EC", 0);
@@ -60,9 +63,10 @@ public class ProductDetailController {
 
         return ResponseEntity.ok(response);
     }
+
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteProductDetail(@PathVariable Long id){
-        try{
+    public ResponseEntity<String> deleteProductDetail(@PathVariable Long id) {
+        try {
             productDetailService.deleteProductDetail(id);
             return ResponseEntity.status(HttpStatus.OK).body("ProductDetail deleted successfully");
         } catch (Exception e) {

@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.repository.BillRepository;
 import org.springframework.beans.BeanUtils;
@@ -19,8 +21,8 @@ public class BillService {
         return billRepository.save(bill);
     }
 
-    public List<Bill> getAllBills() {
-        return billRepository.findAll();
+    public List<BillResponse> getAllBills() {
+        return billRepository.listBillResponseByStatus(Status.ACTIVE.toString());
     }
 
     public Optional<Bill> getBillById(Long id) {
@@ -34,7 +36,6 @@ public class BillService {
         String[] ignoredProperties = {"id", "createdAt", "createdBy"};
         BeanUtils.copyProperties(bill, existingBill, ignoredProperties);
 
-        // Update associations if needed
         if (bill.getVoucher() != null) {
             existingBill.setVoucher(bill.getVoucher());
         }

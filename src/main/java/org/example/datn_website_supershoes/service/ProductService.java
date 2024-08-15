@@ -1,8 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
-import org.example.datn_website_supershoes.dto.request.ProductRequest;
-import org.example.datn_website_supershoes.model.Cart;
+import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.repository.ProductRepository;
 import org.springframework.beans.BeanUtils;
@@ -14,6 +13,7 @@ import java.util.Optional;
 
 @Service
 public class ProductService {
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -21,12 +21,14 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public List<ProductRequest> getAllProduct(){
+    public List<ProductResponse> getAllProduct(){
         return productRepository.findProductRequestsByStatus(Status.ACTIVE.toString());
     }
+
     public Optional<Product> getProductById(Long id){
         return productRepository.findById(id);
     }
+
     public Product updateProduct(Long id, Product product) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
@@ -43,6 +45,7 @@ public class ProductService {
 
         return productRepository.save(product);
     }
+
     public void deleteProduct(Long id){
         productRepository.deleteById(id);
     }

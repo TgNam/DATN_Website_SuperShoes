@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
+import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.VoucherRepository;
 import org.springframework.beans.BeanUtils;
@@ -16,8 +17,8 @@ public class VoucherService {
     @Autowired
     private VoucherRepository voucherRepository;
 
-    public List<Voucher> getActiveVouchers() {
-        return voucherRepository.findAllByStatus(Status.ONGOING.toString());
+    public List<VoucherResponse> getActiveVouchers() {
+        return voucherRepository.listVoucherResponseByStatus(Status.ONGOING.toString());
     }
 
     public Voucher createVoucher(VoucherRequest voucherRequest) {

@@ -15,14 +15,14 @@ public class GuestService {
     @Autowired
     GuestRepository guestRepository;
 
-    public Guest addGuest(GuestRequest guestRequest){
+    public Guest addGuest(GuestRequest guestRequest) {
         Guest guest = convertGuestRequestDTO(guestRequest);
         guest.setStatus(Status.ACTIVE.toString());
         return guestRepository.save(guest);
     }
 
-    public Guest updateGuest(Long id, GuestRequest guestRequest){
-        Guest guest = guestRepository.findById(id).orElseThrow(()->{
+    public Guest updateGuest(Long id, GuestRequest guestRequest) {
+        Guest guest = guestRepository.findById(id).orElseThrow(() -> {
             throw new RuntimeException("Guest not found");
         });
         guest.setName(guestRequest.getName());
@@ -31,19 +31,19 @@ public class GuestService {
         return guestRepository.save(guest);
     }
 
-    public void deleteGuest(Long id){
-        Guest guest = guestRepository.findById(id).orElseThrow(()->{
+    public void deleteGuest(Long id) {
+        Guest guest = guestRepository.findById(id).orElseThrow(() -> {
             throw new RuntimeException("Guest not found");
         });
         guest.setStatus(Status.INACTIVE.toString());
         guestRepository.save(guest);
     }
 
-    public List<Guest> getGuestActive(){
+    public List<Guest> getGuestActive() {
         return guestRepository.findAllByStatus(Status.ACTIVE.toString());
     }
 
-    public Guest convertGuestRequestDTO(GuestRequest guestRequest){
+    public Guest convertGuestRequestDTO(GuestRequest guestRequest) {
         return Guest.builder()
                 .name(guestRequest.getName())
                 .address(guestRequest.getAddress())
