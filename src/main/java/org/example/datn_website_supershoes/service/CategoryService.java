@@ -1,8 +1,10 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.CategoryRequest;
+import org.example.datn_website_supershoes.dto.response.CategoryResponse;
 import org.example.datn_website_supershoes.model.Category;
 import org.example.datn_website_supershoes.repository.CategoryRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,35 +16,41 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public Category createCategory(Category category) {
-        return categoryRepository.save(category);
+    public List<CategoryResponse> findByStatus() {
+        return categoryRepository.findByStatus();
     }
 
-    public List<Category> getAllCategory() {
-        return categoryRepository.findAll();
+    public Category createCategory(CategoryRequest categoryRequest) {
+        Optional<Category> category = categoryRepository.findByName(categoryRequest.getName());
+        if (category.isPresent()) {
+            throw new RuntimeException("Category " + categoryRequest.getName() + " đã tồn tại");
+        }
+        return categoryRepository.save(convertCategoryRequestDTO(categoryRequest));
     }
 
-    public Optional<Category> getCategoryById(Long id) {
-        return categoryRepository.findById(id);
-    }
-
-    public Category updateCategory(Long id, Category category) {
-        Category existingCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("BillDetail not found"));
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(category, existingCategory, ignoredProperties);
-
-        // Update associations if needed
-        if (category.getProducts() != null) {
-            existingCategory.setProducts(category.getProducts());
+    public boolean updateStatus(Long id) {
+        try {
+            Optional<Category> category = categoryRepository.findById(id);
+            if (!category.isPresent()) {
+                throw new RuntimeException("Category null");
+            }
+            String newStatus = category.get().getStatus().equals(Status.ACTIVE.toString()) ? "INACTIVE" : "ACTIVE";
+            category.get().setStatus(newStatus);
+            categoryRepository.save(category.get());
+            return true;
+        } catch (Exception e) {
+            e.getMessage();
+            System.out.println(e.getMessage());
+            return false;
         }
 
-        return categoryRepository.save(existingCategory);
     }
 
-    public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+    public Category convertCategoryRequestDTO(CategoryRequest CategoryRequest) {
+        Category category = Category.builder()
+                .name(CategoryRequest.getName())
+                .build();
+        category.setStatus(Status.ACTIVE.toString());
+        return category;
     }
-
 }

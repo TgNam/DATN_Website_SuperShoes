@@ -1,10 +1,11 @@
 package org.example.datn_website_supershoes.controller;
 
-import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.BrandRequest;
 import org.example.datn_website_supershoes.dto.request.SizeRequest;
+import org.example.datn_website_supershoes.dto.response.BrandResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.SizeResponse;
-import org.example.datn_website_supershoes.service.SizeService;
+import org.example.datn_website_supershoes.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,24 +15,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api/size")
-public class SizeRestAPI {
+@RequestMapping("api/brand")
+public class BrandRestAPI {
     @Autowired
-    private SizeService sizeService;
-    @GetMapping("/list-size")
-    private List<SizeResponse> findByStatusActive(){
-        return sizeService.findByStatus();
+    private BrandService brandService;
+    @GetMapping("/list-brand")
+    private List<BrandResponse> findByStatusActive(){
+        return brandService.findByStatus();
     }
-    @GetMapping("/list-size-search")
-    private List<SizeResponse> findByStatusSearch(@RequestParam("search") String search){
-        return sizeService.findByStatus().stream()
-                .filter(sizeResponse -> sizeResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+    @GetMapping("/list-brand-search")
+    private List<BrandResponse> findByStatusSearch(@RequestParam("search") String search){
+        return brandService.findByStatus().stream()
+                .filter(brandResponse -> brandResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
     private ResponseEntity<?> updateStatus(@RequestParam("id") Long id){
         try{
-            if (sizeService.updateStatus(id)){
+            if (brandService.updateStatus(id)){
                 return ResponseEntity.ok("OK");
             }
             return ResponseEntity
@@ -47,11 +48,11 @@ public class SizeRestAPI {
                     );
         }
     }
-    @PostMapping("/create-size")
-    private ResponseEntity<?> createSize(@RequestBody SizeRequest sizeRequest){
+    @PostMapping("/create-brand")
+    private ResponseEntity<?> createSize(@RequestBody BrandRequest brandRequest){
         try {
-            if (sizeService.createSize(sizeRequest) != null) {
-                return ResponseEntity.ok("Thêm size thành công");
+            if (brandService.createBrand(brandRequest) != null) {
+                return ResponseEntity.ok("Thêm hãng thành công");
             }
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -66,5 +67,4 @@ public class SizeRestAPI {
                     );
         }
     }
-
 }

@@ -1,10 +1,10 @@
 package org.example.datn_website_supershoes.controller;
 
-import org.example.datn_website_supershoes.Enum.Status;
-import org.example.datn_website_supershoes.dto.request.SizeRequest;
+import org.example.datn_website_supershoes.dto.request.CategoryRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.dto.response.SizeResponse;
-import org.example.datn_website_supershoes.service.SizeService;
+import org.example.datn_website_supershoes.dto.response.CategoryResponse;
+import org.example.datn_website_supershoes.service.CategoryService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,24 +14,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api/size")
-public class SizeRestAPI {
+@RequestMapping("/api/category")
+public class CategoryRestAPI {
     @Autowired
-    private SizeService sizeService;
-    @GetMapping("/list-size")
-    private List<SizeResponse> findByStatusActive(){
-        return sizeService.findByStatus();
+    private CategoryService categoryService;
+    @GetMapping("/list-category")
+    private List<CategoryResponse> findByStatusActive(){
+        return categoryService.findByStatus();
     }
-    @GetMapping("/list-size-search")
-    private List<SizeResponse> findByStatusSearch(@RequestParam("search") String search){
-        return sizeService.findByStatus().stream()
-                .filter(sizeResponse -> sizeResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+    @GetMapping("/list-category-search")
+    private List<CategoryResponse> findByStatusSearch(@RequestParam("search") String search){
+        return categoryService.findByStatus().stream()
+                .filter(CategoryResponse -> CategoryResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
     private ResponseEntity<?> updateStatus(@RequestParam("id") Long id){
         try{
-            if (sizeService.updateStatus(id)){
+            if (categoryService.updateStatus(id)){
                 return ResponseEntity.ok("OK");
             }
             return ResponseEntity
@@ -47,11 +47,11 @@ public class SizeRestAPI {
                     );
         }
     }
-    @PostMapping("/create-size")
-    private ResponseEntity<?> createSize(@RequestBody SizeRequest sizeRequest){
+    @PostMapping("/create-category")
+    private ResponseEntity<?> createCategory(@RequestBody CategoryRequest categoryRequest){
         try {
-            if (sizeService.createSize(sizeRequest) != null) {
-                return ResponseEntity.ok("Thêm size thành công");
+            if (categoryService.createCategory(categoryRequest) != null) {
+                return ResponseEntity.ok("Thêm Category thành công");
             }
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -66,5 +66,4 @@ public class SizeRestAPI {
                     );
         }
     }
-
 }
