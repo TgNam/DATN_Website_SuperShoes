@@ -23,7 +23,7 @@ public class CategoryService {
     public Category createCategory(CategoryRequest categoryRequest) {
         Optional<Category> category = categoryRepository.findByName(categoryRequest.getName());
         if (category.isPresent()) {
-            throw new RuntimeException("Category " + categoryRequest.getName() + " đã tồn tại");
+            throw new RuntimeException("Danh mục " + categoryRequest.getName() + " đã tồn tại");
         }
         return categoryRepository.save(convertCategoryRequestDTO(categoryRequest));
     }

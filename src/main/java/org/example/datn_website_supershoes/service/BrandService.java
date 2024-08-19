@@ -24,7 +24,7 @@ public class BrandService {
     public Brand createBrand(BrandRequest brandRequest){
         Optional<Brand> brand = brandRepository.findByName(brandRequest.getName());
         if(brand.isPresent()){
-            throw new RuntimeException("Brand "+ brandRequest.getName() +" đã tồn tại");
+            throw new RuntimeException("Hãng "+ brandRequest.getName() +" đã tồn tại");
         }
         return brandRepository.save(convertBrandRequestDTO(brandRequest));
     }

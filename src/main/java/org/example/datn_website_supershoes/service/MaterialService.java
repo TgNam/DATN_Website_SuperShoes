@@ -24,7 +24,7 @@ public class MaterialService {
     public Material createMaterial(MaterialRequest materialRequest){
         Optional<Material> material = materialRepository.findByName(materialRequest.getName());
         if(material.isPresent()){
-            throw new RuntimeException("Material "+ materialRequest.getName() +" đã tồn tại");
+            throw new RuntimeException("Chất liệu "+ materialRequest.getName() +" đã tồn tại");
         }
         return materialRepository.save(convertMaterialRequestDTO(materialRequest));
     }
