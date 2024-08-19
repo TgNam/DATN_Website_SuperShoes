@@ -1,10 +1,11 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.BrandRequest;
+import org.example.datn_website_supershoes.dto.response.BrandResponse;
 import org.example.datn_website_supershoes.model.Brand;
 import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.repository.BrandRepository;
-import org.example.datn_website_supershoes.repository.SizeReposiotry;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,34 +18,38 @@ public class BrandService {
     @Autowired
     private BrandRepository brandRepository;
 
-    public Brand createBrand(Brand brand) {
-        return brandRepository.save(brand);
+    public List<BrandResponse> findByStatus(){
+        return brandRepository.findByStatus();
     }
-
-    public List<Brand> getAllBrand() {
-        return brandRepository.findAll();
+    public Brand createBrand(BrandRequest brandRequest){
+        Optional<Brand> brand = brandRepository.findByName(brandRequest.getName());
+        if(brand.isPresent()){
+            throw new RuntimeException("Brand "+ brandRequest.getName() +" đã tồn tại");
+        }
+        return brandRepository.save(convertBrandRequestDTO(brandRequest));
     }
-
-    public Optional<Brand> getBrandById(Long id) {
-        return brandRepository.findById(id);
-    }
-
-    public Brand updateBrand(Long id, Brand brand) {
-        Brand existingbrand = brandRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("BillDetail not found"));
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(brand, existingbrand, ignoredProperties);
-
-        // Update associations if needed
-        if (brand.getProducts() != null) {
-            existingbrand.setProducts(brand.getProducts());
+    public boolean updateStatus(Long id){
+        try{
+            Optional<Brand> brand = brandRepository.findById(id);
+            if(!brand.isPresent()){
+                throw new RuntimeException("Brand null");
+            }
+            String newStatus = brand.get().getStatus().equals(Status.ACTIVE.toString())  ? "INACTIVE" : "ACTIVE";
+            brand.get().setStatus(newStatus);
+            brandRepository.save(brand.get());
+            return true;
+        }catch (Exception e){
+            e.getMessage();
+            System.out.println(e.getMessage());
+            return false;
         }
 
-        return brandRepository.save(existingbrand);
     }
-
-    public void deletebrand(Long id) {
-        brandRepository.deleteById(id);
+    public Brand convertBrandRequestDTO(BrandRequest brandRequest){
+        Brand brand = Brand.builder()
+                .name(brandRequest.getName())
+                .build();
+        brand.setStatus(Status.ACTIVE.toString());
+        return brand;
     }
 }

@@ -1,5 +1,9 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.MaterialRequest;
+import org.example.datn_website_supershoes.dto.response.MaterialResponse;
+import org.example.datn_website_supershoes.model.Material;
 import org.example.datn_website_supershoes.model.Material;
 import org.example.datn_website_supershoes.repository.MaterialRepository;
 import org.springframework.beans.BeanUtils;
@@ -14,35 +18,39 @@ public class MaterialService {
     @Autowired
     private MaterialRepository materialRepository;
 
-    public Material createMaterial(Material material) {
-        return materialRepository.save(material);
+    public List<MaterialResponse> findByStatus(){
+        return materialRepository.findByStatus();
     }
-
-    public List<Material> getAllMaterial() {
-        return materialRepository.findAll();
+    public Material createMaterial(MaterialRequest materialRequest){
+        Optional<Material> material = materialRepository.findByName(materialRequest.getName());
+        if(material.isPresent()){
+            throw new RuntimeException("Material "+ materialRequest.getName() +" đã tồn tại");
+        }
+        return materialRepository.save(convertMaterialRequestDTO(materialRequest));
     }
-
-    public Optional<Material> getMaterialById(Long id) {
-        return materialRepository.findById(id);
-    }
-
-    public Material updateMaterial(Long id, Material material) {
-        Material existingMaterial = materialRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("BillDetail not found"));
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(material, existingMaterial, ignoredProperties);
-
-        // Update associations if needed
-        if (material.getProducts() != null) {
-            existingMaterial.setProducts(material.getProducts());
+    public boolean updateStatus(Long id){
+        try{
+            Optional<Material> material = materialRepository.findById(id);
+            if(!material.isPresent()){
+                throw new RuntimeException("Material null");
+            }
+            String newStatus = material.get().getStatus().equals(Status.ACTIVE.toString())  ? "INACTIVE" : "ACTIVE";
+            material.get().setStatus(newStatus);
+            materialRepository.save(material.get());
+            return true;
+        }catch (Exception e){
+            e.getMessage();
+            System.out.println(e.getMessage());
+            return false;
         }
 
-        return materialRepository.save(existingMaterial);
     }
-
-    public void deleteMaterial(Long id) {
-        materialRepository.deleteById(id);
+    public Material convertMaterialRequestDTO(MaterialRequest MaterialRequest){
+        Material material = Material.builder()
+                .name(MaterialRequest.getName())
+                .build();
+        material.setStatus(Status.ACTIVE.toString());
+        return material;
     }
 
 }

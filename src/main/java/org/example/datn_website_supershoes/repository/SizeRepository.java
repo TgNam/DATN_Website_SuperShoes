@@ -12,8 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface SizeRepository extends JpaRepository<Size, Long> {
-    @Query(value = "SELECT new org.example.datn_website_supershoes.dto.response.SizeResponse(s.id, s.name, s.status)FROM Size s"
-    )
+    @Query(value = "SELECT new org.example.datn_website_supershoes.dto.response.SizeResponse(s.id, s.name, s.status)FROM Size s")
     List<SizeResponse> findByStatus();
 
     Optional<Size> findByName(String name);
