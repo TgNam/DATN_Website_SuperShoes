@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.constraints.NotNull;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
+import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.service.AccountService;
@@ -83,5 +84,10 @@ public class AccountRestAPI {
     @GetMapping("/list-accounts")
     public List<Account> getAllAccount() {
         return accountService.getAllAccountActive();
+    }
+
+    @GetMapping("/list-accounts-employee")
+    public List<AccountResponse> getAllAccountEmployee() {
+        return accountService.getAllAccountEmployeeActive();
     }
 }
