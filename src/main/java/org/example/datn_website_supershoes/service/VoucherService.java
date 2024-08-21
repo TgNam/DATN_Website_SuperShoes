@@ -7,9 +7,10 @@ import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.VoucherRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class VoucherService {
@@ -17,8 +18,14 @@ public class VoucherService {
     @Autowired
     private VoucherRepository voucherRepository;
 
-    public List<VoucherResponse> getActiveVouchers() {
-        return voucherRepository.listVoucherResponseByStatus(Status.ONGOING.toString());
+//        public List<VoucherResponse> getAllVouchers() {
+//        return voucherRepository.findAll().stream()
+//                .map(this::convertToVoucherResponse)
+//                .collect(Collectors.toList());
+//    }
+
+    public Page<VoucherResponse> getVouchers(Specification<Voucher> spec, Pageable pageable) {
+        return voucherRepository.findAll(spec, pageable).map(this::convertToVoucherResponse);
     }
 
     public Voucher createVoucher(VoucherRequest voucherRequest) {
@@ -39,8 +46,13 @@ public class VoucherService {
     public void deleteVoucher(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
-        voucher.setStatus(Status.ENDING_SOON.toString());
-        voucherRepository.save(voucher);
+        voucherRepository.delete(voucher);
+    }
+
+    private VoucherResponse convertToVoucherResponse(Voucher voucher) {
+        VoucherResponse response = new VoucherResponse();
+        BeanUtils.copyProperties(voucher, response);
+        return response;
     }
 
     private Voucher convertVoucherRequestDTO(VoucherRequest voucherRequest) {
@@ -58,3 +70,4 @@ public class VoucherService {
                 .build();
     }
 }
+
