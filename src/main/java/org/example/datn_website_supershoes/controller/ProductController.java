@@ -39,7 +39,6 @@ public class ProductController {
         response.put("EM", "Get all products succeed");
         return ResponseEntity.ok(response);
     }
-
     @GetMapping("/detail/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
         Optional<Product> product = productService.getProductById(id);
