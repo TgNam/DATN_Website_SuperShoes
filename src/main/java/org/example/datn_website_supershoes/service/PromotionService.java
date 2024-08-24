@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.repository.PromotionRepository;
 import org.springframework.beans.BeanUtils;
@@ -15,12 +17,13 @@ public class PromotionService {
     @Autowired
     private PromotionRepository promotionRepository;
 
+
     public Promotion createPromotion(Promotion promotion) {
         return promotionRepository.save(promotion);
     }
 
-    public List<Promotion> getAllPromotions() {
-        return promotionRepository.findAll();
+    public List<PromotionResponse> getAllPromotions() {
+        return promotionRepository.listPromotionResponseByStatus();
     }
 
     public Optional<Promotion> getPromotionById(Long id) {

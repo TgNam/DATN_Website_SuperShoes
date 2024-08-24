@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,9 @@ public class PromotionController {
     @Autowired
     private PromotionService promotionService;
 
-    @GetMapping
+    @GetMapping("/list-promotion")
     public ResponseEntity<Map<String, Object>> getAllPromotions() {
-        List<Promotion> listPromotions = promotionService.getAllPromotions();
+        List<PromotionResponse> listPromotions = promotionService.getAllPromotions();
         Map<String, Object> response = new HashMap<>();
         response.put("DT", listPromotions);
         response.put("EC", 0);
