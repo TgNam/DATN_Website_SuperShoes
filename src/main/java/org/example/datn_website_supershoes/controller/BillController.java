@@ -47,19 +47,43 @@ public class BillController {
 //
 //        return ResponseEntity.ok(response);
 //    }
-
     @GetMapping("/list-bills")
     public Page<BillResponse> getAllBills(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "id", required = false) Integer id,
             @RequestParam(value = "type", required = false) Integer type,
-            @RequestParam(value = "deliveryDate", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, pattern = "yyyy-MM-dd'T'HH:mm:ss") Date deliveryDate,
-            @RequestParam(value = "receiveDate", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, pattern = "yyyy-MM-dd'T'HH:mm:ss") Date receiveDate,
+            @RequestParam(value = "deliveryDate", required = false) String deliveryDateStr,
+            @RequestParam(value = "receiveDate", required = false) String receiveDateStr,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
+        Date deliveryDate = null;
+        Date receiveDate = null;
+
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        try {
+            if (deliveryDateStr != null) {
+                if (deliveryDateStr.length() == 10) {
+                    deliveryDate = dateFormat.parse(deliveryDateStr);
+                } else {
+                    deliveryDate = dateTimeFormat.parse(deliveryDateStr);
+                }
+            }
+            if (receiveDateStr != null) {
+                if (receiveDateStr.length() == 10) {
+                    receiveDate = dateFormat.parse(receiveDateStr);
+                } else {
+                    receiveDate = dateTimeFormat.parse(receiveDateStr);
+                }
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException("Failed to parse date: " + deliveryDateStr + " or " + receiveDateStr + ". Expected formats: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss", e);
+        }
+
+        Date finalDeliveryDate = deliveryDate;
+        Date finalReceiveDate = receiveDate;
         Specification<Bill> spec = (root, query, criteriaBuilder) -> {
             Predicate p = criteriaBuilder.conjunction();
 
@@ -75,12 +99,14 @@ public class BillController {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("type"), type));
             }
 
-            if (deliveryDate != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("deliveryDate"), new java.sql.Timestamp(deliveryDate.getTime())));
+            if (finalDeliveryDate != null) {
+                String formattedDeliveryDate = new SimpleDateFormat("yyyy-MM-dd").format(finalDeliveryDate);
+                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("deliveryDate").as(String.class), "%" + formattedDeliveryDate + "%"));
             }
 
-            if (receiveDate != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("receiveDate"), new java.sql.Timestamp(receiveDate.getTime())));
+            if (finalReceiveDate != null) {
+                String formattedReceiveDate = new SimpleDateFormat("yyyy-MM-dd").format(finalReceiveDate);
+                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("receiveDate").as(String.class), "%" + formattedReceiveDate + "%"));
             }
 
             return p;
@@ -89,6 +115,10 @@ public class BillController {
         Pageable pageable = PageRequest.of(page, size);
         return billService.getBills(spec, pageable);
     }
+
+
+
+
 
 
 
