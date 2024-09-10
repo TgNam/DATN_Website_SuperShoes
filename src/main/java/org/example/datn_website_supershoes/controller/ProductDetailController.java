@@ -26,7 +26,7 @@ public class ProductDetailController {
     @Autowired
     private ProductDetailService productDetailService;
 
-    @GetMapping
+    @GetMapping("/list-productDetail")
     public ResponseEntity<Map<String, Object>> getAllProductDetail() {
         List<ProductDetailResponse> productDetailList = productDetailService.getAllProductDetail();
         Map<String, Object> response = new HashMap<>();
