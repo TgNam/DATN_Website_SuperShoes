@@ -14,8 +14,6 @@ import org.example.datn_website_supershoes.model.ProductDetail;
 @Builder
 public class CartDetailRequest {
 
-    private Long id;
-
     private String codeCart;
 
     private Integer quantity;

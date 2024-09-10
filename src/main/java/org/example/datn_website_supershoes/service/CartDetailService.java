@@ -6,6 +6,7 @@ import org.example.datn_website_supershoes.model.CartDetail;
 import org.example.datn_website_supershoes.repository.CartDetailRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,29 +18,19 @@ public class CartDetailService {
     @Autowired
     private CartDetailRepository cartDetailRepository;
 
-    public CartDetail createCartDetail(CartDetail cartDetail) {
-        return cartDetailRepository.save(cartDetail);
+    public List<String> listCodeCartByIdCart(Long id){
+        if (id == null) {
+            throw new IllegalArgumentException("ID không được để trống.");
+        }
+        return cartDetailRepository.listCodeCartByIdCart(id);
+    }
+    public List<CartDetailResponse> listCartDetailResponseById( Long id, String codeCart){
+        if (id == null) {
+            throw new IllegalArgumentException("ID không được để trống.");
+        } else if (codeCart == null) {
+            throw new IllegalArgumentException("codeCart không được để trống.");
+        }
+        return cartDetailRepository.listCartDetailResponseById(id,codeCart);
     }
 
-    public List<CartDetailResponse> getAllCartDetails() {
-        return cartDetailRepository.listCartDetailResponseByStatus(Status.ACTIVE.toString());
-    }
-
-    public Optional<CartDetail> getCartDetailById(Long id) {
-        return cartDetailRepository.findById(id);
-    }
-
-    public CartDetail updateCartDetail(Long id, CartDetail cartDetail) {
-        CartDetail existingCartDetail = cartDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CartDetail not found"));
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(cartDetail, existingCartDetail, ignoredProperties);
-
-        return cartDetailRepository.save(existingCartDetail);
-    }
-
-    public void deleteCartDetail(Long id) {
-        cartDetailRepository.deleteById(id);
-    }
 }

@@ -27,53 +27,6 @@ public class CartDetailController {
     @Autowired
     private CartDetailService cartDetailService;
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllCartDetails() {
-        List<CartDetailResponse> listCartDetails = cartDetailService.getAllCartDetails();
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", listCartDetails);
-        response.put("EC", 0);
-        response.put("EM", "Get all cart details succeed");
 
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<CartDetail> getCartDetailById(@PathVariable Long id) {
-        Optional<CartDetail> cartDetail = cartDetailService.getCartDetailById(id);
-        return cartDetail.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createCartDetail(@RequestBody CartDetail cartDetail) {
-        CartDetail createdCartDetail = cartDetailService.createCartDetail(cartDetail);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdCartDetail);
-        response.put("EC", 0);
-        response.put("EM", "CartDetail added successfully");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateCartDetail(@PathVariable Long id, @RequestBody CartDetail cartDetail) {
-        CartDetail updatedCartDetail = cartDetailService.updateCartDetail(id, cartDetail);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedCartDetail);
-        response.put("EC", 0);
-        response.put("EM", "CartDetail updated successfully");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteCartDetail(@PathVariable Long id) {
-        try {
-            cartDetailService.deleteCartDetail(id);
-            return ResponseEntity.status(HttpStatus.OK).body("CartDetail deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting cartDetail");
-        }
-    }
 }
 
