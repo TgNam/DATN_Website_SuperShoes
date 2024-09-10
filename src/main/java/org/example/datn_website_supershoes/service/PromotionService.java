@@ -1,13 +1,16 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.PromotionRequest;
+import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.repository.PromotionRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PromotionService {
@@ -15,51 +18,47 @@ public class PromotionService {
     @Autowired
     private PromotionRepository promotionRepository;
 
-    public Promotion createPromotion(Promotion promotion) {
+    public Page<PromotionResponse> getPromotions(Specification<Promotion> spec, Pageable pageable) {
+        return promotionRepository.findAll(spec, pageable).map(this::convertToPromotionResponse);
+    }
+
+    public Promotion createPromotion(PromotionRequest promotionRequest) {
+        Promotion promotion = convertPromotionRequestDTO(promotionRequest);
+        promotion.setStatus(Status.ONGOING.toString());
         return promotionRepository.save(promotion);
     }
 
-    public List<Promotion> getAllPromotions() {
-        return promotionRepository.findAll();
-    }
-
-    public Optional<Promotion> getPromotionById(Long id) {
-        return promotionRepository.findById(id);
-    }
-
-    public Promotion updatePromotion(Long id, Promotion promotion) {
-        Promotion existingPromotion = promotionRepository.findById(id)
+    public Promotion updatePromotion(Long id, PromotionRequest promotionRequest) {
+        Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promotion not found"));
 
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(promotion, existingPromotion, ignoredProperties);
+        String[] ignoredProperties = {"id", "createdAt", "createdBy", "status"};
+        BeanUtils.copyProperties(promotionRequest, promotion, ignoredProperties);
 
-        if (promotion.getCodePromotion() != null) {
-            existingPromotion.setCodePromotion(promotion.getCodePromotion());
-        }
-        if (promotion.getName() != null) {
-            existingPromotion.setName(promotion.getName());
-        }
-        if (promotion.getValue() != null) {
-            existingPromotion.setValue(promotion.getValue());
-        }
-        if (promotion.getType() != null) {
-            existingPromotion.setType(promotion.getType());
-        }
-        if (promotion.getNote() != null) {
-            existingPromotion.setNote(promotion.getNote());
-        }
-        if (promotion.getStartAt() != null) {
-            existingPromotion.setStartAt(promotion.getStartAt());
-        }
-        if (promotion.getEndAt() != null) {
-            existingPromotion.setEndAt(promotion.getEndAt());
-        }
-
-        return promotionRepository.save(existingPromotion);
+        return promotionRepository.save(promotion);
     }
 
     public void deletePromotion(Long id) {
-        promotionRepository.deleteById(id);
+        Promotion promotion = promotionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Promotion not found"));
+        promotionRepository.delete(promotion);
+    }
+
+    private PromotionResponse convertToPromotionResponse(Promotion promotion) {
+        PromotionResponse response = new PromotionResponse();
+        BeanUtils.copyProperties(promotion, response);
+        return response;
+    }
+
+    private Promotion convertPromotionRequestDTO(PromotionRequest promotionRequest) {
+        return Promotion.builder()
+                .codePromotion(promotionRequest.getCodePromotion())
+                .name(promotionRequest.getName())
+                .note(promotionRequest.getNote())
+                .value(promotionRequest.getValue())
+                .type(promotionRequest.getType())
+                .startAt(promotionRequest.getStartAt())
+                .endAt(promotionRequest.getEndAt())
+                .build();
     }
 }

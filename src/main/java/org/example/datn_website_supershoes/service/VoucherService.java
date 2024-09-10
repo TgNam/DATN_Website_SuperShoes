@@ -18,12 +18,6 @@ public class VoucherService {
     @Autowired
     private VoucherRepository voucherRepository;
 
-//        public List<VoucherResponse> getAllVouchers() {
-//        return voucherRepository.findAll().stream()
-//                .map(this::convertToVoucherResponse)
-//                .collect(Collectors.toList());
-//    }
-
     public Page<VoucherResponse> getVouchers(Specification<Voucher> spec, Pageable pageable) {
         return voucherRepository.findAll(spec, pageable).map(this::convertToVoucherResponse);
     }
@@ -38,8 +32,11 @@ public class VoucherService {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
+        // Những thuộc tính không được cập nhật
         String[] ignoredProperties = {"id", "createdAt", "createdBy", "status"};
         BeanUtils.copyProperties(voucherRequest, voucher, ignoredProperties);
+
+        // Cập nhật lại dữ liệu trong cơ sở dữ liệu
         return voucherRepository.save(voucher);
     }
 
@@ -70,4 +67,3 @@ public class VoucherService {
                 .build();
     }
 }
-
