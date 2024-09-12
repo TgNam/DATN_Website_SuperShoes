@@ -12,8 +12,8 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByEmail(String email);
-
     List<Account> findAllByStatus(String status);
+
 
     @Query(value = """
         SELECT new org.example.datn_website_supershoes.dto.response.AccountResponse(
@@ -25,5 +25,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
           AND a.role = 'EMPLOYEE'
         """)
     List<AccountResponse> listAccountResponseByStatus(@Param("status") String status);
+
 
 }
