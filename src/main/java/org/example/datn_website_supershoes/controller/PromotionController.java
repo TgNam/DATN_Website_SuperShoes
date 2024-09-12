@@ -1,16 +1,28 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.constraints.NotNull;
+import org.example.datn_website_supershoes.dto.request.PromotionRequest;
+import org.example.datn_website_supershoes.dto.response.PromotionResponse;
+import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/promotion")
@@ -19,87 +31,78 @@ public class PromotionController {
     @Autowired
     private PromotionService promotionService;
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllPromotions() {
-        List<Promotion> listPromotions = promotionService.getAllPromotions();
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", listPromotions);
-        response.put("EC", 0);
-        response.put("EM", "Get all promotions succeeded");
+    @GetMapping("/list-promotion")
+    public Page<PromotionResponse> getAllPromotions(
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "codePromotion", required = false) String codePromotion,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        Specification<Promotion> spec = (root, query, criteriaBuilder) -> {
+            Predicate p = criteriaBuilder.conjunction();
+            if (status != null && !status.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
+            }
+            if (codePromotion != null && !codePromotion.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("codePromotion"), "%" + codePromotion + "%"));
+            }
+            return p;
+        };
 
-        return ResponseEntity.ok(response);
+        Pageable pageable = PageRequest.of(page, size);
+        return promotionService.getPromotions(spec, pageable);
     }
 
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<Map<String, Object>> getPromotionById(@PathVariable Long id) {
-        Optional<Promotion> promotion = promotionService.getPromotionById(id);
-        Map<String, Object> response = new HashMap<>();
-        if (promotion.isPresent()) {
-            response.put("data", promotion.get());
-            response.put("errorCode", 0);
-            response.put("message", "Promotion retrieved successfully");
-            return ResponseEntity.ok(response);
-        } else {
-            response.put("errorCode", 1);
-            response.put("message", "Promotion not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    @PostMapping("/create")
+    public ResponseEntity<?> createPromotion(@RequestBody @NotNull PromotionRequest promotionRequest) {
+        try {
+            return ResponseEntity.ok(promotionService.createPromotion(promotionRequest));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createPromotion(@RequestBody Promotion promotion) {
-        if (promotion == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createErrorResponse("Invalid promotion data"));
-        }
-
-        Promotion createdPromotion = promotionService.createPromotion(promotion);
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", createdPromotion);
-        response.put("errorCode", 0);
-        response.put("message", "Promotion added successfully");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updatePromotion(@PathVariable Long id, @RequestBody Promotion promotionDetails) {
+    public ResponseEntity<?> updatePromotion(@PathVariable("id") long id,
+                                             @RequestBody PromotionRequest promotionRequest) {
         try {
-            Promotion updatedPromotion = promotionService.updatePromotion(id, promotionDetails);
-            Map<String, Object> response = new HashMap<>();
-            response.put("data", updatedPromotion);
-            response.put("errorCode", 0);
-            response.put("message", "Promotion updated successfully");
-
-            return ResponseEntity.ok(response);
+            Promotion updatedPromotion = promotionService.updatePromotion(id, promotionRequest);
+            return ResponseEntity.ok(updatedPromotion);
         } catch (RuntimeException e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("errorCode", 1);
-            response.put("message", "Error updating promotion: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Map<String, Object>> deletePromotion(@PathVariable Long id) {
+    public ResponseEntity<?> deletePromotion(@PathVariable("id") Long id) {
         try {
             promotionService.deletePromotion(id);
-            Map<String, Object> response = new HashMap<>();
-            response.put("errorCode", 0);
-            response.put("message", "Promotion deleted successfully");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .status(HttpStatus.OK.toString())
+                            .mess("Promotion with ID " + id + " successfully deleted")
+                            .build()
+            );
         } catch (RuntimeException e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("errorCode", 1);
-            response.put("message", "Error deleting promotion: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
-    }
-
-    private Map<String, Object> createErrorResponse(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", null);
-        response.put("errorCode", 1);
-        response.put("message", message);
-        return response;
     }
 }

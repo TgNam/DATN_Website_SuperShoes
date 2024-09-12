@@ -11,15 +11,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+
 @Service
 public class AuthenticationService {
 
     @Autowired
     AccountRepository accountRepository;
+
     @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
+
     PasswordEncoderService passwordEncoderService;
 
     @Autowired
@@ -43,6 +46,7 @@ public class AuthenticationService {
 
     }
 
+
     public void resetPassword(String email){
         Account account = accountRepository
                 .findByEmail(email)
@@ -55,7 +59,6 @@ public class AuthenticationService {
         }
 
     }
-
     public void verify(String token,Long id){
         Account account = accountRepository
                 .findById(id)

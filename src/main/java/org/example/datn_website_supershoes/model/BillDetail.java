@@ -39,5 +39,4 @@ public class BillDetail extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "id_product_detail", referencedColumnName = "id")
     private ProductDetail productDetail;
-
 }

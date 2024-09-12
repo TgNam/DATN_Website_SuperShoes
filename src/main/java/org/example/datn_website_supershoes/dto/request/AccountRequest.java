@@ -9,8 +9,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountRequest {
+
+    private Long id;
+
     private String name;
+
     private String email;
+
     private String password;
+
     private String role;
+
+    private String status;
+
 }

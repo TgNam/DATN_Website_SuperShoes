@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.springframework.beans.BeanUtils;
@@ -15,15 +17,16 @@ public class ProductDetailService {
     private ProductDetailRepository productDetailRepository;
 
 
-    public ProductDetail createProductDetail(ProductDetail productDetail){
+    public ProductDetail createProductDetail(ProductDetail productDetail) {
 
         return productDetailRepository.save(productDetail);
     }
 
-    public List<ProductDetail> getAllProductDetail(){
-        return productDetailRepository.findAll();
+    public List<ProductDetailResponse> getAllProductDetail() {
+        return productDetailRepository.findProductDetailRequestsByStatus(Status.ACTIVE.toString());
     }
-    public Optional<ProductDetail> getProductByIdDetail(Long id){
+
+    public Optional<ProductDetail> getProductByIdDetail(Long id) {
         return productDetailRepository.findById(id);
     }
 
@@ -59,7 +62,8 @@ public class ProductDetailService {
 
         return productDetailRepository.save(productDetail);
     }
-    public void deleteProductDetail(Long id){
+
+    public void deleteProductDetail(Long id) {
         productDetailRepository.deleteById(id);
     }
 }

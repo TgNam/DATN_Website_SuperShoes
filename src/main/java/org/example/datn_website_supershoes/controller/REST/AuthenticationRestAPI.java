@@ -18,10 +18,10 @@ public class AuthenticationRestAPI {
     AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginHandle(@RequestBody AccountRequest accountRequest){
+    public ResponseEntity<?> loginHandle(@RequestBody AccountRequest accountRequest) {
         try {
             return new ResponseEntity<>(authenticationService.authentication(accountRequest), HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
@@ -33,7 +33,7 @@ public class AuthenticationRestAPI {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@Param("email") String email){
+    public ResponseEntity<?> resetPassword(@Param("email") String email) {
         try {
             authenticationService.resetPassword(email);
             return ResponseEntity
@@ -43,7 +43,7 @@ public class AuthenticationRestAPI {
                             .mess("Succ")
                             .build()
                     );
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
@@ -53,11 +53,12 @@ public class AuthenticationRestAPI {
                     );
         }
     }
+
     @GetMapping("/verify-reset-password/{token}/{id}")
     public ResponseEntity<?> verifyResetPassword(@PathVariable("token") String token,
-                                                 @PathVariable("id") Long id){
+                                                 @PathVariable("id") Long id) {
         try {
-            authenticationService.verify(token,id);
+            authenticationService.verify(token, id);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(Response.builder()
@@ -65,7 +66,7 @@ public class AuthenticationRestAPI {
                             .mess("Succ")
                             .build()
                     );
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
