@@ -21,4 +21,5 @@ public class AccountRequest {
     private String role;
 
     private String status;
+
 }

@@ -62,5 +62,4 @@ public class AccountService {
         account.setStatus(Status.ACTIVE.toString());
         return account;
     }
-
 }

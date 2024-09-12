@@ -9,6 +9,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 
 @Service
 public class AuthenticationService {
@@ -18,6 +20,13 @@ public class AuthenticationService {
 
     @Autowired
     AuthenticationManager authenticationManager;
+
+    @Autowired
+
+    PasswordEncoderService passwordEncoderService;
+
+    @Autowired
+    EmailService emailService;
 
     @Autowired
     JWTService jwtService;
@@ -35,5 +44,28 @@ public class AuthenticationService {
                 .resfreshToken("1234")
                 .build();
 
+    }
+
+
+    public void resetPassword(String email){
+        Account account = accountRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Not Found Emaill!"));
+        if(!account.getRole().equals("ADMIN")){
+            String token = jwtService.generateToken(account);
+            String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+            String urlSend = baseUrl + "/api/v1/auth/reset" +token + "/" + account.getId();
+            emailService.sendEmail(email,"Khôi Phục Mật Khẩu", urlSend);
+        }
+
+    }
+    public void verify(String token,Long id){
+        Account account = accountRepository
+                .findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Not Found Emaill!"));
+        if(jwtService.isValid(token,account)){
+            emailService.sendEmail(account.getEmail(), "New Pass", "888888" );
+            account.setPassword(passwordEncoderService.encodedPassword("888888"));
+        }
     }
 }
