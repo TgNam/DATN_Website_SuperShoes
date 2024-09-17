@@ -2,12 +2,18 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductResponse;
+import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,9 +28,62 @@ public class ProductDetailService {
         return productDetailRepository.save(productDetail);
     }
 
-    public List<ProductDetailResponse> getAllProductDetail() {
-        return productDetailRepository.findProductDetailRequestsByStatus(Status.ACTIVE.toString());
+    public Page<ProductDetailResponse> getAllProductDetail(Specification<ProductDetail> spec, Pageable pageable) {
+//
+        return productDetailRepository.findAll(spec, pageable).map(this::convertToProductDetailResponse);
     }
+
+    private ProductDetailResponse convertToProductDetailResponse(ProductDetail productDetail) {
+        ProductDetailResponse response = new ProductDetailResponse();
+
+        // Chép các thuộc tính từ ProductDetail
+        response.setId(productDetail.getId());
+        response.setQuantity(productDetail.getQuantity() != null ? productDetail.getQuantity() : 0); // Cung cấp giá trị mặc định nếu null
+        response.setPrice(productDetail.getPrice() != null ? productDetail.getPrice() : BigDecimal.ZERO); // Cung cấp giá trị mặc định nếu null
+
+
+        // Kiểm tra nếu Product không bị null
+        if (productDetail.getProduct() != null) {
+            Product product = productDetail.getProduct();
+            response.setIdProduct(product.getId());
+            response.setNameProduct(product.getName());
+            response.setImageByte(product.getImageByte());
+            response.setGender(product.isGender());
+
+            // Chuyển tiếp các giá trị từ các đối tượng liên quan
+            if (product.getBrand() != null) {
+                response.setIdBrand(product.getBrand().getId());
+                response.setNameBrand(product.getBrand().getName());
+            }
+            if (product.getCategory() != null) {
+                response.setIdCategory(product.getCategory().getId());
+                response.setNameCategory(product.getCategory().getName());
+            }
+            if (product.getMaterial() != null) {
+                response.setIdMaterial(product.getMaterial().getId());
+                response.setNameMaterial(product.getMaterial().getName());
+            }
+            if (product.getShoeSole() != null) {
+                response.setIdShoeSole(product.getShoeSole().getId());
+                response.setNameShoeSole(product.getShoeSole().getName());
+            }
+        }
+
+        // Gán các giá trị khác nếu có
+        if (productDetail.getColor() != null) {
+            response.setIdColor(productDetail.getColor().getId());
+            response.setNameColor(productDetail.getColor().getName());
+        }
+        if (productDetail.getSize() != null) {
+            response.setIdSize(productDetail.getSize().getId());
+            response.setNameSize(productDetail.getSize().getName());
+        }
+
+        response.setStatus(productDetail.getStatus());
+
+        return response;
+    }
+
 
     public Optional<ProductDetail> getProductByIdDetail(Long id) {
         return productDetailRepository.findById(id);
