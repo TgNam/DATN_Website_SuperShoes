@@ -25,12 +25,20 @@ public class CartService {
     AccountRepository accountRepository;
 
     public CartResponse getCartResponseByAccountId(Long accountId) {
-        return cartRepository.CartResponse(accountId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng cho tài khoản này!"));
+        Optional<CartResponse> cartResponse = cartRepository.CartResponse(accountId);
+        if (!cartResponse.isPresent()){
+            CartRequest cartRequest = new CartRequest();
+            cartRequest.setIdAccount(accountId);
+            Cart cart = cartRepository.save(convertCartRequestDTO(cartRequest));
+            CartResponse newCartResponse = new CartResponse();
+            newCartResponse.setId(cart.getId());
+            newCartResponse.setIdAccount(cart.getAccount().getId());
+            return newCartResponse;
+        }else{
+            return cartResponse.get();
+        }
     }
-    public Cart createCart(CartRequest cartRequest){
-        return cartRepository.save(convertCartRequestDTO(cartRequest));
-    }
+
     public void deleteCartById(Long id) {
         if (cartRepository.existsById(id)) {
             cartRepository.deleteById(id);

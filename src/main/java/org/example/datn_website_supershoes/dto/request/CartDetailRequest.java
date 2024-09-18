@@ -22,5 +22,4 @@ public class CartDetailRequest {
 
     private ProductDetail idProductDetail;
 
-    private String status;
 }

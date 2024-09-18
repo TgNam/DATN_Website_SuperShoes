@@ -20,25 +20,11 @@ public class CartRestAPI {
     @Autowired
     private CartService cartService;
     @GetMapping("/find")
-    public ResponseEntity<?> findByAccountId(@RequestParam("id") Long id) {
+    public ResponseEntity<?> findByAccountId() {
         try {
+            Long id = 6L;
             CartResponse cart = cartService.getCartResponseByAccountId(id);
             return ResponseEntity.ok(cart);
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Response.builder()
-                            .status(HttpStatus.CONFLICT.toString())
-                            .mess(e.getMessage())
-                            .build()
-                    );
-        }
-    }
-    @PostMapping("/create")
-    public ResponseEntity<?> createAccount(@RequestBody CartRequest cartRequest) {
-        try {
-            Cart cart = cartService.createCart(cartRequest);
-            return ResponseEntity.ok("OK");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
