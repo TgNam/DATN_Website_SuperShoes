@@ -26,18 +26,33 @@ public class VoucherController {
     @GetMapping("/list-voucher")
     public Page<VoucherResponse> getAllVouchers(
             @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "codeVoucher", required = false) String codeVoucher,
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
         Specification<Voucher> spec = (root, query, criteriaBuilder) -> {
             Predicate p = criteriaBuilder.conjunction();
+
             if (status != null && !status.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             }
-            if (codeVoucher != null && !codeVoucher.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("codeVoucher"), "%" + codeVoucher + "%"));
+
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                Predicate codePredicate = criteriaBuilder.like(root.get("codeVoucher"), "%" + searchTerm + "%");
+                Predicate namePredicate = criteriaBuilder.like(root.get("name"), "%" + searchTerm + "%");
+                p = criteriaBuilder.and(p, criteriaBuilder.or(codePredicate, namePredicate));
             }
+
+            if (startDate != null && !startDate.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.greaterThanOrEqualTo(root.get("startAt"), startDate));
+            }
+
+            if (endDate != null && !endDate.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.lessThanOrEqualTo(root.get("endAt"), endDate));
+            }
+
             return p;
         };
 

@@ -32,11 +32,9 @@ public class VoucherService {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
-        // Những thuộc tính không được cập nhật
         String[] ignoredProperties = {"id", "createdAt", "createdBy", "status"};
         BeanUtils.copyProperties(voucherRequest, voucher, ignoredProperties);
 
-        // Cập nhật lại dữ liệu trong cơ sở dữ liệu
         return voucherRepository.save(voucher);
     }
 
