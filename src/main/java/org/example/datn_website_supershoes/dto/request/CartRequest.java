@@ -1,10 +1,7 @@
 package org.example.datn_website_supershoes.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @Getter
 @Setter
@@ -12,10 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class CartRequest {
-
-    private Long id;
-
+    @NotNull
     private Long idAccount;
 
-    private String status;
 }

@@ -27,7 +27,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Bill extends BaseEntity {
-
+    @Column
+    private String codeBill;
     @Column
     private String nameCustomer;
 

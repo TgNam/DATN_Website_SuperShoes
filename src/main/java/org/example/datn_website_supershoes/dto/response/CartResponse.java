@@ -17,7 +17,4 @@ public class CartResponse {
 
     private Long idAccount;
 
-    private String nameAccount;
-
-    private String status;
 }
