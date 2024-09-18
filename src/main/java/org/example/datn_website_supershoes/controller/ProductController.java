@@ -2,8 +2,13 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
+import org.example.datn_website_supershoes.dto.response.SizeResponse;
 import org.example.datn_website_supershoes.model.Product;
+import org.example.datn_website_supershoes.repository.BrandRepository;
+import org.example.datn_website_supershoes.repository.CategoryRepository;
+import org.example.datn_website_supershoes.repository.MaterialRepository;
 import org.example.datn_website_supershoes.repository.ProductRepository;
+import org.example.datn_website_supershoes.repository.ShoeSoleRepository;
 import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +28,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/product")
 public class ProductController {
@@ -36,6 +43,17 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private BrandRepository brandRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    @Autowired
+    private ShoeSoleRepository shoeSoleRepository;
 //    @GetMapping
 //    public ResponseEntity<Map<String, Object>> getAllProduct() {
 //        List<ProductResponse> productList = productService.getAllProduct();
@@ -52,7 +70,6 @@ public class ProductController {
             @RequestParam(value = "category", required = false) Long categoryId,
             @RequestParam(value = "brand", required = false) Long brandId,
             @RequestParam(value = "name", required = false) String name,
-
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size
     ) {
@@ -64,13 +81,14 @@ public class ProductController {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             }
             if (name != null && !name.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("name"), name));
+                // Sử dụng LIKE để tìm kiếm từng ký tự một
+                p = criteriaBuilder.and(p, criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
             }
             if (categoryId != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("category").get("id").as(String.class), "%" + categoryId + "%"));
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("category").get("id"), categoryId));
             }
             if (brandId != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("brand").get("id").as(String.class), "%" + brandId + "%"));
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("brand").get("id"), brandId));
             }
 
             return p;
@@ -91,15 +109,26 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/detail/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
         Optional<Product> product = productService.getProductById(id);
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createProduct(@RequestBody Product product) {
-        Product createdProduct = productService.createProduct(product);
+        System.out.println("Product received: " + product);
+
+        ProductResponse createdProduct = productService.createProduct(product);
+        System.out.println("Created product response: " + createdProduct);
+
+        if (createdProduct == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Unable to create product"));
+        }
+
         Map<String, Object> response = new HashMap<>();
         response.put("DT", createdProduct);
         response.put("EC", 0);

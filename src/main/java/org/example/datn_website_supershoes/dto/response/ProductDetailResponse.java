@@ -31,5 +31,26 @@ public class ProductDetailResponse {
 
     private String nameColor;
 
+    private byte[] imageByte;
+
+    private boolean gender;
+
+    private Long idBrand;
+
+    private String nameBrand;
+
+    private Long idCategory;
+
+    private String nameCategory;
+
+    private Long idMaterial;
+
+    private String nameMaterial;
+
+    private Long idShoeSole;
+
+    private String nameShoeSole;
+
+
     private String status;
 }

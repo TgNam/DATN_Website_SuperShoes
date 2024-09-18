@@ -5,7 +5,11 @@ import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.Voucher;
+import org.example.datn_website_supershoes.repository.BrandRepository;
+import org.example.datn_website_supershoes.repository.CategoryRepository;
+import org.example.datn_website_supershoes.repository.MaterialRepository;
 import org.example.datn_website_supershoes.repository.ProductRepository;
+import org.example.datn_website_supershoes.repository.ShoeSoleRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,10 +26,30 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Product createProduct(Product product){
-        return productRepository.save(product);
-    }
 
+    @Autowired
+    private BrandRepository brandRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    @Autowired
+    private ShoeSoleRepository shoeSoleRepository;
+
+
+    //    public Product createProduct(Product product){
+//        return productRepository.save(product);
+//    }
+public ProductResponse createProduct(Product product) {
+    // Lưu đối tượng Product vào cơ sở dữ liệu
+    Product savedProduct = productRepository.save(product);
+
+    // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
+    return convertToProductResponse(savedProduct);
+}
 //    public List<ProductResponse> getAllProduct(){
 //        return productRepository.findProductRequestsByStatus(Status.ACTIVE.toString());
 //    }
