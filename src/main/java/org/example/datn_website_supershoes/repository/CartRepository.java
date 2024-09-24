@@ -8,14 +8,18 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
     @Query(value = """
-            SELECT new org.example.datn_website_supershoes.dto.response.CartResponse(c.id, a.id, a.name, c.status)
+            SELECT new org.example.datn_website_supershoes.dto.response.CartResponse(c.id, a.id)
             FROM Cart c JOIN Account a ON c.account.id = a.id
-            WHERE c.status = :status
+            WHERE a.id = :id
             """)
-    List<CartResponse> listCartResponseByStatus(@Param("status") String status);
+    Optional<CartResponse> CartResponse(@Param("id") Long id);
+
+
+
 }
