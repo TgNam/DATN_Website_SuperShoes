@@ -94,26 +94,29 @@ public class BillController {
         Specification<Bill> spec = (root, query, criteriaBuilder) -> {
             Predicate p = criteriaBuilder.conjunction();
 
+            // Filtering by status if provided
             if (status != null && !status.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             }
 
+            // Partial matching for codeBill (search by each letter)
             if (codeBill != null && !codeBill.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("codeBill"), codeBill));
+                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("codeBill"), "%" + codeBill + "%"));
             }
 
+            // Filtering by type if provided
             if (type != null) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("type"), type));
             }
 
+            // Filtering by deliveryDate using >= comparison
             if (deliveryDate != null) {
-                String formattedDeliveryDate = new SimpleDateFormat("yyyy-MM-dd").format(deliveryDate);
-                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("deliveryDate").as(String.class), "%" + formattedDeliveryDate + "%"));
+                p = criteriaBuilder.and(p, criteriaBuilder.greaterThanOrEqualTo(root.get("deliveryDate").as(Date.class), deliveryDate));
             }
 
+            // Filtering by receiveDate using <= comparison
             if (receiveDate != null) {
-                String formattedReceiveDate = new SimpleDateFormat("yyyy-MM-dd").format(receiveDate);
-                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("receiveDate").as(String.class), "%" + formattedReceiveDate + "%"));
+                p = criteriaBuilder.and(p, criteriaBuilder.lessThanOrEqualTo(root.get("receiveDate").as(Date.class), receiveDate));
             }
 
             return p;
@@ -143,6 +146,7 @@ public class BillController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format: " + dateStr + ". Expected formats: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss", e);
         }
     }
+
 
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createBill(@RequestBody Bill bill) {
