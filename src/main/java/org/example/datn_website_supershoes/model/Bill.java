@@ -29,6 +29,9 @@ import java.util.List;
 public class Bill extends BaseEntity {
 
     @Column
+    private String codeBill;
+
+    @Column
     private String nameCustomer;
 
     @Column

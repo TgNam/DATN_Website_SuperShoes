@@ -1,34 +1,24 @@
 package org.example.datn_website_supershoes.controller;
 
 import org.example.datn_website_supershoes.dto.response.BillResponse;
+import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.service.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import jakarta.persistence.criteria.Predicate;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.persistence.criteria.Predicate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/bill")
@@ -37,53 +27,70 @@ public class BillController {
     @Autowired
     private BillService billService;
 
-    //    @GetMapping("/list-billC")
-//    public ResponseEntity<Map<String, Object>> getAllBills() {
-//        List<BillResponse> listBills = billService.getAllBills();
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("DT", listBills);
-//        response.put("EC", 0);
-//        response.put("EM", "Get all bills succeed");
-//
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/detail/{codeBill}")
+    public ResponseEntity<BillResponse> getBillByCodeBill(@PathVariable String codeBill) {
+        Optional<BillResponse> billResponse = billService.getBillByCodeBill(codeBill);
+        return billResponse.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // New method for fetching Bill summary by codeBill
+    @GetMapping("/list-bill-summaries")
+    public Page<BillSummaryResponse> getBillSummaries(
+            @RequestParam(value = "codeBill", required = false) String codeBill,
+            @RequestParam(value = "nameCustomer", required = false) String nameCustomer,
+            @RequestParam(value = "phoneNumber", required = false) String phoneNumber,
+            @RequestParam(value = "address", required = false) String address,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "createdAt") String sortField,
+            @RequestParam(value = "sortDirection", defaultValue = "DESC") String sortDirection
+    ) {
+        Specification<Bill> spec = (root, query, criteriaBuilder) -> {
+            Predicate p = criteriaBuilder.conjunction();
+
+            if (codeBill != null && !codeBill.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("codeBill"), codeBill));
+            }
+
+            if (nameCustomer != null && !nameCustomer.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("nameCustomer"), "%" + nameCustomer + "%"));
+            }
+
+            if (phoneNumber != null && !phoneNumber.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("phoneNumber"), "%" + phoneNumber + "%"));
+            }
+
+            if (address != null && !address.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("address"), "%" + address + "%"));
+            }
+
+            return p;
+        };
+
+        // Setting the sorting direction
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        return billService.getBillSummaries(spec, pageable);
+    }
+
+
     @GetMapping("/list-bills")
     public Page<BillResponse> getAllBills(
             @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "id", required = false) Integer id,
+            @RequestParam(value = "codeBill", required = false) String codeBill,
             @RequestParam(value = "type", required = false) Integer type,
             @RequestParam(value = "deliveryDate", required = false) String deliveryDateStr,
             @RequestParam(value = "receiveDate", required = false) String receiveDateStr,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "createdAt") String sortField,
+            @RequestParam(value = "sortDirection", defaultValue = "DESC") String sortDirection
     ) {
-        Date deliveryDate = null;
-        Date receiveDate = null;
+        Date deliveryDate = parseDate(deliveryDateStr);
+        Date receiveDate = parseDate(receiveDateStr);
 
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        try {
-            if (deliveryDateStr != null) {
-                if (deliveryDateStr.length() == 10) {
-                    deliveryDate = dateFormat.parse(deliveryDateStr);
-                } else {
-                    deliveryDate = dateTimeFormat.parse(deliveryDateStr);
-                }
-            }
-            if (receiveDateStr != null) {
-                if (receiveDateStr.length() == 10) {
-                    receiveDate = dateFormat.parse(receiveDateStr);
-                } else {
-                    receiveDate = dateTimeFormat.parse(receiveDateStr);
-                }
-            }
-        } catch (ParseException e) {
-            throw new RuntimeException("Failed to parse date: " + deliveryDateStr + " or " + receiveDateStr + ". Expected formats: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss", e);
-        }
-
-        Date finalDeliveryDate = deliveryDate;
-        Date finalReceiveDate = receiveDate;
         Specification<Bill> spec = (root, query, criteriaBuilder) -> {
             Predicate p = criteriaBuilder.conjunction();
 
@@ -91,54 +98,50 @@ public class BillController {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             }
 
-            if (id != null && id >= 0) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("id"), id));
+            if (codeBill != null && !codeBill.isEmpty()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("codeBill"), codeBill));
             }
 
             if (type != null) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("type"), type));
             }
 
-            if (finalDeliveryDate != null) {
-                String formattedDeliveryDate = new SimpleDateFormat("yyyy-MM-dd").format(finalDeliveryDate);
+            if (deliveryDate != null) {
+                String formattedDeliveryDate = new SimpleDateFormat("yyyy-MM-dd").format(deliveryDate);
                 p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("deliveryDate").as(String.class), "%" + formattedDeliveryDate + "%"));
             }
 
-            if (finalReceiveDate != null) {
-                String formattedReceiveDate = new SimpleDateFormat("yyyy-MM-dd").format(finalReceiveDate);
+            if (receiveDate != null) {
+                String formattedReceiveDate = new SimpleDateFormat("yyyy-MM-dd").format(receiveDate);
                 p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("receiveDate").as(String.class), "%" + formattedReceiveDate + "%"));
             }
 
             return p;
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        // Setting the sorting direction
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
         return billService.getBills(spec, pageable);
     }
 
+    // Helper method to parse dates
+    private Date parseDate(String dateStr) {
+        if (dateStr == null) return null;
 
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-
-
-
-
-    @GetMapping("/list-bill1")
-    public List<BillResponse> getAllBill2() {
-
-
-        return billService.getAllBills();
-    }
-
-    @GetMapping("/list-bill")
-    public List<Bill> getAll() {
-
-        return billService.getAllBills2();
-    }
-
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<Bill> getBillById(@PathVariable Long id) {
-        Optional<Bill> bill = billService.getBillById(id);
-        return bill.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        try {
+            if (dateStr.length() == 10) {
+                return dateFormat.parse(dateStr);
+            } else {
+                return dateTimeFormat.parse(dateStr);
+            }
+        } catch (ParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format: " + dateStr + ". Expected formats: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss", e);
+        }
     }
 
     @PostMapping("/add")
