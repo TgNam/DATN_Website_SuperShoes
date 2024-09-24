@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+
 import java.util.Optional;
 
 @Service
@@ -26,23 +26,6 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-
-    @Autowired
-    private BrandRepository brandRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private MaterialRepository materialRepository;
-
-    @Autowired
-    private ShoeSoleRepository shoeSoleRepository;
-
-
-    //    public Product createProduct(Product product){
-//        return productRepository.save(product);
-//    }
 public ProductResponse createProduct(Product product) {
     // Lưu đối tượng Product vào cơ sở dữ liệu
     Product savedProduct = productRepository.save(product);
@@ -50,16 +33,12 @@ public ProductResponse createProduct(Product product) {
     // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
     return convertToProductResponse(savedProduct);
 }
-//    public List<ProductResponse> getAllProduct(){
-//        return productRepository.findProductRequestsByStatus(Status.ACTIVE.toString());
-//    }
+
 
     public Page<ProductResponse> getAllProduct(Specification<Product> spec, Pageable pageable) {
         return productRepository.findAll(spec, pageable).map(this::convertToProductResponse);
     }
-//    public List<ProductResponse> getAllProduct(String status){
-//        return productRepository.findProductRequestsByStatus(status);
-//    }
+
 private ProductResponse convertToProductResponse(Product product) {
     ProductResponse response = new ProductResponse();
     // Chép các thuộc tính đơn giản
