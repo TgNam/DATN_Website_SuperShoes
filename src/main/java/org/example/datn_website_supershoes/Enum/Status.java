@@ -6,5 +6,6 @@ public enum Status {
     SUSPENDED,
     CLOSED,
     ONGOING,
-    ENDING_SOON
+    ENDING_SOON,
+    WAITING_FOR_PAYMENT
 }
