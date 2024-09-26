@@ -17,7 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Guest extends BaseEntity {
+public class    Guest extends BaseEntity {
 
     @Column
     private String name;

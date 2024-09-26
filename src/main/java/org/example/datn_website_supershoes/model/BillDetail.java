@@ -25,7 +25,7 @@ public class BillDetail extends BaseEntity {
     private Integer quantity;
 
     @Column
-    private BigDecimal price_discount;
+    private BigDecimal priceDiscount;
 
     @Column
     private String note;
