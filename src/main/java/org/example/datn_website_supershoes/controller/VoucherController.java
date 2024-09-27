@@ -12,9 +12,23 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/voucher")
@@ -24,14 +38,22 @@ public class VoucherController {
     private VoucherService voucherService;
 
     @GetMapping("/list-voucher")
-    public Page<VoucherResponse> getAllVouchers(
+    public ResponseEntity<Page<VoucherResponse>> getAllVouchers(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "searchTerm", required = false) String searchTerm,
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate,
+            @RequestParam(value = "filterByStartAt", defaultValue = "false") boolean filterByStartAt,
+            @RequestParam(value = "filterByEndAt", defaultValue = "false") boolean filterByEndAt,
+            @RequestParam(value = "type", required = false) Integer type,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
+        String trimmedSearchTerm = Optional.ofNullable(searchTerm)
+                .map(String::trim)
+                .filter(term -> !term.isEmpty())
+                .orElse(null);
+
         Specification<Voucher> spec = (root, query, criteriaBuilder) -> {
             Predicate p = criteriaBuilder.conjunction();
 
@@ -39,26 +61,58 @@ public class VoucherController {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             }
 
-            if (searchTerm != null && !searchTerm.isEmpty()) {
-                Predicate codePredicate = criteriaBuilder.like(root.get("codeVoucher"), "%" + searchTerm + "%");
-                Predicate namePredicate = criteriaBuilder.like(root.get("name"), "%" + searchTerm + "%");
+            if (trimmedSearchTerm != null) {
+                String likePattern = "%" + trimmedSearchTerm.toLowerCase() + "%";
+                Predicate codePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("codeVoucher")), likePattern);
+                Predicate namePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), likePattern);
                 p = criteriaBuilder.and(p, criteriaBuilder.or(codePredicate, namePredicate));
             }
 
-            if (startDate != null && !startDate.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.greaterThanOrEqualTo(root.get("startAt"), startDate));
+            if (type != null) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("type"), type));
             }
 
-            if (endDate != null && !endDate.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.lessThanOrEqualTo(root.get("endAt"), endDate));
+            if (filterByStartAt) {
+                if (startDate != null && endDate != null) {
+                    Predicate startAtPredicate = criteriaBuilder.between(root.get("startAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+                    p = criteriaBuilder.and(p, startAtPredicate);
+                } else if (startDate != null) {
+                    Predicate startAtPredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("startAt"), startDate.atStartOfDay());
+                    p = criteriaBuilder.and(p, startAtPredicate);
+                } else if (endDate != null) {
+                    Predicate startAtPredicate = criteriaBuilder.lessThanOrEqualTo(root.get("startAt"), endDate.atTime(23, 59, 59));
+                    p = criteriaBuilder.and(p, startAtPredicate);
+                }
+            }
+
+            if (filterByEndAt) {
+                if (startDate != null && endDate != null) {
+                    Predicate endAtPredicate = criteriaBuilder.between(root.get("endAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+                    p = criteriaBuilder.and(p, endAtPredicate);
+                } else if (startDate != null) {
+                    Predicate endAtPredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("endAt"), startDate.atStartOfDay());
+                    p = criteriaBuilder.and(p, endAtPredicate);
+                } else if (endDate != null) {
+                    Predicate endAtPredicate = criteriaBuilder.lessThanOrEqualTo(root.get("endAt"), endDate.atTime(23, 59, 59));
+                    p = criteriaBuilder.and(p, endAtPredicate);
+                }
+            }
+
+            if (filterByStartAt && filterByEndAt && startDate != null && endDate != null) {
+                Predicate startAtPredicate = criteriaBuilder.between(root.get("startAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+                Predicate endAtPredicate = criteriaBuilder.between(root.get("endAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+                p = criteriaBuilder.and(p, criteriaBuilder.or(startAtPredicate, endAtPredicate));
             }
 
             return p;
         };
 
         Pageable pageable = PageRequest.of(page, size);
-        return voucherService.getVouchers(spec, pageable);
+        Page<VoucherResponse> vouchers = voucherService.getVouchers(spec, pageable);
+        return ResponseEntity.ok(vouchers);
     }
+
+
 
     @PostMapping("/create")
     public ResponseEntity<?> createVoucher(@RequestBody @NotNull VoucherRequest voucherRequest) {
@@ -76,8 +130,7 @@ public class VoucherController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateVoucher(@PathVariable("id") long id,
-                                           @RequestBody VoucherRequest voucherRequest) {
+    public ResponseEntity<?> updateVoucher(@PathVariable("id") long id, @RequestBody VoucherRequest voucherRequest) {
         try {
             Voucher updatedVoucher = voucherService.updateVoucher(id, voucherRequest);
             return ResponseEntity.ok(updatedVoucher);
