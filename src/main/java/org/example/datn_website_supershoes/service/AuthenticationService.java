@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
+import org.example.datn_website_supershoes.dto.request.LoginRequest;
 import org.example.datn_website_supershoes.dto.token.TokenResponse;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.repository.AccountRepository;
@@ -31,12 +32,12 @@ public class AuthenticationService {
     @Autowired
     JWTService jwtService;
 
-    public TokenResponse authentication(AccountRequest accountRequest){
+    public TokenResponse authentication(LoginRequest loginRequest){
         Account account = accountRepository
-                .findByEmail(accountRequest.getEmail())
+                .findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Not found account!"));
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(accountRequest.getEmail(),accountRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getPassword())
         );
 
         return TokenResponse.builder()
