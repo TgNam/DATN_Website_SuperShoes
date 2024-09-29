@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -42,7 +43,16 @@ public class Account extends BaseEntity implements UserDetails {
     private String password;
 
     @Column
+    private String phoneNumber;
+
+    @Column
     private String role;
+
+    @Column
+    private Integer gender;
+
+    @Column
+    private Date birthday;
 
     @Column
     private Integer rewards;
