@@ -1,5 +1,8 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.dto.request.BillRequest;
 import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
@@ -12,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,6 +23,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/bill")
@@ -169,6 +174,71 @@ public class BillController {
 
         return ResponseEntity.ok(response);
     }
+    @PutMapping("/updateCodeBill/{codeBill}")
+    public ResponseEntity<Map<String, Object>> updatecodeBill(@PathVariable String codeBill, @RequestBody Bill billDetails) {
+        Bill updatedBill = billService.updateCodeBill(codeBill, billDetails);
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", updatedBill);
+        response.put("EC", 0);
+        response.put("EM", "Bill updated successfully");
+
+        return ResponseEntity.ok(response);
+    }
+    @PutMapping("/updateCodeBill2/{codeBill}")
+    public ResponseEntity<?> updateBill2(
+            @PathVariable String codeBill,
+            @RequestBody @Valid BillRequest billRequest,
+            BindingResult bindingResult) {
+
+        // Check for validation errors in the provided fields
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getFieldErrors()
+                    .stream()
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        }
+
+        // Check if path variable and request body match
+        if (!codeBill.equals(billRequest.getCodeBill())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("The code in the URL does not match the code in the request body.");
+        }
+
+        try {
+            // Fetch the existing bill
+            Bill bill = billService.findBillByCode(codeBill);
+
+            // Update fields only if they are present in the request
+            if (billRequest.getNameCustomer() != null) {
+                bill.setNameCustomer(billRequest.getNameCustomer());
+            }
+            if (billRequest.getPhoneNumber() != null) {
+                bill.setPhoneNumber(billRequest.getPhoneNumber());
+            }
+            if (billRequest.getAddress() != null) {
+                bill.setAddress(billRequest.getAddress());
+            }
+            if (billRequest.getNote() != null) {
+                bill.setNote(billRequest.getNote());
+            }
+
+            // Save the updated bill
+            Bill updatedBill = billService.save(bill);
+
+            // Convert to response DTO
+            BillSummaryResponse updatedBillResponse = new BillSummaryResponse(updatedBill);
+            return ResponseEntity.ok(updatedBillResponse);
+
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Bill with code " + codeBill + " not found.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating bill with code " + codeBill);
+        }
+    }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteBill(@PathVariable Long id) {

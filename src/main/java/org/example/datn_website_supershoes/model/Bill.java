@@ -29,8 +29,7 @@ import java.util.List;
 public class Bill extends BaseEntity {
     @Column
     private String codeBill;
-    @Column
-    private String codeBill;
+
 
     @Column
     private String nameCustomer;
@@ -63,10 +62,6 @@ public class Bill extends BaseEntity {
 
     @Column
     private BigDecimal totalAmount;
-
-    @OneToOne
-    @JoinColumn(name = "guest_id")
-    private Guest guest;
 
     @JsonBackReference(value = "billReference")
     @ManyToOne

@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
+import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
@@ -98,4 +97,27 @@ public class BillDetailController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting BillDetail");
         }
     }
+    @DeleteMapping("/delete-by-product-code")
+    public ResponseEntity<?> deleteBillDetailsByProductCode(@RequestParam("productCode") String productCode) {
+        try {
+            billDetailService.deleteBillDetailsByProductCode(productCode);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(Response.builder()
+                            .status(HttpStatus.OK.toString())
+                            .mess("Delete success")
+                            .build()
+                    );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+
 }

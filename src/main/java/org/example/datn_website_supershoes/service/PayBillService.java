@@ -1,7 +1,9 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
+import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.PayBill;
+import org.example.datn_website_supershoes.model.PaymentMethod;
 import org.example.datn_website_supershoes.repository.PayBillRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -90,6 +92,19 @@ public class PayBillService {
         response.setCreatedAt(payBill.getCreatedAt());
         response.setType(payBill.getType());
 
+        // Copy attributes from PaymentMethod if available
+        PaymentMethod paymentMethod = payBill.getPaymentMethod();
+        if (paymentMethod != null) {
+            response.setNamePayment(paymentMethod.getMethodName());
+        }
+
+        // Copy attributes from Account if available
+        Account account = payBill.getBill().getEmployees();
+        if (account != null) {
+            response.setNameEployee(account.getName());
+        }
+
         return response;
     }
+
 }
