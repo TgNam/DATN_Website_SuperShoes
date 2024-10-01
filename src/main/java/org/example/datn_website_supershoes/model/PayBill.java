@@ -28,6 +28,9 @@ public class PayBill extends BaseEntity {
     private String tradingCode;
 
     @Column
+    private Integer type;
+
+    @Column
     private String note;
 
     @JsonBackReference(value = "billPayBillReference")
@@ -39,5 +42,7 @@ public class PayBill extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "id_payment_method", referencedColumnName = "id")
     private PaymentMethod paymentMethod;
+
+
 
 }

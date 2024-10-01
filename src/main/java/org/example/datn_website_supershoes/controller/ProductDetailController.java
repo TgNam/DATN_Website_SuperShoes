@@ -54,6 +54,7 @@ public class ProductDetailController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "category", required = false) Long categoryId,
             @RequestParam(value = "brand", required = false) Long brandId,
+            @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size
@@ -66,7 +67,9 @@ public class ProductDetailController {
             if (status != null && !status.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             }
-
+            if (id != null) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("id"), id));
+            }
             // Lọc theo tên sản phẩm (truy vấn qua Product)
             if (name != null && !name.isEmpty()) {
                 Join<ProductDetail, Product> productJoin = root.join("product");

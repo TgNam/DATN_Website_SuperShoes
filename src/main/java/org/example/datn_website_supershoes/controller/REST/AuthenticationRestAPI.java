@@ -1,6 +1,8 @@
+//
 //package org.example.datn_website_supershoes.controller.REST;
 //
 //import org.example.datn_website_supershoes.dto.request.AccountRequest;
+//import org.example.datn_website_supershoes.dto.request.LoginRequest;
 //import org.example.datn_website_supershoes.dto.response.Response;
 //import org.example.datn_website_supershoes.dto.token.TokenResponse;
 //import org.example.datn_website_supershoes.service.AuthenticationService;
@@ -18,9 +20,9 @@
 //    AuthenticationService authenticationService;
 //
 //    @PostMapping("/login")
-//    public ResponseEntity<?> loginHandle(@RequestBody AccountRequest accountRequest) {
+//    public ResponseEntity<?> loginHandle(@RequestBody LoginRequest loginRequest) {
 //        try {
-//            return new ResponseEntity<>(authenticationService.authentication(accountRequest), HttpStatus.OK);
+//            return new ResponseEntity<>(authenticationService.authentication(loginRequest), HttpStatus.OK);
 //        } catch (Exception e) {
 //            return ResponseEntity
 //                    .status(HttpStatus.NOT_FOUND)
@@ -77,3 +79,4 @@
 //        }
 //    }
 //}
+//

@@ -13,7 +13,7 @@ import java.util.List;
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
 
     @Query(value = """
-                SELECT pm.id,pm.method_name,pm.note,pm.status
+                SELECT pm.id,pm.methodName,pm.note,pm.status
                 FROM 
                 PaymentMethod pm WHERE pm.status = :status
 

@@ -1,7 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
-import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.response.BillResponse;
+import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.repository.BillRepository;
 import org.springframework.beans.BeanUtils;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,36 +20,41 @@ public class BillService {
     @Autowired
     private BillRepository billRepository;
 
+    // Method to create a new Bill
     public Bill createBill(Bill bill) {
         return billRepository.save(bill);
     }
 
+    // Fetch all BillResponse objects with ACTIVE status
     public List<BillResponse> getAllBills() {
         return billRepository.listBillResponseByStatus();
     }
 
-    //    public List<BillResponse> getAllBills() {
-//        return billRepository.listBillResponseByStatus(Status.ACTIVE.toString());
-//    }
+    // Paginated fetching of bills using Specification for filtering
     public Page<BillResponse> getBills(Specification<Bill> spec, Pageable pageable) {
         return billRepository.findAll(spec, pageable).map(this::convertToBillResponse);
     }
 
+    // Fetch all Bill entities
     public List<Bill> getAllBills2() {
         return billRepository.findAll();
     }
 
+    // Fetch Bill by ID
     public Optional<Bill> getBillById(Long id) {
         return billRepository.findById(id);
     }
 
+    // Update an existing Bill
     public Bill updateBill(Long id, Bill bill) {
         Bill existingBill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bill not found"));
 
+        // List of properties to ignore during update
         String[] ignoredProperties = {"id", "createdAt", "createdBy"};
         BeanUtils.copyProperties(bill, existingBill, ignoredProperties);
 
+        // Set related entities if they are not null
         if (bill.getVoucher() != null) {
             existingBill.setVoucher(bill.getVoucher());
         }
@@ -76,16 +80,30 @@ public class BillService {
         return billRepository.save(existingBill);
     }
 
+    // Delete a Bill by ID
     public void deleteBill(Long id) {
         billRepository.deleteById(id);
     }
 
+    // Fetch BillResponse by codeBill
+    public Optional<BillResponse> getBillByCodeBill(String codeBill) {
+        Optional<Bill> optionalBill = billRepository.findByCodeBill(codeBill);
+        return optionalBill.map(this::convertToBillResponse);
+    }
+
+    // New method to fetch BillSummaryResponse by codeBill
+    public Optional<BillSummaryResponse> getBillSummaryByCodeBill(String codeBill) {
+        return billRepository.findBillSummaryByCodeBill(codeBill);
+    }
+
+    // Helper method to convert Bill entity to BillResponse DTO
     private BillResponse convertToBillResponse(Bill bill) {
         BillResponse response = new BillResponse();
 
         // Copy simple attributes
         response.setId(bill.getId());
-        response.setNameCustomer(bill.getNameCustomer());
+        response.setCodeBill(bill.getCodeBill());
+        response.setNameCustomer(bill.getCustomer() != null ? bill.getCustomer().getName() : null);
         response.setPhoneNumber(bill.getPhoneNumber());
         response.setAddress(bill.getAddress());
         response.setNote(bill.getNote());
@@ -98,7 +116,7 @@ public class BillService {
         response.setStatus(bill.getStatus());
         response.setCreatedAt(bill.getCreatedAt());
 
-        // Copy attributes from related objects if not null
+        // Copy related object data if present
         if (bill.getGuest() != null) {
             response.setIdGuest(bill.getGuest().getId());
         }
@@ -116,6 +134,19 @@ public class BillService {
 
         return response;
     }
+    public Page<BillSummaryResponse> getBillSummaries(Specification<Bill> spec, Pageable pageable) {
+        return billRepository.findAll(spec, pageable).map(this::convertToBillSummaryResponse);
+    }
 
+    // Helper method to convert Bill entity to BillSummaryResponse DTO
+    private BillSummaryResponse convertToBillSummaryResponse(Bill bill) {
+        return new BillSummaryResponse(
+                bill.getStatus(),
+                bill.getNameCustomer(),
+                bill.getAddress(),
+                bill.getPhoneNumber(),
+                bill.getNote()
+        );
+    }
 
 }

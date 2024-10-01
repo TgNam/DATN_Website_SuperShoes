@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product> {
+
 @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductResponse(" +
         "p.id, p.name, p.productCode, p.imageByte, p.gender, " +
         "b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status" +
@@ -32,7 +33,6 @@ List<ProductResponse> findProductRequestsByStatus(
         @Param("categoryId") Long categoryId,
         @Param("brandId") Long brandId,
         @Param("name") String name);
-
 
 Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 

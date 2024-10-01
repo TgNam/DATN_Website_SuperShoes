@@ -7,27 +7,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.math.BigDecimal;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
 @ToString
-public class BillDetailRequest {
-
-    private Long id;
-
-    private Integer quantity;
-
-    private BigDecimal priceDiscount;
+public class BillHistoryRequest {
 
     private String note;
 
-    private Long idBill;
+    private Long billId;
 
-    private Long idProductDetail;
+    private Long accountId;
 
-    private String status;
+    private String status; // Optional: If needed to track the status when creating a history entry
+
 }
