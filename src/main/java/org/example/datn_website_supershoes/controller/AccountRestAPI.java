@@ -27,13 +27,13 @@ public class AccountRestAPI {
     private EmailService emailService;
     @PostMapping("/create")
     public ResponseEntity<?> createAccount(@RequestBody @Valid AccountRequest accountRequest, BindingResult result) {
+        try {
         if (result.hasErrors()) {
             List<String> errors = result.getAllErrors().stream()
                     .map(error -> error.getDefaultMessage())
                     .collect(Collectors.toList());
             return ResponseEntity.badRequest().body(errors);
         }
-        try {
             Account account = accountService.createAccount(accountRequest);
             return ResponseEntity.ok(account);
         } catch (RuntimeException e) {
@@ -88,17 +88,27 @@ public class AccountRestAPI {
 
     @GetMapping("/list-accounts-customer")
     public List<AccountResponse> getAllAccount() {
+        List<AccountResponse> accountResponses = accountService.getAllAccountCustomerActive();
         return accountService.getAllAccountCustomerActive();
     }
     @GetMapping("/list-accounts-customer-search")
     public List<AccountResponse> getAllAccountSearch(
             @RequestParam("search") String search,
             @RequestParam("status") String status) {
+
+        String searchLower = search.trim().toLowerCase();
+        String statusTrimmed = status.trim();
+
         return accountService.getAllAccountCustomerActive().stream()
-                .filter(account -> account.getName().toLowerCase().contains(search.trim().toLowerCase()))
-                .filter(account -> "ALL".equalsIgnoreCase(status.trim()) || account.getStatus().equalsIgnoreCase(status.trim()))  // Không lọc theo status nếu là ALL
+                .filter(account -> {
+                    String accountName = account.getName().toLowerCase();
+                    String accountPhone = account.getPhoneNumber().toLowerCase();
+                    return accountName.contains(searchLower) || accountPhone.contains(searchLower);
+                })
+                .filter(account -> "ALL".equalsIgnoreCase(statusTrimmed) || account.getStatus().equalsIgnoreCase(statusTrimmed))
                 .collect(Collectors.toList());
     }
+
 
     @GetMapping("/list-accounts-employee")
     public List<AccountResponse> getAllAccountEmployee() {

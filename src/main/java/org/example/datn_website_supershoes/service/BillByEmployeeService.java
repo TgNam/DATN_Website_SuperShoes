@@ -44,6 +44,8 @@ public class BillByEmployeeService {
     }
 
     public Bill convertBill() {
+        //get lấy id của người dùng từ đăng nhập
+        // vd lấy id của người đăng nhập đó bằng 2
         Long id = 2L;
         Account employee = accountRepository.findById(id).get();
         UUID uuid = UUID.randomUUID();
