@@ -4,7 +4,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
+import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Voucher;
+import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.VoucherRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class VoucherService {
@@ -23,38 +26,53 @@ public class VoucherService {
     @Autowired
     private VoucherRepository voucherRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     private String generateVoucherCode() {
-        return RandomStringUtils.randomAlphabetic(6, 8).toUpperCase();
+        int length = 6 + (int) (Math.random() * 3);
+        String randomAlphanumeric = RandomStringUtils.randomAlphanumeric(length).toUpperCase();
+        return randomAlphanumeric;
     }
 
-    public Voucher createVoucher(VoucherRequest voucherRequest) {
+    public long countVouchers(Specification<Voucher> spec) {
+        return voucherRepository.count(spec);
+    }
+
+    public Voucher createVoucher(VoucherRequest voucherRequest, Long userId) {
         Voucher voucher = convertVoucherRequestDTO(voucherRequest);
         voucher.setCodeVoucher(generateVoucherCode());
         Date currentDate = new Date();
 
+        Account creator = accountRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        voucher.setCreatedBy(creator.getName());
+
         if (voucher.getStartAt().after(currentDate)) {
             voucher.setStatus(Status.UPCOMING.toString());
-        }
-        else if (voucher.getStartAt().before(currentDate) && voucher.getEndAt().after(currentDate)) {
+        } else if (voucher.getStartAt().before(currentDate) && voucher.getEndAt().after(currentDate)) {
             voucher.setStatus(Status.ONGOING.toString());
         }
 
         return voucherRepository.save(voucher);
     }
 
-
-    public Voucher updateVoucher(Long id, VoucherRequest voucherRequest) {
+    public Voucher updateVoucher(Long id, VoucherRequest voucherRequest, Long userId) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
         Date currentDate = new Date();
 
-        if (voucher.getStatus().equals(Status.ENDING_SOON.toString()) ||
-                voucher.getStatus().equals(Status.EXPIRED.toString())) {
+        if (voucher.getStatus().equals(Status.EXPIRED.toString())) {
             throw new RuntimeException("Không thể cập nhật voucher đã hết hạn.");
         }
 
+        Account updater = accountRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
         String[] ignoredProperties = {"id", "createdAt", "createdBy", "status", "codeVoucher"};
         BeanUtils.copyProperties(voucherRequest, voucher, ignoredProperties);
+        voucher.setUpdatedBy(updater.getName());
 
         return voucherRepository.save(voucher);
     }
@@ -66,17 +84,46 @@ public class VoucherService {
         voucherRepository.delete(voucher);
     }
 
-    public Voucher endVoucherEarly(Long id, String updatedBy) {
+    public Voucher endVoucherEarly(Long id, Long userId) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
 
-        voucher.setStatus(Status.ENDING_SOON.toString());
-        voucher.setUpdatedBy(updatedBy); 
+        Account updater = accountRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        voucher.setStatus(Status.ENDED_EARLY.toString());
+        voucher.setUpdatedBy(updater.getName());
 
         return voucherRepository.save(voucher);
     }
 
-    @Scheduled(cron = "0 0 0 * * *") 
+    public Voucher reactivateVoucher(Long id, Long userId) {
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
+
+        if (!voucher.getStatus().equals(Status.ENDED_EARLY.toString())) {
+            throw new RuntimeException("Chỉ có thể bật lại voucher có trạng thái 'Kết thúc sớm'.");
+        }
+
+        Account updater = accountRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        Date currentDate = new Date();
+        if (voucher.getEndAt().after(currentDate)) {
+            if (voucher.getStartAt().after(currentDate)) {
+                voucher.setStatus(Status.UPCOMING.toString());
+            } else {
+                voucher.setStatus(Status.ONGOING.toString());
+            }
+        } else {
+            throw new RuntimeException("Không thể bật lại voucher đã quá ngày hết hạn.");
+        }
+
+        voucher.setUpdatedBy(updater.getName());
+        return voucherRepository.save(voucher);
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
     public void checkAndExpireVouchers() {
         List<Voucher> vouchers = voucherRepository.findAll();
         Date currentDate = new Date();

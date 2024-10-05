@@ -7,6 +7,7 @@ import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.service.VoucherService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,15 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -38,13 +31,11 @@ public class VoucherController {
     private VoucherService voucherService;
 
     @GetMapping("/list-voucher")
-    public ResponseEntity<Page<VoucherResponse>> getAllVouchers(
+    public ResponseEntity<Map<String, Object>> getAllVouchers(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "searchTerm", required = false) String searchTerm,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate,
-            @RequestParam(value = "filterByStartAt", defaultValue = "false") boolean filterByStartAt,
-            @RequestParam(value = "filterByEndAt", defaultValue = "false") boolean filterByEndAt,
             @RequestParam(value = "type", required = false) Integer type,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
@@ -72,36 +63,14 @@ public class VoucherController {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("type"), type));
             }
 
-            if (filterByStartAt) {
-                if (startDate != null && endDate != null) {
-                    Predicate startAtPredicate = criteriaBuilder.between(root.get("startAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-                    p = criteriaBuilder.and(p, startAtPredicate);
-                } else if (startDate != null) {
-                    Predicate startAtPredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("startAt"), startDate.atStartOfDay());
-                    p = criteriaBuilder.and(p, startAtPredicate);
-                } else if (endDate != null) {
-                    Predicate startAtPredicate = criteriaBuilder.lessThanOrEqualTo(root.get("startAt"), endDate.atTime(23, 59, 59));
-                    p = criteriaBuilder.and(p, startAtPredicate);
-                }
+            if (startDate != null) {
+                Predicate startAtPredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("startAt"), startDate.atStartOfDay());
+                p = criteriaBuilder.and(p, startAtPredicate);
             }
 
-            if (filterByEndAt) {
-                if (startDate != null && endDate != null) {
-                    Predicate endAtPredicate = criteriaBuilder.between(root.get("endAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-                    p = criteriaBuilder.and(p, endAtPredicate);
-                } else if (startDate != null) {
-                    Predicate endAtPredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("endAt"), startDate.atStartOfDay());
-                    p = criteriaBuilder.and(p, endAtPredicate);
-                } else if (endDate != null) {
-                    Predicate endAtPredicate = criteriaBuilder.lessThanOrEqualTo(root.get("endAt"), endDate.atTime(23, 59, 59));
-                    p = criteriaBuilder.and(p, endAtPredicate);
-                }
-            }
-
-            if (filterByStartAt && filterByEndAt && startDate != null && endDate != null) {
-                Predicate startAtPredicate = criteriaBuilder.between(root.get("startAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-                Predicate endAtPredicate = criteriaBuilder.between(root.get("endAt"), startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-                p = criteriaBuilder.and(p, criteriaBuilder.or(startAtPredicate, endAtPredicate));
+            if (endDate != null) {
+                Predicate endAtPredicate = criteriaBuilder.lessThanOrEqualTo(root.get("endAt"), endDate.atTime(23, 59, 59));
+                p = criteriaBuilder.and(p, endAtPredicate);
             }
 
             return p;
@@ -109,15 +78,25 @@ public class VoucherController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<VoucherResponse> vouchers = voucherService.getVouchers(spec, pageable);
-        return ResponseEntity.ok(vouchers);
+        long totalRecords = voucherService.countVouchers(spec);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("vouchers", vouchers.getContent());
+        response.put("currentPage", vouchers.getNumber());
+        response.put("totalItems", vouchers.getTotalElements());
+        response.put("totalPages", vouchers.getTotalPages());
+        response.put("totalRecords", totalRecords);
+
+        return ResponseEntity.ok(response);
     }
 
-
-
     @PostMapping("/create")
-    public ResponseEntity<?> createVoucher(@RequestBody @NotNull VoucherRequest voucherRequest) {
+    public ResponseEntity<?> createVoucher(@RequestBody @NotNull VoucherRequest voucherRequest,
+                                           @RequestParam(required = false) Long userId) {
         try {
-            return ResponseEntity.ok(voucherService.createVoucher(voucherRequest));
+            Long defaultUserId = 1L;  // ID mặc định cho người tạo
+            Long creatorId = (userId != null) ? userId : defaultUserId;
+            return ResponseEntity.ok(voucherService.createVoucher(voucherRequest, creatorId));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -130,9 +109,13 @@ public class VoucherController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateVoucher(@PathVariable("id") long id, @RequestBody VoucherRequest voucherRequest) {
+    public ResponseEntity<?> updateVoucher(@PathVariable("id") long id,
+                                           @RequestBody VoucherRequest voucherRequest,
+                                           @RequestParam(required = false) Long userId) {
         try {
-            Voucher updatedVoucher = voucherService.updateVoucher(id, voucherRequest);
+            Long defaultUserId = 1L;
+            Long updaterId = (userId != null) ? userId : defaultUserId;
+            Voucher updatedVoucher = voucherService.updateVoucher(id, voucherRequest, updaterId);
             return ResponseEntity.ok(updatedVoucher);
         } catch (RuntimeException e) {
             return ResponseEntity
@@ -144,6 +127,7 @@ public class VoucherController {
                     );
         }
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteVoucher(@PathVariable("id") Long id) {
@@ -165,5 +149,48 @@ public class VoucherController {
                             .build()
                     );
         }
+    }
+
+    @PutMapping("/end-early/{id}")
+    public ResponseEntity<?> endVoucherEarly(@PathVariable("id") Long id,
+                                             @RequestParam(value = "userId", required = false) Long userId) {
+        try {
+            Voucher updatedVoucher = voucherService.endVoucherEarly(id, userId != null ? userId : 1);
+            VoucherResponse response = convertToVoucherResponse(updatedVoucher);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+    @PutMapping("/reactivate/{id}")
+    public ResponseEntity<?> reactivateVoucher(@PathVariable("id") Long id,
+                                               @RequestParam(value = "userId", required = false) Long userId) {
+        try {
+            Voucher updatedVoucher = voucherService.reactivateVoucher(id, userId != null ? userId : 1);
+            VoucherResponse response = convertToVoucherResponse(updatedVoucher);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+
+    private VoucherResponse convertToVoucherResponse(Voucher voucher) {
+        VoucherResponse response = new VoucherResponse();
+        BeanUtils.copyProperties(voucher, response);
+        return response;
     }
 }
