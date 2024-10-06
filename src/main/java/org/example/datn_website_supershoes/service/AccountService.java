@@ -1,8 +1,8 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Role;
-import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.accountWithPassword.AccountWithPassword;
+import org.example.datn_website_supershoes.dto.request.AccountUpdateRequest;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.model.Account;
@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,25 +46,39 @@ public class AccountService {
         }
     }
 
-    public Account updateAccount(Long id, String username) {
-        Account account = accountRepository.findById(id).orElseGet(() -> {
-            throw new RuntimeException("Account not exits");
+    public Account updateAccount(Long idAccount, AccountUpdateRequest accountRequest) {
+        Account account = accountRepository.findById(idAccount).orElseGet(() -> {
+            throw new RuntimeException("Tài khoản không tồn tại");
         });
-        account.setName(username);
+        account.setName(accountRequest.getName());
+        account.setPhoneNumber(accountRequest.getPhoneNumber());
+        account.setGender(accountRequest.getGender());
+        account.setBirthday(accountRequest.getBirthday());
+        account.setStatus(accountRequest.getStatus());
         return accountRepository.save(account);
-    }
-
-    public void deleteAccount(Long id) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not exits"));
-        account.setStatus(Status.INACTIVE.toString());
-        accountRepository.deleteById(id);
     }
 
     public List<AccountResponse> getAllAccountCustomerActive() {
         return accountRepository.listCustomerResponseByStatus(Role.CUSTOMER.toString());
     }
-
+    public AccountResponse findAccountById(Long idAccount){
+        Optional<Account> accountOP = accountRepository.findById(idAccount);
+        if (!accountOP.isPresent()) {
+            throw new RuntimeException("Đối tượng không tồn tại .");
+        }
+        AccountResponse accountResponse = AccountResponse.builder()
+                .id(accountOP.get().getId())
+                .name(accountOP.get().getName())
+                .email(accountOP.get().getEmail())
+                .phoneNumber(accountOP.get().getPhoneNumber())
+                .role(accountOP.get().getRole())
+                .gender(accountOP.get().getGender())
+                .birthday(accountOP.get().getBirthday())
+                .rewards(accountOP.get().getRewards())
+                .status(accountOP.get().getStatus())
+                .build();
+        return accountResponse;
+    }
     public List<AccountResponse> getAllAccountEmployeeActive() {
         return accountRepository.listEmployeeResponseByStatus(Role.EMPLOYEE.toString());
     }

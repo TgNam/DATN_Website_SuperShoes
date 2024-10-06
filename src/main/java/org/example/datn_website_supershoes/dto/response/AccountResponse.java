@@ -2,10 +2,7 @@ package org.example.datn_website_supershoes.dto.response;
 
 
 import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
@@ -13,6 +10,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Setter
 @Getter
+@Builder
 public class AccountResponse {
 
     private Long id;
