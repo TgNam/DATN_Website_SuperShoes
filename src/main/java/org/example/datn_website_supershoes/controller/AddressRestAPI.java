@@ -68,17 +68,17 @@ public class AddressRestAPI {
         }
     }
     @GetMapping("/findAddress")
-    public ResponseEntity<?> findAddress(@RequestParam(value ="idAccount", required = false) Long idAccount) {
+    public ResponseEntity<?> findAddress(@RequestParam(value ="idAddress", required = false) Long idAddress) {
         try {
-            if (idAccount == null) {
+            if (idAddress == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
                                 .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: ID địa chỉ không được để trống!")
+                                .mess("Lỗi: ID tài khoản không được để trống!")
                                 .build()
                 );
             }
-            return ResponseEntity.ok().body(addressService.findAddressById(idAccount));
+            return ResponseEntity.ok().body(addressService.findAddressById(idAddress));
         }catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)

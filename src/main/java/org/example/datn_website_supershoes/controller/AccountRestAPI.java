@@ -1,13 +1,12 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import org.example.datn_website_supershoes.dto.request.AccountUpdateRequest;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.service.AccountService;
-import org.example.datn_website_supershoes.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +22,6 @@ public class AccountRestAPI {
     @Autowired
     AccountService accountService;
 
-    @Autowired
-    private EmailService emailService;
     @PostMapping("/create")
     public ResponseEntity<?> createAccount(@RequestBody @Valid AccountRequest accountRequest, BindingResult result) {
         try {
@@ -47,11 +44,29 @@ public class AccountRestAPI {
         }
     }
 
-    @PutMapping("update/{id}")
-    public ResponseEntity<?> updateAccount(@PathVariable("id") long id, @RequestBody AccountRequest accountRequest) {
+    @PutMapping("/updateAccount")
+    public ResponseEntity<?> updateAccount(
+            @RequestParam(value = "idAccount", required = false) Long idAccount,
+            @RequestBody @Valid AccountUpdateRequest accountRequest,
+            BindingResult result
+    ) {
         try {
-            String username = accountRequest.getName();
-            Account account = accountService.updateAccount(id, username);
+            // Kiểm tra nếu idAccount bị trống (null)
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID địa chỉ không được để trống!")
+                                .build()
+                );
+            }
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            Account account = accountService.updateAccount(idAccount, accountRequest);
             return ResponseEntity.ok(account);
         } catch (RuntimeException e) {
             return ResponseEntity
@@ -64,33 +79,13 @@ public class AccountRestAPI {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        try {
-            accountService.deleteAccount(id);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(Response.builder()
-                            .status(HttpStatus.OK.toString())
-                            .mess("Delete success")
-                            .build()
-                    );
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(Response.builder()
-                            .status(HttpStatus.NOT_FOUND.toString())
-                            .mess(e.getMessage())
-                            .build()
-                    );
-        }
-    }
 
     @GetMapping("/list-accounts-customer")
     public List<AccountResponse> getAllAccount() {
         List<AccountResponse> accountResponses = accountService.getAllAccountCustomerActive();
-        return accountService.getAllAccountCustomerActive();
+        return accountResponses;
     }
+
     @GetMapping("/list-accounts-customer-search")
     public List<AccountResponse> getAllAccountSearch(
             @RequestParam("search") String search,
@@ -108,7 +103,29 @@ public class AccountRestAPI {
                 .filter(account -> "ALL".equalsIgnoreCase(statusTrimmed) || account.getStatus().equalsIgnoreCase(statusTrimmed))
                 .collect(Collectors.toList());
     }
-
+    @GetMapping("/findAccounts")
+    public ResponseEntity<?> findAccounts(@RequestParam(value ="idAccount", required = false) Long idAccount) {
+        try {
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID của tài khoản không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(accountService.findAccountById(idAccount));
+        }catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(
+                            Response.builder()
+                                    .status(HttpStatus.NOT_FOUND.toString())
+                                    .mess(e.getMessage())
+                                    .build()
+                    );
+        }
+    }
 
     @GetMapping("/list-accounts-employee")
     public List<AccountResponse> getAllAccountEmployee() {
