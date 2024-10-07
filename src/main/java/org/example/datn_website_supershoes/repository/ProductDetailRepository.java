@@ -33,8 +33,8 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "AND (:id IS NULL OR pd.id = :id)" +
             "AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND (:categoryId IS NOT NULL OR :brandId IS NOT NULL OR :name IS NOT NULL) " + // Thêm điều kiện bắt buộc ít nhất 1 tham số khác null
-            "GROUP BY pd.id, pd.quantity, pd.price, p.id, p.name, s.id, s.name, c.id, c.name,\n" +
-            "p.imageByte, p.gender, b.id, b.name, ca.id, ca.name, m.id, m.name, ss.id, ss.name, pd.status\n")
+            "GROUP BY pd.id, pd.quantity, pd.price, p.id, p.name, s.id, s.name, c.id, c.name," +
+            "p.imageByte, p.gender, b.id, b.name, ca.id, ca.name, m.id, m.name, ss.id, ss.name, pd.status")
     List<ProductDetailResponse> findProductDetailRequestsByStatus(@Param("status") String status,
                                                                   @Param("categoryId") Long categoryId,
                                                                   @Param("brandId") Long brandId,
