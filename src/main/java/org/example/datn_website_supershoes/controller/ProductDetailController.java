@@ -108,4 +108,6 @@ public class ProductDetailController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting productDetail");
         }
     }
+
+
 }

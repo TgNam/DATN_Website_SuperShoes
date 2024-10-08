@@ -20,6 +20,12 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
             FROM Promotion p WHERE p.status = :status
             """)
     List<PromotionResponse> listPromotionResponseByStatus(@Param("status") String status);
-
+    @Query("""
+            SELECT new org.example.datn_website_supershoes.dto.response.PromotionResponse(
+            p.id, p.codePromotion, p.name, p.value, p.type, p.note,
+            p.startAt, p.endAt, p.status)
+            FROM Promotion p
+            """)
+    List<PromotionResponse> listPromotionResponse();
     Page<Promotion> findAll(Specification<Promotion> spec, Pageable pageable);
 }
