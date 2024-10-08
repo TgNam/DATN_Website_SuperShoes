@@ -15,8 +15,6 @@ import java.util.Date;
 @Builder
 public class PromotionRequest {
 
-    private Long id;
-
     private String codePromotion;
 
     private String name;
