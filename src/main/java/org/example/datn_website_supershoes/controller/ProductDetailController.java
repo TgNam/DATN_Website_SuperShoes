@@ -1,7 +1,9 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
+import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
@@ -27,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/productDetail")
@@ -109,5 +112,18 @@ public class ProductDetailController {
         }
     }
 
-
+    @GetMapping("/listProductDetail")
+    public ResponseEntity<?> getProductDetail(@RequestParam("idProducts") List<Long> idProducts) {
+        List<ProductDetailResponseByNam> productDetails = productDetailService.findProductDetailRequests(idProducts);
+        return ResponseEntity.ok(productDetails);
+    }
+    @GetMapping("/filterListProductDetail")
+    public List<ProductDetailResponseByNam> getAllAccountSearch(
+            @RequestParam("idProducts") List<Long> idProducts,
+            @RequestParam("search") String search,
+            @RequestParam("nameSize") String nameSize,
+            @RequestParam("nameColor") String nameColor,
+            @RequestParam("priceRange") String priceRange) {
+        return productDetailService.filterListProductDetail(idProducts,search,nameSize,nameColor,priceRange);
+    }
 }
