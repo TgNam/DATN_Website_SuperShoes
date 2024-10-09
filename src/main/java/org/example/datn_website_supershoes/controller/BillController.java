@@ -199,8 +199,8 @@ public class BillController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
         }
 
-        // Check if path variable and request body match
-        if (!codeBill.equals(billRequest.getCodeBill())) {
+        // Check if path variable and request body codeBill match
+        if (billRequest.getCodeBill() != null && !codeBill.equals(billRequest.getCodeBill())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("The code in the URL does not match the code in the request body.");
         }
@@ -208,6 +208,11 @@ public class BillController {
         try {
             // Fetch the existing bill
             Bill bill = billService.findBillByCode(codeBill);
+
+            if (bill == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Bill with code " + codeBill + " not found.");
+            }
 
             // Update fields only if they are present in the request
             if (billRequest.getNameCustomer() != null) {
@@ -221,6 +226,27 @@ public class BillController {
             }
             if (billRequest.getNote() != null) {
                 bill.setNote(billRequest.getNote());
+            }
+            if (billRequest.getType() != null) {
+                bill.setType(billRequest.getType());
+            }
+            if (billRequest.getDeliveryDate() != null) {
+                bill.setDeliveryDate(billRequest.getDeliveryDate());
+            }
+            if (billRequest.getReceiveDate() != null) {
+                bill.setReceiveDate(billRequest.getReceiveDate());
+            }
+            if (billRequest.getTotalMerchandise() != null) {
+                bill.setTotalMerchandise(billRequest.getTotalMerchandise());
+            }
+            if (billRequest.getPriceDiscount() != null) {
+                bill.setPriceDiscount(billRequest.getPriceDiscount());
+            }
+            if (billRequest.getTotalAmount() != null) {
+                bill.setTotalAmount(billRequest.getTotalAmount());
+            }
+            if (billRequest.getStatus() != null) {
+                bill.setStatus(billRequest.getStatus());
             }
 
             // Save the updated bill
@@ -238,6 +264,7 @@ public class BillController {
                     .body("Error updating bill with code " + codeBill);
         }
     }
+
 
 
     @DeleteMapping("/delete/{id}")

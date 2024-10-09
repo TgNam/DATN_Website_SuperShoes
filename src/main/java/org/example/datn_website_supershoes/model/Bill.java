@@ -11,10 +11,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -26,10 +23,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Bill extends BaseEntity {
+
     @Column
     private String codeBill;
-
 
     @Column
     private String nameCustomer;
@@ -62,6 +60,10 @@ public class Bill extends BaseEntity {
 
     @Column
     private BigDecimal totalAmount;
+
+    @OneToOne
+    @JoinColumn(name = "guest_id")
+    private Guest guest;
 
     @JsonBackReference(value = "billReference")
     @ManyToOne

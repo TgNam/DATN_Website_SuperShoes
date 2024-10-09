@@ -1,6 +1,8 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.BillDetail;
@@ -67,8 +69,11 @@ public class BillDetailController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createBillDetail(@RequestBody BillDetail billDetail) {
-        BillDetail createdBillDetail = billDetailService.createBillDetail(billDetail);
+    public ResponseEntity<Map<String, Object>> createBillDetail(@Valid @RequestBody BillDetailRequest billDetailRequest) {
+        // Convert BillDetailRequest to BillDetail entity
+        BillDetail createdBillDetail = billDetailService.createBillDetail(billDetailRequest);
+
+        // Create response map
         Map<String, Object> response = new HashMap<>();
         response.put("DT", createdBillDetail);
         response.put("EC", 0);
@@ -77,9 +82,10 @@ public class BillDetailController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateBillDetail(@PathVariable Long id, @RequestBody BillDetail billDetailDetails) {
-        BillDetail updatedBillDetail = billDetailService.updateBillDetail(id, billDetailDetails);
+
+    @PutMapping("/update")
+    public ResponseEntity<Map<String, Object>> updateBillDetail(@Valid @RequestBody BillDetailRequest billDetailRequest) {
+        BillDetail updatedBillDetail = billDetailService.updateBillDetail(billDetailRequest);
         Map<String, Object> response = new HashMap<>();
         response.put("DT", updatedBillDetail);
         response.put("EC", 0);
@@ -87,6 +93,7 @@ public class BillDetailController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteBillDetail(@PathVariable Long id) {

@@ -1,15 +1,16 @@
 package org.example.datn_website_supershoes.dto.response;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.Column;
+import lombok.*;
+
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
+@Builder
 public class AccountResponse {
 
     private Long id;
@@ -18,13 +19,15 @@ public class AccountResponse {
 
     private String email;
 
-    private String password;
+    private String phoneNumber;
 
     private String role;
 
-    private String gmail;
+    private Integer gender;
 
-    private String number;
+    private Date birthday;
+
+    private Integer rewards;
 
     private String status;
 }

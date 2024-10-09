@@ -30,13 +30,13 @@ public class BillSummaryResponse {
     @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
     private String nameCustomer;
 
-    @NotNull(message = "Phone number cannot be null")
-    @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 digits")
-    private String phoneNumber;
-
     @NotNull(message = "Address cannot be null")
     @Size(min = 10, message = "Address must be at least 10 characters long")
     private String address;
+
+    @NotNull(message = "Phone number cannot be null")
+    @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 digits")
+    private String phoneNumber;
 
     @Size(max = 200, message = "Note cannot exceed 200 characters")
     private String note;
@@ -45,8 +45,8 @@ public class BillSummaryResponse {
     public BillSummaryResponse(Bill bill) {
         this.codeBill = bill.getCodeBill();
         this.status = bill.getStatus();
-        this.nameCustomer = bill.getNameCustomer();
         this.address = bill.getAddress();
+        this.nameCustomer = bill.getNameCustomer();
         this.phoneNumber = bill.getPhoneNumber();
         this.note = bill.getNote();
     }

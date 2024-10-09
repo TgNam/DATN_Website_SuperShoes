@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.BillDetail;
@@ -7,6 +8,8 @@ import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.BillDetailRepository;
+import org.example.datn_website_supershoes.repository.BillRepository;
+import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,10 +27,36 @@ public class BillDetailService {
     @Autowired
     private BillDetailRepository billDetailRepository;
 
-    // Method to create a new BillDetail
-    public BillDetail createBillDetail(BillDetail billDetail) {
+    @Autowired
+    private BillRepository billRepository;
+
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
+
+    // Method to create a new BillDetail using BillDetailRequest
+    public BillDetail createBillDetail(BillDetailRequest billDetailRequest) {
+        BillDetail billDetail = new BillDetail();
+        billDetail.setQuantity(billDetailRequest.getQuantity());
+        billDetail.setPriceDiscount(billDetailRequest.getPriceDiscount());
+        billDetail.setNote(billDetailRequest.getNote());
+        billDetail.setStatus(billDetailRequest.getStatus());
+
+        // Set relationships by fetching from the repository
+        if (billDetailRequest.getIdBill() != null) {
+            Bill bill = billRepository.findById(billDetailRequest.getIdBill())
+                    .orElseThrow(() -> new RuntimeException("Bill not found with id: " + billDetailRequest.getIdBill()));
+            billDetail.setBill(bill);
+        }
+
+        if (billDetailRequest.getIdProductDetail() != null) {
+            ProductDetail productDetail = productDetailRepository.findById(billDetailRequest.getIdProductDetail())
+                    .orElseThrow(() -> new RuntimeException("ProductDetail not found with id: " + billDetailRequest.getIdProductDetail()));
+            billDetail.setProductDetail(productDetail);
+        }
+
         return billDetailRepository.save(billDetail);
     }
+
 
     // Fetch all BillDetailResponse objects by Bill code
     public List<BillDetailResponse> getBillDetailsByCodeBill(String codeBill) {
@@ -49,25 +78,61 @@ public class BillDetailService {
         return billDetailRepository.findById(id);
     }
 
-    // Update an existing BillDetail
-    public BillDetail updateBillDetail(Long id, BillDetail billDetail) {
-        BillDetail existingBillDetail = billDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("BillDetail not found"));
+    public BillDetail updateBillDetail(BillDetailRequest billDetailRequest) {
+        // Check if a BillDetail with the given idBill and idProductDetail already exists
+        Optional<BillDetail> existingProductDetail = billDetailRepository.findAll().stream()
+                .filter(bd -> {
+                    if (bd.getProductDetail() != null && bd.getBill() != null) {
+                        return bd.getProductDetail().getId().equals(billDetailRequest.getIdProductDetail()) &&
+                                bd.getBill().getId().equals(billDetailRequest.getIdBill());
+                    }
+                    return false;
+                })
+                .findFirst();
 
-        // List of properties to ignore during update
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(billDetail, existingBillDetail, ignoredProperties);
+        if (existingProductDetail.isPresent()) {
+            // If it exists, update the existing BillDetail's quantity
+            BillDetail billDetail = existingProductDetail.get();
+            billDetail.setQuantity(billDetail.getQuantity() + billDetailRequest.getQuantity());
 
-        // Set related entities if they are not null
-        if (billDetail.getBill() != null) {
-            existingBillDetail.setBill(billDetail.getBill());
+            // Update other fields if needed
+            if (billDetailRequest.getPriceDiscount() != null) {
+                billDetail.setPriceDiscount(billDetailRequest.getPriceDiscount());
+            }
+            if (billDetailRequest.getNote() != null) {
+                billDetail.setNote(billDetailRequest.getNote());
+            }
+            if (billDetailRequest.getStatus() != null) {
+                billDetail.setStatus(billDetailRequest.getStatus());
+            }
+
+            return billDetailRepository.save(billDetail); // Save the updated BillDetail
+        } else {
+            // If it does not exist, create a new BillDetail
+            BillDetail newBillDetail = new BillDetail();
+            newBillDetail.setQuantity(billDetailRequest.getQuantity());
+            newBillDetail.setPriceDiscount(billDetailRequest.getPriceDiscount());
+            newBillDetail.setNote(billDetailRequest.getNote());
+            newBillDetail.setStatus(billDetailRequest.getStatus());
+
+            // Set relationships
+            if (billDetailRequest.getIdBill() != null) {
+                Bill bill = billRepository.findById(billDetailRequest.getIdBill())
+                        .orElseThrow(() -> new RuntimeException("Bill not found with id: " + billDetailRequest.getIdBill()));
+                newBillDetail.setBill(bill);
+            }
+
+            if (billDetailRequest.getIdProductDetail() != null) {
+                ProductDetail productDetail = productDetailRepository.findById(billDetailRequest.getIdProductDetail())
+                        .orElseThrow(() -> new RuntimeException("ProductDetail not found with id: " + billDetailRequest.getIdProductDetail()));
+                newBillDetail.setProductDetail(productDetail);
+            }
+
+            return billDetailRepository.save(newBillDetail); // Save the new BillDetail
         }
-        if (billDetail.getProductDetail() != null) {
-            existingBillDetail.setProductDetail(billDetail.getProductDetail());
-        }
-
-        return billDetailRepository.save(existingBillDetail);
     }
+
+
 
     // Delete a BillDetail by ID
     public void deleteBillDetail(Long id) {
@@ -86,44 +151,34 @@ public class BillDetailService {
             throw new RuntimeException("No BillDetails found for the given product code: " + productCode);
         }
     }
-
-
-    // Helper method to convert BillDetail entity to BillDetailResponse DTO
     private BillDetailResponse convertToBillDetailResponse(BillDetail billDetail) {
         BillDetailResponse response = new BillDetailResponse();
 
-        // Copy simple attributes
         response.setId(billDetail.getId());
         response.setQuantity(billDetail.getQuantity());
-        response.setStatus(billDetail.getStatus()); // Assuming status should reflect a state like "Pending", "Paid", etc.
+        response.setStatus(billDetail.getStatus());
+        response.setPriceDiscount(billDetail.getPriceDiscount());
 
-        // Copy Bill related data if present
-        Bill bill = billDetail.getBill(); // Assuming there's a getBill() method in BillDetail
-        if (bill != null) {
-            BigDecimal totalAmount = bill.getTotalAmount();
-            if (totalAmount != null) {
-                response.setTotalAmount(totalAmount); // Ensure response has a proper field to handle totalAmount
-            }
-        }
+        Optional.ofNullable(billDetail.getProductDetail()).ifPresent(productDetail -> {
+            Optional.ofNullable(productDetail.getProduct()).ifPresent(product -> {
+                // Calculate the total amount using BigDecimal
+                BigDecimal totalAmount = productDetail.getPrice().multiply(BigDecimal.valueOf(billDetail.getQuantity()));
+                response.setTotalAmount(totalAmount);
+               // Set the sumPrice with totalAmount
 
-        // Copy related object data if present
-        ProductDetail productDetail = billDetail.getProductDetail();
-        if (productDetail != null) {
-            Product product = productDetail.getProduct();
-            if (product != null) {
                 response.setImageByte(product.getImageByte());
                 response.setNameProduct(product.getName());
                 response.setProductCode(product.getProductCode());
-            }
+            });
 
-            Color color = productDetail.getColor();
-            if (color != null) {
+            Optional.ofNullable(productDetail.getColor()).ifPresent(color -> {
                 response.setNameColor(color.getName());
-            }
-        }
+            });
+        });
 
         return response;
     }
+
 
 
 }

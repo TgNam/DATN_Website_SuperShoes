@@ -17,15 +17,18 @@ import java.util.Optional;
 public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
 
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.BillDetailResponse(" +
-            "bd.id,p.productCode, p.imageByte, p.name, c.name, bd.quantity, b.totalAmount, b.status) " +
+            "bd.id, p.productCode, p.imageByte, p.name, c.name, bd.quantity, pd.price, bd.status, bd.priceDiscount) " +
             "FROM BillDetail bd " +
             "JOIN bd.productDetail pd " +
             "JOIN pd.product p " +
             "JOIN pd.color c " +
             "JOIN bd.bill b " +
             "WHERE b.codeBill = :codeBill " +
-            "ORDER BY pd.updatedAt DESC ")
+            "GROUP BY bd.id, p.productCode, p.imageByte, p.name, c.name, bd.quantity, pd.price, b.status " +
+            "ORDER BY pd.createdAt DESC")
     List<BillDetailResponse> listBillDetailResponseByCodeBill(@Param("codeBill") String codeBill);
+
+
 
     // Pagination support for listing BillDetails based on specifications
     Page<BillDetail> findAll(Specification<BillDetail> spec, Pageable pageable);

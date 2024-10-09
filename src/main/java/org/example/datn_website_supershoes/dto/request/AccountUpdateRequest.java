@@ -1,25 +1,19 @@
 package org.example.datn_website_supershoes.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Date;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class AddressRequest {
-
-    @NotNull(message = "id của tài khoản không được để trống")
-    private Long idAccount;
-
+public class AccountUpdateRequest {
     @NotBlank(message = "Tên là bắt buộc")
     @Size(min = 2, max = 50, message = "Tên phải chứa ít nhất 2 ký tự không được vượt quá 50 ký tự")
     private String name;
@@ -28,8 +22,12 @@ public class AddressRequest {
     @Pattern(regexp = "^0[0-9]{9,10}$", message = "Số điện thoại phải bắt đầu bằng số 0 và có từ 10 đến 11 số")
     private String phoneNumber;
 
-    @NotBlank(message = "Địa chỉ là bắt buộc")
-    @Size(min = 2, max = 100, message = "Tên phải chứa ít nhất 2 ký tự không được vượt quá 100 ký tự")
-    private String address;
+    private Integer gender;  // Có thể dùng giá trị 1: Nam, 2: Nữ, 3: Khác
 
+    @Past(message = "Vui lòng nhập ngày sinh hợp lệ (trước ngày hiện tại)")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date birthday;
+
+    @NotBlank(message = "Trạng thái tài khoản là bắt buộc")
+    private String status;
 }
