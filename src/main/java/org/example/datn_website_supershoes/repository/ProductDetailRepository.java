@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Size;
@@ -40,5 +41,14 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
 
     Page<ProductDetail> findAll(Specification<ProductDetail> spec, Pageable pageable);
 
+
+    @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam(" +
+            "pd.id, pd.quantity, pd.price, p.id, p.name, s.id, s.name, c.id, c.name, c.codeColor, pd.status) " +
+            "FROM ProductDetail pd " +
+            "JOIN pd.product p " +
+            "JOIN pd.color c " +
+            "JOIN pd.size s " +
+            "where p.id IN :idProducts")
+    List<ProductDetailResponseByNam> findProductDetailRequests(@Param("idProducts") List<Long> idProducts);
 
 }

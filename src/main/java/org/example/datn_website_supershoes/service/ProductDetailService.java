@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductDetailService {
@@ -125,4 +127,36 @@ public class ProductDetailService {
     public void deleteProductDetail(Long id) {
         productDetailRepository.deleteById(id);
     }
+
+
+    public List<ProductDetailResponseByNam> findProductDetailRequests(List<Long> idProducts) {
+        return productDetailRepository.findProductDetailRequests(idProducts);
+    }
+
+    public List<ProductDetailResponseByNam> filterListProductDetail(List<Long> idProducts, String search, String nameSize, String nameColor,String priceRange) {
+        return productDetailRepository.findProductDetailRequests(idProducts).stream()
+                .filter(productDetailResponse -> productDetailResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
+                .filter(productDetailResponse -> productDetailResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
+                .filter(productDetailResponse -> productDetailResponse.getNameColor().toLowerCase().contains(nameColor.trim().toLowerCase()))
+                .filter(productDetailResponse -> filterByPriceRange(productDetailResponse.getPrice(), priceRange))
+                .collect(Collectors.toList());
+    }
+
+    private boolean filterByPriceRange(BigDecimal price, String priceRange) {
+        switch (priceRange) {
+            case "under500":
+                // Dưới 500.000
+                return price.compareTo(BigDecimal.valueOf(500000)) < 0;
+            case "500to2000":
+                // Từ 500.000 đến 2.000.000
+                return price.compareTo(BigDecimal.valueOf(500000)) >= 0 && price.compareTo(BigDecimal.valueOf(2000000)) <= 0;
+            case "above2000":
+                // Từ 2.000.000 trở lên
+                return price.compareTo(BigDecimal.valueOf(2000000)) > 0;
+            default:
+                // Nếu không có điều kiện lọc, trả về true để không lọc
+                return true;
+        }
+    }
+
 }

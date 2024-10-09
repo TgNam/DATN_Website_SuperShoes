@@ -119,15 +119,13 @@ public class PromotionController {
             @RequestParam("status") String status) {
 
         String searchLower = search.trim().toLowerCase();
-        String statusTrimmed = status.trim();
-
         return promotionService.getAllPromotion().stream()
                 .filter(promotion -> {
                     String promotionName = promotion.getName().toLowerCase();
                     String codePromotion = promotion.getCodePromotion().toLowerCase();
                     return promotionName.contains(searchLower) || codePromotion.contains(searchLower);
                 })
-                .filter(promotion -> "ALL".equalsIgnoreCase(statusTrimmed) || promotion.getStatus().equalsIgnoreCase(statusTrimmed))
+                .filter(promotion -> promotion.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
 }
