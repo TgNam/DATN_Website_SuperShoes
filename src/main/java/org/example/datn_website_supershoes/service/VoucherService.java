@@ -5,8 +5,10 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Account;
+import org.example.datn_website_supershoes.model.AccountVoucher;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.AccountRepository;
+import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
 import org.example.datn_website_supershoes.repository.VoucherRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class VoucherService {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private AccountVoucherRepository accountVoucherRepository;
 
     private String generateVoucherCode() {
         int length = 6 + (int) (Math.random() * 3);
@@ -81,8 +86,11 @@ public class VoucherService {
     public void deleteVoucher(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
+
+        accountVoucherRepository.deleteByVoucherId(id);
         voucherRepository.delete(voucher);
     }
+
 
     public Voucher endVoucherEarly(Long id, Long userId) {
         Voucher voucher = voucherRepository.findById(id)
@@ -93,7 +101,7 @@ public class VoucherService {
 
         voucher.setStatus(Status.ENDED_EARLY.toString());
         voucher.setUpdatedBy(updater.getName());
-
+        accountVoucherRepository.updateStatusByVoucherId(id, "INACTIVE");
         return voucherRepository.save(voucher);
     }
 
@@ -120,6 +128,7 @@ public class VoucherService {
         }
 
         voucher.setUpdatedBy(updater.getName());
+        accountVoucherRepository.updateStatusByVoucherId(id, "ACTIVE");
         return voucherRepository.save(voucher);
     }
 

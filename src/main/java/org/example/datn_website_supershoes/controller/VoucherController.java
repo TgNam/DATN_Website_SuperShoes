@@ -19,7 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -187,6 +189,23 @@ public class VoucherController {
         }
     }
 
+    @GetMapping("/check-expired")
+    public ResponseEntity<?> checkExpiredVouchers() {
+        try {
+            voucherService.checkAndExpireVouchers();
+            return ResponseEntity.ok(Response.builder()
+                    .status(HttpStatus.OK.toString())
+                    .mess("Checked and updated expired vouchers successfully.")
+                    .build());
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                            .mess(e.getMessage())
+                            .build());
+        }
+    }
 
     private VoucherResponse convertToVoucherResponse(Voucher voucher) {
         VoucherResponse response = new VoucherResponse();

@@ -6,7 +6,6 @@ public enum Status {
     SUSPENDED,
     CLOSED,
     ONGOING,
-    ENDING_SOON,
     EXPIRED,
     ENDED_EARLY,
     UPCOMING
