@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.criteria.Predicate;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,6 +32,32 @@ public class BillController {
 
     @Autowired
     private BillService billService;
+
+    @PutMapping("/update-status-note/{codeBill}")
+    public ResponseEntity<?> updateBillStatusAndNote(
+            @PathVariable String codeBill,
+            @RequestParam String status,
+            @RequestParam String note) {
+        try {
+            // Call the service to update status and note
+            billService.updateBillStatusAndNoteByCode(codeBill, status, note);
+            return ResponseEntity.ok("Bill status and note updated successfully.");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bill with code " + codeBill + " not found.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/update-status/{codeBill}")
+    public ResponseEntity<?> updateBillStatus(@PathVariable String codeBill) {
+        try {
+            billService.updateBillStatus(codeBill);
+            return ResponseEntity.ok("Bill status updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
     @GetMapping("/detail/{codeBill}")
     public ResponseEntity<BillResponse> getBillByCodeBill(@PathVariable String codeBill) {
@@ -175,16 +202,6 @@ public class BillController {
         return ResponseEntity.ok(response);
     }
     @PutMapping("/updateCodeBill/{codeBill}")
-    public ResponseEntity<Map<String, Object>> updatecodeBill(@PathVariable String codeBill, @RequestBody Bill billDetails) {
-        Bill updatedBill = billService.updateCodeBill(codeBill, billDetails);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedBill);
-        response.put("EC", 0);
-        response.put("EM", "Bill updated successfully");
-
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/updateCodeBill2/{codeBill}")
     public ResponseEntity<?> updateBill2(
             @PathVariable String codeBill,
             @RequestBody @Valid BillRequest billRequest,
@@ -264,7 +281,6 @@ public class BillController {
                     .body("Error updating bill with code " + codeBill);
         }
     }
-
 
 
     @DeleteMapping("/delete/{id}")

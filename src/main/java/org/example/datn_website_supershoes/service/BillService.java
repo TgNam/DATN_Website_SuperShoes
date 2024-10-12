@@ -22,41 +22,66 @@ public class BillService {
     @Autowired
     private BillRepository billRepository;
 
-    // Method to create a new Bill
+    public void updateBillStatusAndNoteByCode(String codeBill, String status, String note) {
+        Bill bill = billRepository.findByCodeBill(codeBill)
+                .orElseThrow(() -> new RuntimeException("Bill not found with code: " + codeBill));
+
+        // Update the status and note fields
+        bill.setStatus(status);
+        bill.setNote(note);
+
+        // Save the updated bill
+        billRepository.save(bill);
+    }
+
+    public void updateBillStatus(String codeBill) {
+        Bill bill = billRepository.findByCodeBill(codeBill)
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+
+        // Assuming you have some logic for updating status
+        if (bill.getStatus().equals("PENDING")) {
+            bill.setStatus("CONFIRMED");
+        } else if (bill.getStatus().equals("CONFIRMED")) {
+            bill.setStatus("SHIPPED");
+        } else if (bill.getStatus().equals("SHIPPED")) {
+            bill.setStatus("COMPLETED");
+        } else {
+            throw new RuntimeException("Invalid bill status");
+        }
+
+        billRepository.save(bill);
+    }
+
+
     public Bill createBill(Bill bill) {
         return billRepository.save(bill);
     }
 
-    // Fetch all BillResponse objects with ACTIVE status
-//    public List<BillResponse> getAllBills() {
-//        return billRepository.listBillResponseByStatus();
-//    }
 
-    // Paginated fetching of bills using Specification for filtering
     public Page<BillResponse> getBills(Specification<Bill> spec, Pageable pageable) {
         return billRepository.findAll(spec, pageable).map(this::convertToBillResponse);
     }
 
-    // Fetch all Bill entities
+
     public List<Bill> getAllBills2() {
         return billRepository.findAll();
     }
 
-    // Fetch Bill by ID
+
     public Optional<Bill> getBillById(Long id) {
         return billRepository.findById(id);
     }
 
     public Bill updateCodeBill(String codeBill, Bill bill) {
-        // Find the existing bill by codeBill
+
         Bill existingBill = billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new RuntimeException("Bill not found with codeBill: " + codeBill));
 
-        // List of properties to ignore during update
+
         String[] ignoredProperties = {"id", "createdAt", "createdBy"};
         BeanUtils.copyProperties(bill, existingBill, ignoredProperties);
 
-        // Set related entities if they are not null
+
         if (bill.getVoucher() != null) {
             existingBill.setVoucher(bill.getVoucher());
         }
@@ -86,11 +111,11 @@ public class BillService {
         Bill existingBill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bill not found"));
 
-        // List of properties to ignore during update
+
         String[] ignoredProperties = {"id", "createdAt", "createdBy"};
         BeanUtils.copyProperties(bill, existingBill, ignoredProperties);
 
-        // Set related entities if they are not null
+
         if (bill.getVoucher() != null) {
             existingBill.setVoucher(bill.getVoucher());
         }
@@ -115,27 +140,26 @@ public class BillService {
     }
 
 
-    // Delete a Bill by ID
+
     public void deleteBill(Long id) {
         billRepository.deleteById(id);
     }
 
-    // Fetch BillResponse by codeBill
+
     public Optional<BillResponse> getBillByCodeBill(String codeBill) {
         Optional<Bill> optionalBill = billRepository.findByCodeBill(codeBill);
         return optionalBill.map(this::convertToBillResponse);
     }
 
-    // New method to fetch BillSummaryResponse by codeBill
+
     public Optional<BillSummaryResponse> getBillSummaryByCodeBill(String codeBill) {
         return billRepository.findBillSummaryByCodeBill(codeBill);
     }
 
-    // Helper method to convert Bill entity to BillResponse DTO
     private BillResponse convertToBillResponse(Bill bill) {
         BillResponse response = new BillResponse();
 
-        // Copy simple attributes
+
         response.setId(bill.getId());
         response.setCodeBill(bill.getCodeBill());
         response.setNameCustomer(bill.getCustomer() != null ? bill.getCustomer().getName() : null);
@@ -172,7 +196,7 @@ public class BillService {
         return billRepository.findAll(spec, pageable).map(this::convertToBillSummaryResponse);
     }
 
-    // Helper method to convert Bill entity to BillSummaryResponse DTO
+
     private BillSummaryResponse convertToBillSummaryResponse(Bill bill) {
         return new BillSummaryResponse(
                 bill.getCodeBill(),
@@ -184,20 +208,20 @@ public class BillService {
         );
     }
     public BillSummaryResponse updateBillByCode(String codeBill, BillRequest billRequest) {
-        // Fetch the Bill entity by codeBill
+
         Bill bill = billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new EntityNotFoundException("Bill not found with code: " + codeBill));
 
-        // Update the bill fields with new values from billRequest
+
         bill.setNameCustomer(billRequest.getNameCustomer());
         bill.setPhoneNumber(billRequest.getPhoneNumber());
         bill.setAddress(billRequest.getAddress());
         bill.setNote(billRequest.getNote());
 
-        // Save the updated bill entity
+
         bill = billRepository.save(bill);
 
-        // Convert Bill entity to BillSummaryResponse DTO
+
         return new BillSummaryResponse(bill);
     }
     public Bill findBillByCode(String codeBill) {

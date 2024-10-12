@@ -30,6 +30,7 @@ public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
 
 
 
+
     // Pagination support for listing BillDetails based on specifications
     Page<BillDetail> findAll(Specification<BillDetail> spec, Pageable pageable);
 

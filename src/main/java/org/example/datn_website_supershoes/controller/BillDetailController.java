@@ -85,14 +85,44 @@ public class BillDetailController {
 
     @PutMapping("/update")
     public ResponseEntity<Map<String, Object>> updateBillDetail(@Valid @RequestBody BillDetailRequest billDetailRequest) {
-        BillDetail updatedBillDetail = billDetailService.updateBillDetail(billDetailRequest);
         Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedBillDetail);
-        response.put("EC", 0);
-        response.put("EM", "BillDetail updated successfully");
+        try {
+            // Update BillDetail
+            BillDetail updatedBillDetail = billDetailService.updateBillDetail(billDetailRequest);
 
-        return ResponseEntity.ok(response);
+            // Success response
+            response.put("DT", updatedBillDetail);
+            response.put("EC", 0); // EC = 0: No error
+            response.put("EM", "BillDetail updated successfully");
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException ex) {
+            // Handle runtime exceptions like insufficient stock, BillDetail not found, etc.
+            response.put("DT", null);
+            response.put("EC", 1); // EC = 1: Error code for runtime errors
+            response.put("EM", ex.getMessage()); // Provide specific error message
+
+            // Log the exception (you can use any logger, such as log4j or slf4j)
+            System.err.println("Error occurred: " + ex.getMessage());
+            ex.printStackTrace(); // Log stack trace for debugging purposes
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (Exception ex) {
+            // Handle unexpected errors
+            response.put("DT", null);
+            response.put("EC", 2); // EC = 2: Error code for unexpected errors
+            response.put("EM", "An unexpected error occurred");
+
+            // Log the unexpected error for further investigation
+            System.err.println("Unexpected error: " + ex.getMessage());
+            ex.printStackTrace();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
+
+
 
 
     @DeleteMapping("/delete/{id}")
