@@ -18,12 +18,16 @@ public class ColorRestAPI {
     @Autowired
     private ColorService colorService;
     @GetMapping("/list-color")
+    private List<ColorResponse> findAllColor(){
+        return colorService.findAllColor();
+    }
+    @GetMapping("/listColorACTIVE")
     private List<ColorResponse> findByStatusActive(){
-        return colorService.findByStatus();
+        return colorService.findColorByStatusACTIVE();
     }
     @GetMapping("/list-color-search")
     private List<ColorResponse> findByStatusSearch(@RequestParam("search") String search){
-        return colorService.findByStatus().stream()
+        return colorService.findAllColor().stream()
                 .filter(ColorResponse -> ColorResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }

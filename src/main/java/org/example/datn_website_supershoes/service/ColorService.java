@@ -19,8 +19,11 @@ public class ColorService {
     @Autowired
     private ColorRepository colorRepository;
 
-    public List<ColorResponse> findByStatus(){
-        return colorRepository.findByStatus();
+    public List<ColorResponse> findAllColor(){
+        return colorRepository.findAllColor();
+    }
+    public List<ColorResponse> findColorByStatusACTIVE(){
+        return colorRepository.findColorByStatus(Status.ACTIVE.toString());
     }
     public Color createColor(ColorRequest ColorRequest){
         Optional<Color> color = colorRepository.findByCodeColor(ColorRequest.getCodeColor());

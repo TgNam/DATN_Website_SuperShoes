@@ -18,8 +18,11 @@ public class SizeService {
 
     @Autowired
     SizeRepository sizeRepository;
-    public List<SizeResponse> findByStatus(){
-        return sizeRepository.findByStatus();
+    public List<SizeResponse> findAllSize(){
+        return sizeRepository.findAllSize();
+    }
+    public List<SizeResponse> findSizeByStatusACTIVE(){
+        return sizeRepository.findSizeByStatus(Status.ACTIVE.toString());
     }
     public Size createSize(SizeRequest sizeRequest){
             Optional<Size> size = sizeRepository.findByName(sizeRequest.getName());

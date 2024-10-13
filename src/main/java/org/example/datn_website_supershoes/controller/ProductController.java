@@ -1,6 +1,8 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
+import org.example.datn_website_supershoes.dto.response.AccountResponse;
+import org.example.datn_website_supershoes.dto.response.ColorResponse;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Brand;
 import org.example.datn_website_supershoes.model.Category;
@@ -36,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/product")
@@ -163,5 +166,16 @@ public class ProductController {
         }
     }
 
-
+    // dùng cho sale sản phẩm
+    @GetMapping("/listProduct")
+    public List<ProductResponse> getAllAccount() {
+        List<ProductResponse> productResponse = productService.findProductRequests();
+        return productResponse;
+    }
+    @GetMapping("/listProductSearch")
+    private List<ProductResponse> findSearch(@RequestParam("search") String search){
+        return productService.findProductRequests().stream()
+                .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                .collect(Collectors.toList());
+    }
 }
