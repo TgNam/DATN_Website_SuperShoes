@@ -26,13 +26,16 @@ public class SizeRestAPI {
     private SizeService sizeService;
 
     @GetMapping("/list-size")
-    private List<SizeResponse> findByStatusActive(){
-        return sizeService.findByStatus();
+    private List<SizeResponse> findAllSize(){
+        return sizeService.findAllSize();
     }
-
+    @GetMapping("/listSizeACTIVE")
+    private List<SizeResponse> findByStatusActive(){
+        return sizeService.findSizeByStatusACTIVE();
+    }
     @GetMapping("/list-size-search")
     private List<SizeResponse> findByStatusSearch(@RequestParam("search") String search){
-        return sizeService.findByStatus().stream()
+        return sizeService.findAllSize().stream()
                 .filter(sizeResponse -> sizeResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }

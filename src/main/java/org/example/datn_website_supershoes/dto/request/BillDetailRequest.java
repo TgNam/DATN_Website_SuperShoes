@@ -21,7 +21,7 @@ public class BillDetailRequest {
 
     private Integer quantity;
 
-    private BigDecimal price_discount;
+    private BigDecimal priceDiscount;
 
     private String note;
 

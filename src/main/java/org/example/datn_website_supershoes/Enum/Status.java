@@ -9,4 +9,6 @@ public enum Status {
     EXPIRED,
     ENDED_EARLY,
     UPCOMING
+    ENDING_SOON,
+    WAITING_FOR_PAYMENT
 }

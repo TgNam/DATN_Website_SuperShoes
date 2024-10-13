@@ -12,19 +12,25 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByEmail(String email);
+    Optional<Account> findById(Long id);
     List<Account> findAllByStatus(String status);
-
 
     @Query(value = """
         SELECT new org.example.datn_website_supershoes.dto.response.AccountResponse(
-            a.id, a.name, a.email, a.password, a.role, 
-            ad.address, ad.phoneNumber, a.status) 
+            a.id, a.name, a.email,a.phoneNumber, a.role, 
+            a.gender, a.birthday, a.rewards, a.status) 
         FROM Account a 
-        JOIN a.address ad
-        WHERE a.status = :status 
-          AND a.role = 'EMPLOYEE'
+        WHERE a.role = :role
         """)
-    List<AccountResponse> listAccountResponseByStatus(@Param("status") String status);
+    List<AccountResponse> listCustomerResponseByStatus( @Param("role") String role);
+    @Query(value = """
+        SELECT new org.example.datn_website_supershoes.dto.response.AccountResponse(
+            a.id, a.name, a.email,a.phoneNumber, a.role, 
+            a.gender, a.birthday, a.rewards, a.status) 
+        FROM Account a 
+        WHERE a.role = :role
+        """)
+    List<AccountResponse> listEmployeeResponseByStatus( @Param("role") String role);
 
 
 }

@@ -13,7 +13,10 @@ import java.util.Optional;
 @Repository
 public interface SizeRepository extends JpaRepository<Size, Long> {
     @Query(value = "SELECT new org.example.datn_website_supershoes.dto.response.SizeResponse(s.id, s.name, s.status)FROM Size s")
-    List<SizeResponse> findByStatus();
+    List<SizeResponse> findAllSize();
+
+    @Query(value = "SELECT new org.example.datn_website_supershoes.dto.response.SizeResponse(s.id, s.name, s.status)FROM Size s")
+    List<SizeResponse> findSizeByStatus(@Param("status") String status);
 
     Optional<Size> findByName(String name);
 }
