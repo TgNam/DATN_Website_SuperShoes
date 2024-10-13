@@ -1,8 +1,10 @@
 package org.example.datn_website_supershoes.repository;
 
+import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.dto.response.AccountVoucherResponse;
 import org.example.datn_website_supershoes.model.AccountVoucher;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,4 +20,14 @@ public interface AccountVoucherRepository extends JpaRepository<AccountVoucher, 
             WHERE av.status = :status
             """)
     List<AccountVoucherResponse> listAccountVoucherResponsesByStatus(@Param("status") String status);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM AccountVoucher av WHERE av.voucher.id = :voucherId")
+    void deleteByVoucherId(@Param("voucherId") Long voucherId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE AccountVoucher a SET a.status = :status WHERE a.voucher.id = :voucherId")
+    void updateStatusByVoucherId(@Param("voucherId") Long voucherId, @Param("status") String status);
 }

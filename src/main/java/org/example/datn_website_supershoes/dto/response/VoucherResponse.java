@@ -38,5 +38,7 @@ public class VoucherResponse {
 
     private Date endAt;
 
+    private Boolean isPrivate;
+
     private String status;
 }

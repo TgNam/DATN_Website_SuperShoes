@@ -46,7 +46,7 @@ public class Voucher extends BaseEntity {
     private BigDecimal maximumDiscount;
 
     @Column
-    private Integer type;
+    private Integer type;  // 0 = Phần trăm, 1 = Tiền
 
     @Column
     private BigDecimal minBillValue;
@@ -58,6 +58,9 @@ public class Voucher extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     private Date endAt;
+
+    @Column
+    private Boolean isPrivate; // true = Riêng tư, false = Công khai
 
     @JsonIgnore
     @JsonManagedReference(value = "accountVoucherReference")

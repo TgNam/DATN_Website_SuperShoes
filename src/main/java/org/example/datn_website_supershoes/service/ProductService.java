@@ -40,9 +40,6 @@ public class ProductService {
     private ShoeSoleRepository shoeSoleRepository;
 
 
-    //    public Product createProduct(Product product){
-//        return productRepository.save(product);
-//    }
 public ProductResponse createProduct(Product product) {
     // Lưu đối tượng Product vào cơ sở dữ liệu
     Product savedProduct = productRepository.save(product);
