@@ -12,10 +12,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Long>, JpaSpecificationExecutor<ProductDetail> {
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponse(" +
             "pd.id, pd.quantity, pd.price, p.id, p.name, s.id, s.name, c.id, c.name, " +
@@ -50,5 +51,5 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "JOIN pd.size s " +
             "where p.id IN :idProducts")
     List<ProductDetailResponseByNam> findProductDetailRequests(@Param("idProducts") List<Long> idProducts);
-
+    Optional<ProductDetail> findById(Long idProductDetail);
 }

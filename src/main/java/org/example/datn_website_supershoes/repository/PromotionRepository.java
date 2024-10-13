@@ -8,9 +8,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
-
+@Repository
 public interface PromotionRepository extends JpaRepository<Promotion, Long> {
 
     @Query("""
@@ -27,5 +29,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
             FROM Promotion p
             """)
     List<PromotionResponse> listPromotionResponse();
-    Page<Promotion> findAll(Specification<Promotion> spec, Pageable pageable);
+    @Query("SELECT d FROM Promotion d WHERE d.endAt < :currentTime AND d.status = 'ACTIVE'")
+    List<Promotion> findExpiredDiscounts(@Param("currentTime") LocalDateTime currentTime);
 }

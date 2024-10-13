@@ -1,11 +1,20 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
+import org.example.datn_website_supershoes.dto.request.PromotionRequest;
+import org.example.datn_website_supershoes.model.ProductDetail;
+import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
+import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,40 +23,42 @@ public class PromotionDetailService {
 
     @Autowired
     private PromotionDetailRepository promotionDetailRepository;
-
-    public PromotionDetail createPromotionDetail(PromotionDetail promotionDetail) {
-        return promotionDetailRepository.save(promotionDetail);
-    }
-
-    public List<PromotionDetail> getAllPromotionDetails() {
-        return promotionDetailRepository.findAll();
-    }
-
-    public Optional<PromotionDetail> getPromotionDetailById(Long id) {
-        return promotionDetailRepository.findById(id);
-    }
-
-    public PromotionDetail updatePromotionDetail(Long id, PromotionDetail promotionDetail) {
-        PromotionDetail existingPromotionDetail = promotionDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PromotionDetail not found"));
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(promotionDetail, existingPromotionDetail, ignoredProperties);
-
-        if (promotionDetail.getPromotionPrice() != null) {
-            existingPromotionDetail.setPromotionPrice(promotionDetail.getPromotionPrice());
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
+    public List<PromotionDetail> createPromotionDetail(Promotion promotion,List<PromotionDetailRequest> promotionDetailRequest) {
+        for (PromotionDetailRequest request : promotionDetailRequest){
+            Optional<PromotionDetail> promotionDetailOptional = promotionDetailRepository.findPromotionDetailByIdProductDetailAndStatuses(
+                    request.getIdProductDetail(),
+                    Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
+            if (promotionDetailOptional.isPresent()){
+                PromotionDetail promotionDetail = promotionDetailOptional.get();
+                promotionDetail.setStatus(Status.FINISHED.toString());
+                promotionDetailRepository.save(promotionDetail);
+            }
         }
-        if (promotionDetail.getProductDetail() != null) {
-            existingPromotionDetail.setProductDetail(promotionDetail.getProductDetail());
-        }
-        if (promotionDetail.getPromotion() != null) {
-            existingPromotionDetail.setPromotion(promotionDetail.getPromotion());
-        }
-
-        return promotionDetailRepository.save(existingPromotionDetail);
+        List<PromotionDetail> promotionDetails = promotionDetailRepository.saveAll(convertPromotionDetailRequestDTO(promotion,promotionDetailRequest));
+        return promotionDetails;
     }
 
-    public void deletePromotionDetail(Long id) {
-        promotionDetailRepository.deleteById(id);
+
+    private List<PromotionDetail> convertPromotionDetailRequestDTO(Promotion promotion,List<PromotionDetailRequest> promotionDetailRequest) {
+        List<PromotionDetail> promotionDetails = new ArrayList<>();
+        for (PromotionDetailRequest request : promotionDetailRequest){
+            Optional<ProductDetail> productDetail = productDetailRepository.findById(request.getIdProductDetail());
+            if (!productDetail.isPresent()){
+                throw new RuntimeException("Id "+productDetail.get().getId()+" của sản phẩm chi tiết không tồn tại trên hệ thống.");
+            }
+            // Tính toán giá khuyến mãi
+            BigDecimal promotionPrice = productDetail.get().getPrice().multiply(BigDecimal.valueOf(1 - promotion.getValue() / 100));
+            // Tạo đối tượng PromotionDetail
+            PromotionDetail promotionDetail = new PromotionDetail();
+            promotionDetail.setQuantity(request.getQuantity());
+            promotionDetail.setPromotionPrice(promotionPrice);
+            promotionDetail.setProductDetail(productDetail.get());
+            promotionDetail.setPromotion(promotion);
+            promotionDetail.setStatus(Status.UPCOMING.toString());
+            promotionDetails.add(promotionDetail);
+        }
+        return promotionDetails;
     }
 }
