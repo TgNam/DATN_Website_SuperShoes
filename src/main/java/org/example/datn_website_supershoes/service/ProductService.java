@@ -110,4 +110,9 @@ private ProductResponse convertToProductResponse(Product product) {
     public void deleteProduct(Long id){
         productRepository.deleteById(id);
     }
+
+
+    public List<ProductResponse> findProductRequests(){
+    return productRepository.findProductRequests();
+    }
 }

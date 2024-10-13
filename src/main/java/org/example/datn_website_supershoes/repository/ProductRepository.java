@@ -10,9 +10,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+@Repository
 public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product> {
 
 //@Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductResponse(" +
@@ -30,7 +31,6 @@ public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpeci
 //        "AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))\n" + // Điều kiện tìm kiếm theo tên
 //        "GROUP BY p.id, p.name, p.productCode, p.imageByte, p.gender, " +
 //        "b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status,pd.id,pd.quantity,pd.price")
-
 @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductResponse(" +
         "p.id, p.name, p.productCode, p.imageByte, p.gender, " +
         "b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status " +
@@ -51,10 +51,12 @@ List<ProductResponse> findProductRequestsByStatus(
         @Param("name") String name);
 
 
-
 Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 
 
-
+@Query("select new org.example.datn_website_supershoes.dto.response.ProductResponse(p.id, p.name, p.productCode, p.imageByte, p.gender, b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status)" +
+        "from Product p " +
+        "join p.brand b join p.category c join p.material m join p.shoeSole s")
+List<ProductResponse> findProductRequests();
 
 }

@@ -25,4 +25,11 @@ public class RandomPasswordGeneratorService {
 
         return randomPassword;
     }
+    public static String getCodePromotion() {
+        int passwordLength = 10;
+
+        String randomCodePromotion = generatePassword(passwordLength);
+
+        return randomCodePromotion;
+    }
 }

@@ -24,6 +24,9 @@ public class PromotionDetail extends BaseEntity {
     @Column
     private BigDecimal promotionPrice;
 
+    @Column
+    private Integer quantity;
+
     @JsonBackReference(value = "productDetailPromotionDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_productDetail", referencedColumnName = "id")

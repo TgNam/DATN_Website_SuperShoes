@@ -92,15 +92,13 @@ public class AccountRestAPI {
             @RequestParam("status") String status) {
 
         String searchLower = search.trim().toLowerCase();
-        String statusTrimmed = status.trim();
-
         return accountService.getAllAccountCustomerActive().stream()
                 .filter(account -> {
                     String accountName = account.getName().toLowerCase();
                     String accountPhone = account.getPhoneNumber().toLowerCase();
                     return accountName.contains(searchLower) || accountPhone.contains(searchLower);
                 })
-                .filter(account -> "ALL".equalsIgnoreCase(statusTrimmed) || account.getStatus().equalsIgnoreCase(statusTrimmed))
+                .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
     @GetMapping("/findAccounts")
