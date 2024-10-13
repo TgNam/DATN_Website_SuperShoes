@@ -16,12 +16,17 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -130,18 +135,28 @@ public class VoucherController {
         }
     }
 
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<?> getVoucher(@PathVariable Long id) {
+        try {
+            VoucherResponse voucherResponse = voucherService.getVoucherById(id);
+            if ("EXPIRED".equals(voucherResponse.getStatus())) {
+                throw new RuntimeException("Không thể xem voucher đã hết hạn.");
+            }
+            return ResponseEntity.ok(voucherResponse);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder()
+                    .status(HttpStatus.BAD_REQUEST.toString())
+                    .mess(e.getMessage())
+                    .build());
+        }
+    }
 
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/delete/{id}")
     public ResponseEntity<?> deleteVoucher(@PathVariable("id") Long id) {
         try {
-            voucherService.deleteVoucher(id);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(Response.builder()
-                            .status(HttpStatus.OK.toString())
-                            .mess("Delete success")
-                            .build()
-                    );
+            Voucher updatedVoucher = voucherService.deleteVoucher(id);
+            VoucherResponse response = convertToVoucherResponse(updatedVoucher);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)

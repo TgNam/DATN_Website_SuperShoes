@@ -17,7 +17,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long>, JpaSpec
     @Query("""
             SELECT new org.example.datn_website_supershoes.dto.response.VoucherResponse(
             v.id, v.codeVoucher, v.name, v.note, v.value, v.quantity, v.maximumDiscount, v.type,
-            v.minBillValue, v.startAt, v.endAt, v.isPrivate, v.status)
+            v.minBillValue, v.startAt, v.endAt, v.isPrivate, v.status, v.createdAt, v.createdBy, v.updatedAt, v.updatedBy)
             FROM Voucher v WHERE v.status = :status
             """)
     List<VoucherResponse> listVoucherResponseByStatus(@Param("status") String status);
