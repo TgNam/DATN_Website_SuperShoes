@@ -40,7 +40,6 @@ public class BaseEntity {
     @PrePersist
     public void setCreationDate() {
         this.createdAt = new Date();
-        this.updatedAt = new Date();
     }
 
     @PreUpdate
@@ -83,4 +82,5 @@ public class BaseEntity {
     public void setStatus(String status) {
         this.status = status;
     }
+
 }

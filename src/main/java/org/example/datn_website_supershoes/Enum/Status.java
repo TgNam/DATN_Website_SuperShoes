@@ -7,5 +7,9 @@ public enum Status {
     CLOSED,
     ONGOING,
     ENDING_SOON,
-    WAITING_FOR_PAYMENT
+    WAITING_FOR_PAYMENT,
+    EXPIRED,
+    ENDED_EARLY,
+    UPCOMING
+
 }
