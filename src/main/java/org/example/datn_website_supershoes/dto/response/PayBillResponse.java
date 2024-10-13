@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,15 +21,19 @@ public class PayBillResponse {
 
     private Long id;
 
+    private String tradingCode;
+
     private BigDecimal amount;
 
-    private String tradingCode;
+    private String status;
+
+    private Date createdAt;
+
+    private Integer type;
+
+    private String namePayment;
 
     private String note;
 
-    private Long idBill;
-
-    private Long idPaymentMethod;
-
-    private String status;
+    private String nameEployee;
 }

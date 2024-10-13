@@ -22,7 +22,7 @@ import java.util.List;
 public class PaymentMethod extends BaseEntity {
 
     @Column
-    private String method_name;
+    private String methodName;
 
     @Column
     private String note;

@@ -18,6 +18,8 @@ public class BillResponse {
 
     private Long id;
 
+    private String codeBill;
+
     private String nameCustomer;
 
     private String phoneNumber;

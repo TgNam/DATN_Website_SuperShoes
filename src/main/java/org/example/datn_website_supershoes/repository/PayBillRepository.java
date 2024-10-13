@@ -1,7 +1,11 @@
 package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
+import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.PayBill;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,14 +16,18 @@ import java.util.List;
 @Repository
 public interface PayBillRepository extends JpaRepository<PayBill, Long> {
 
-    @Query(value = """
-                SELECT new org.example.datn_website_supershoes.dto.response.PayBillResponse(pb.id,pb.amount,pb.tradingCode,pb.note,b.id,pm.id,b.status)
-                FROM PayBill pb
-                JOIN Bill b ON pb.bill.id = b.id
-                JOIN PaymentMethod pm ON pb.paymentMethod.id = pm.id
-                WHERE pb.status = :status
-            """)
-    List<PayBillResponse> listPayBillResponeByStatus(@Param("status") String status);
+    @Query("SELECT new org.example.datn_website_supershoes.dto.response.PayBillResponse(" +
+            "pb.id,pb.tradingCode, pb.amount, pb.status, pb.createdAt, pb.type, pm.methodName, pb.note, a.name) " +
+            "FROM PayBill pb " +
+            "JOIN pb.bill b " +
+            "JOIN pb.paymentMethod pm " +
+            "JOIN b.employees a " +
+            "WHERE b.codeBill = :codeBill " +
+            "ORDER BY pb.createdAt DESC")
+    List<PayBillResponse> listPayBillResponseByCodeBill(@Param("codeBill") String codeBill);
 
+
+
+    Page<PayBill> findAll(Specification<PayBill> spec, Pageable pageable);
 
 }

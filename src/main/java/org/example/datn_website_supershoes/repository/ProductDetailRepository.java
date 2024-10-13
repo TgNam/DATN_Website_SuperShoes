@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Size;
@@ -11,10 +12,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Long>, JpaSpecificationExecutor<ProductDetail> {
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponse(" +
             "pd.id, pd.quantity, pd.price, p.id, p.name, s.id, s.name, c.id, c.name, " +
@@ -41,4 +43,13 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
     Page<ProductDetail> findAll(Specification<ProductDetail> spec, Pageable pageable);
 
 
+    @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam(" +
+            "pd.id, pd.quantity, pd.price, p.id, p.name, s.id, s.name, c.id, c.name, c.codeColor, pd.status) " +
+            "FROM ProductDetail pd " +
+            "JOIN pd.product p " +
+            "JOIN pd.color c " +
+            "JOIN pd.size s " +
+            "where p.id IN :idProducts")
+    List<ProductDetailResponseByNam> findProductDetailRequests(@Param("idProducts") List<Long> idProducts);
+    Optional<ProductDetail> findById(Long idProductDetail);
 }
