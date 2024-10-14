@@ -41,4 +41,13 @@ public class VoucherResponse {
     private Boolean isPrivate;
 
     private String status;
+
+    private Date createdAt;
+
+    private String createdBy;
+
+    private Date updatedAt;
+
+    private String updatedBy;
+
 }
