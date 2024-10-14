@@ -33,12 +33,6 @@ public class AccountVoucherService {
         return accountVoucherRepository.save(accountVoucher);
     }
 
-    public void deleteAccountVoucher(Long id) {
-        AccountVoucher accountVoucher = accountVoucherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("AccountVoucher not found"));
-        accountVoucherRepository.delete(accountVoucher);
-    }
-
     private AccountVoucher convertAccountVoucherRequestDTO(AccountVoucherRequest accountVoucherRequest) {
         return AccountVoucher.builder()
                 .dateOfUse(accountVoucherRequest.getDateOfUse())

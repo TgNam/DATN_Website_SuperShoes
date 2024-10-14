@@ -69,25 +69,4 @@ public class AccountVoucherController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteAccountVoucher(@PathVariable("id") Long id) {
-        try {
-            accountVoucherService.deleteAccountVoucher(id);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(Response.builder()
-                            .status(HttpStatus.OK.toString())
-                            .mess("Delete success")
-                            .build()
-                    );
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(Response.builder()
-                            .status(HttpStatus.NOT_FOUND.toString())
-                            .mess(e.getMessage())
-                            .build()
-                    );
-        }
-    }
 }
