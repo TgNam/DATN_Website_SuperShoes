@@ -28,21 +28,13 @@ public class CategoryService {
         return categoryRepository.save(convertCategoryRequestDTO(categoryRequest));
     }
 
-    public boolean updateStatus(Long id) {
-        try {
+    public Category updateStatus(Long id, String status) {
             Optional<Category> category = categoryRepository.findById(id);
             if (!category.isPresent()) {
-                throw new RuntimeException("Category null");
+                throw new RuntimeException("Id "+category.get().getId()+" của danh mục không tồn tại");
             }
-            String newStatus = category.get().getStatus().equals(Status.ACTIVE.toString()) ? "INACTIVE" : "ACTIVE";
-            category.get().setStatus(newStatus);
-            categoryRepository.save(category.get());
-            return true;
-        } catch (Exception e) {
-            e.getMessage();
-            System.out.println(e.getMessage());
-            return false;
-        }
+            category.get().setStatus(status);
+            return categoryRepository.save(category.get());
 
     }
 

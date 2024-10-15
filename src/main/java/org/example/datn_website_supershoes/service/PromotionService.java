@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -28,13 +30,32 @@ public class PromotionService {
     private PromotionDetailService promotionDetailService;
     @Autowired
     private RandomPasswordGeneratorService randomCodePromotion;
-
+    //chuyển trạng thái từ sắp diễn ra thành diễn ra
     @Transactional
-    public void updateExpiredDiscounts() {
+    public void updateUpcomingDiscounts() {
         LocalDateTime now = LocalDateTime.now();
-        List<Promotion> expiredDiscounts = promotionRepository.findExpiredDiscounts(now);
+        //tìm kiếm trạng thái đang diễn ra
+        List<Promotion> expiredDiscounts = promotionRepository.findUpcomingDiscounts(now,Status.UPCOMING.toString());
         for (Promotion discount : expiredDiscounts) {
-            discount.setStatus("EXPIRED");
+            //cập nhật trạng thái
+            discount.setStatus(Status.ONGOING.toString());
+            //cập nhật trạng thái cho promotionDetail
+            promotionDetailService.updatePromotionDetailUpcoming(discount.getId());
+        }
+        promotionRepository.saveAll(expiredDiscounts);
+    }
+    //chuyển các trạng thái sắp diễn ra, đang diễn ra, kết thúc sớm thành kết thúc
+    @Transactional
+    public void updateFinishedDiscounts() {
+        LocalDateTime now = LocalDateTime.now();
+        //tìm kiếm trạng thái đang sắp diễn ra, đang diễn ra, kết thúc sớm
+        List<String> status = new ArrayList<>(Arrays.asList(Status.ONGOING.toString(),Status.UPCOMING.toString(),Status.ENDING_SOON.toString()));
+        List<Promotion> expiredDiscounts = promotionRepository.findFinishedDiscounts(now,status);
+        for (Promotion discount : expiredDiscounts) {
+            //cập nhật trạng thái
+            discount.setStatus(Status.FINISHED.toString());
+            //cập nhật trạng thái cho promotionDetail
+            promotionDetailService.updatePromotionDetailFinished(discount.getId());
         }
         promotionRepository.saveAll(expiredDiscounts);
     }
@@ -44,14 +65,11 @@ public class PromotionService {
     }
 
     public Promotion createPromotion(PromotionCreationRequest promotionCreationRequest) {
-        System.out.println("Check Ngày bắt đầu: " + promotionCreationRequest.getPromotionRequest().getStartAt());
-        System.out.println("Check Ngày kết thúc: " + promotionCreationRequest.getPromotionRequest().getEndAt());
         promotionCreationRequest.getPromotionRequest().validateEndDates();
         Promotion promotion = promotionRepository.save(convertPromotionRequestDTO(promotionCreationRequest.getPromotionRequest()));
         if (promotionCreationRequest.getPromotionDetailRequest() != null && !promotionCreationRequest.getPromotionDetailRequest().isEmpty()) {
-            List<PromotionDetail> promotionDetails = promotionDetailService.createPromotionDetail(promotion, promotionCreationRequest.getPromotionDetailRequest());
+            promotionDetailService.createPromotionDetail(promotion, promotionCreationRequest.getPromotionDetailRequest());
         }
-
         return promotion;
     }
 

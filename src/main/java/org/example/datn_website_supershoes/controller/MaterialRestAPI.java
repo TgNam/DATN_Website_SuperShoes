@@ -1,12 +1,16 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.MaterialRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.MaterialResponse;
+import org.example.datn_website_supershoes.model.Material;
+import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.MaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,14 +32,29 @@ public class MaterialRestAPI {
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(@RequestParam("id") Long id){
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="status", required = false) String status
+    ){
         try{
-            if (materialService.updateStatus(id)){
-                return ResponseEntity.ok("OK");
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID kích cỡ không được để trống!")
+                                .build()
+                );
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("False");
+            if (status==null){
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Trạng thái không được để trống!")
+                                .build()
+                );
+            }
+            Material material = materialService.updateStatus(id,status);
+            return ResponseEntity.ok(material);
         }catch (RuntimeException e){
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -47,14 +66,15 @@ public class MaterialRestAPI {
         }
     }
     @PostMapping("/create-material")
-    private ResponseEntity<?> createMaterial(@RequestBody MaterialRequest materialRequest){
+    private ResponseEntity<?> createMaterial(@RequestBody @Valid MaterialRequest materialRequest, BindingResult result){
         try {
-            if (materialService.createMaterial(materialRequest) != null) {
-                return ResponseEntity.ok("Thêm chất liệu thành công");
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("Thêm thất bại");
+            return ResponseEntity.ok(materialService.createMaterial(materialRequest));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

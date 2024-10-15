@@ -13,5 +13,6 @@ import java.util.Optional;
 public interface PromotionDetailRepository extends JpaRepository<PromotionDetail,Long> {
     @Query("select p from PromotionDetail p where p.productDetail.id=:idProductDetail and p.status IN (:statuses)")
     Optional<PromotionDetail> findPromotionDetailByIdProductDetailAndStatuses(@Param("idProductDetail") Long idProductDetail, @Param("statuses") List<String> statuses);
-
+    @Query("select p from PromotionDetail p where p.promotion.id = :idPromotion and p.status IN (:statuses)")
+    List<PromotionDetail> findPromotionDetailByIdPromotionAndStatuses(@Param("idPromotion") Long idPromotion, @Param("statuses") List<String> statuses);
 }

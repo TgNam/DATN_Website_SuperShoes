@@ -25,6 +25,22 @@ public class PromotionDetailService {
     private PromotionDetailRepository promotionDetailRepository;
     @Autowired
     private ProductDetailRepository productDetailRepository;
+    //cập nhật trạng thái từ sắp diễn ra thành diễn ra
+    public void updatePromotionDetailUpcoming(Long idPromotion){
+        List<PromotionDetail>  promotionDetails = promotionDetailRepository.findPromotionDetailByIdPromotionAndStatuses(idPromotion,Arrays.asList(Status.UPCOMING.toString()));
+        for (PromotionDetail pd : promotionDetails){
+            pd.setStatus(Status.ONGOING.toString());
+            promotionDetailRepository.save(pd);
+        }
+    }
+    //cập nhật trạng thái từ sắp diễn ra, đang diễn ra, kết thúc sớm thành kết thúc
+    public void updatePromotionDetailFinished(Long idPromotion){
+        List<PromotionDetail>  promotionDetails = promotionDetailRepository.findPromotionDetailByIdPromotionAndStatuses(idPromotion,Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
+        for (PromotionDetail pd : promotionDetails){
+            pd.setStatus(Status.FINISHED.toString());
+            promotionDetailRepository.save(pd);
+        }
+    }
     public List<PromotionDetail> createPromotionDetail(Promotion promotion,List<PromotionDetailRequest> promotionDetailRequest) {
         for (PromotionDetailRequest request : promotionDetailRequest){
             Optional<PromotionDetail> promotionDetailOptional = promotionDetailRepository.findPromotionDetailByIdProductDetailAndStatuses(

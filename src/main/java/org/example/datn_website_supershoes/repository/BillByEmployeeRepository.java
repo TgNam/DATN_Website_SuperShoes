@@ -17,7 +17,7 @@ public interface BillByEmployeeRepository extends JpaRepository<Bill, Long> {
     @Query("""
         SELECT b.codeBill
         FROM Bill b JOIN b.employees e
-        WHERE e.id = :idEmployees AND b.status = :status
+        WHERE e.id = :idEmployees AND b.status = :status ORDER BY b.createdAt asc 
         """)
     List<String> findCodeBillWaitingForPayment(@Param("idEmployees") Long idEmployees, @Param("status") String status);
 

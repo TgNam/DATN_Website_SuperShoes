@@ -87,7 +87,7 @@ public class AccountRestAPI {
     }
 
     @GetMapping("/list-accounts-customer-search")
-    public List<AccountResponse> getAllAccountSearch(
+    public List<AccountResponse> getAllAccountCustomerSearch(
             @RequestParam("search") String search,
             @RequestParam("status") String status) {
 
@@ -128,5 +128,20 @@ public class AccountRestAPI {
     @GetMapping("/list-accounts-employee")
     public List<AccountResponse> getAllAccountEmployee() {
         return accountService.getAllAccountEmployeeActive();
+    }
+    @GetMapping("/list-accounts-employee-search")
+    public List<AccountResponse> getAllAccountEmployeeSearch(
+            @RequestParam("search") String search,
+            @RequestParam("status") String status) {
+
+        String searchLower = search.trim().toLowerCase();
+        return accountService.getAllAccountEmployeeActive().stream()
+                .filter(account -> {
+                    String accountName = account.getName().toLowerCase();
+                    String accountPhone = account.getPhoneNumber().toLowerCase();
+                    return accountName.contains(searchLower) || accountPhone.contains(searchLower);
+                })
+                .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
+                .collect(Collectors.toList());
     }
 }

@@ -30,21 +30,15 @@ public class ShoeSoleService {
         }
         return shoeSoleRepository.save(convertShoeSoleRequestDTO(shoeSoleRequest));
     }
-    public boolean updateStatus(Long id){
-        try{
+    public ShoeSole updateStatus(Long id, String status){
             Optional<ShoeSole> shoeSole = shoeSoleRepository.findById(id);
             if(!shoeSole.isPresent()){
-                throw new RuntimeException("ShoeSole null");
+                throw new RuntimeException("Id "+shoeSole.get().getId()+" của loại đế giày không tồn tại");
             }
-            String newStatus = shoeSole.get().getStatus().equals(Status.ACTIVE.toString())  ? "INACTIVE" : "ACTIVE";
-            shoeSole.get().setStatus(newStatus);
-            shoeSoleRepository.save(shoeSole.get());
-            return true;
-        }catch (Exception e){
-            e.getMessage();
-            System.out.println(e.getMessage());
-            return false;
-        }
+            shoeSole.get().setStatus(status);
+
+            return shoeSoleRepository.save(shoeSole.get());
+
 
     }
     public ShoeSole convertShoeSoleRequestDTO(ShoeSoleRequest ShoeSoleRequest){

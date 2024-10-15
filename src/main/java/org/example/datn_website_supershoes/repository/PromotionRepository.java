@@ -29,6 +29,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
             FROM Promotion p
             """)
     List<PromotionResponse> listPromotionResponse();
-    @Query("SELECT d FROM Promotion d WHERE d.endAt < :currentTime AND d.status = 'ACTIVE'")
-    List<Promotion> findExpiredDiscounts(@Param("currentTime") LocalDateTime currentTime);
+    @Query("SELECT d FROM Promotion d WHERE d.endAt < :currentTime AND d.status in(:status)")
+    List<Promotion> findFinishedDiscounts(@Param("currentTime") LocalDateTime currentTime,List<String> status);
+    @Query("SELECT d FROM Promotion d WHERE d.startAt < :currentTime AND d.endAt > :currentTime AND d.status = :status")
+    List<Promotion> findUpcomingDiscounts(@Param("currentTime") LocalDateTime currentTime,String status);
 }

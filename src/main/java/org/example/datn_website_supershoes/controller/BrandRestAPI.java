@@ -1,14 +1,18 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.BrandRequest;
 import org.example.datn_website_supershoes.dto.request.SizeRequest;
 import org.example.datn_website_supershoes.dto.response.BrandResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.SizeResponse;
+import org.example.datn_website_supershoes.model.Brand;
+import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,14 +34,29 @@ public class BrandRestAPI {
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(@RequestParam("id") Long id){
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="status", required = false) String status
+    ){
         try{
-            if (brandService.updateStatus(id)){
-                return ResponseEntity.ok("OK");
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID kích cỡ không được để trống!")
+                                .build()
+                );
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("False");
+            if (status==null){
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Trạng thái không được để trống!")
+                                .build()
+                );
+            }
+            Brand brand = brandService.updateStatus(id, status);
+            return ResponseEntity.ok(brand);
         }catch (RuntimeException e){
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -49,14 +68,15 @@ public class BrandRestAPI {
         }
     }
     @PostMapping("/create-brand")
-    private ResponseEntity<?> createSize(@RequestBody BrandRequest brandRequest){
+    private ResponseEntity<?> createSize(@RequestBody @Valid BrandRequest brandRequest, BindingResult result){
         try {
-            if (brandService.createBrand(brandRequest) != null) {
-                return ResponseEntity.ok("Thêm hãng thành công");
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("Thêm thất bại");
+            return ResponseEntity.ok(brandService.createBrand(brandRequest));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

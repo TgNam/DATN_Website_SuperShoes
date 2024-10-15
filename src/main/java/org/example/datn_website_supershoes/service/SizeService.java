@@ -27,25 +27,18 @@ public class SizeService {
     public Size createSize(SizeRequest sizeRequest){
             Optional<Size> size = sizeRepository.findByName(sizeRequest.getName());
             if(size.isPresent()){
-                throw new RuntimeException("Size "+ sizeRequest.getName() +" đã tồn tại");
+                throw new RuntimeException("Kích cỡ "+ sizeRequest.getName() +" đã tồn tại");
             }
             return sizeRepository.save(convertSizeRequestDTO(sizeRequest));
     }
-    public boolean updateStatus(Long id){
-        try{
-            Optional<Size> size = sizeRepository.findById(id);
-            if(!size.isPresent()){
-                throw new RuntimeException("Size null");
+    public Size updateStatus(Long id, String status){
+            Optional<Size> sizeOt = sizeRepository.findById(id);
+            if(!sizeOt.isPresent()){
+                throw new RuntimeException("Id "+sizeOt.get().getId()+" của kích cỡ không tồn tại");
             }
-            String newStatus = size.get().getStatus().equals(Status.ACTIVE.toString())  ? "INACTIVE" : "ACTIVE";
-            size.get().setStatus(newStatus);
-            sizeRepository.save(size.get());
-            return true;
-        }catch (Exception e){
-            e.getMessage();
-            System.out.println(e.getMessage());
-            return false;
-        }
+            sizeOt.get().setStatus(status);
+            Size size = sizeRepository.save(sizeOt.get());
+            return size;
 
     }
     public Size convertSizeRequestDTO(SizeRequest sizeRequest){

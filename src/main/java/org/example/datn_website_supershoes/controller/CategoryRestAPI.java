@@ -1,13 +1,17 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.CategoryRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.CategoryResponse;
+import org.example.datn_website_supershoes.model.Category;
+import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.CategoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,14 +33,29 @@ public class CategoryRestAPI {
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(@RequestParam("id") Long id){
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="status", required = false) String status
+    ){
         try{
-            if (categoryService.updateStatus(id)){
-                return ResponseEntity.ok("OK");
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID kích cỡ không được để trống!")
+                                .build()
+                );
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("False");
+            if (status==null){
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Trạng thái không được để trống!")
+                                .build()
+                );
+            }
+            Category category = categoryService.updateStatus(id, status);
+            return ResponseEntity.ok(category);
         }catch (RuntimeException e){
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -48,14 +67,15 @@ public class CategoryRestAPI {
         }
     }
     @PostMapping("/create-category")
-    private ResponseEntity<?> createCategory(@RequestBody CategoryRequest categoryRequest){
+    private ResponseEntity<?> createCategory(@RequestBody @Valid CategoryRequest categoryRequest, BindingResult result){
         try {
-            if (categoryService.createCategory(categoryRequest) != null) {
-                return ResponseEntity.ok("Thêm danh mục thành công");
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("Thêm thất bại");
+            return ResponseEntity.ok(categoryService.createCategory(categoryRequest));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
