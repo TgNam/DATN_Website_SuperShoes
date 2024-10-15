@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -42,4 +43,6 @@ public class VoucherRequest {
     private Boolean isPrivate;
 
     private String status;
+
+    private List<Long> accountIds;
 }
