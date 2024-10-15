@@ -33,6 +33,14 @@ public class BillDetailService {
     // Method to create a new BillDetail using BillDetailRequest
     @Transactional
     public BillDetail createBillDetail(BillDetailRequest billDetailRequest) {
+        // Check if BillDetail with the same idProductDetail and idBill already exists
+        Optional<BillDetail> existingBillDetail = billDetailRepository.findByIdBillAndIdProductDetail(
+                billDetailRequest.getIdBill(), billDetailRequest.getIdProductDetail());
+
+        if (existingBillDetail.isPresent()) {
+            throw new RuntimeException("BillDetail with this product and bill already exists.");
+        }
+
         BillDetail billDetail = new BillDetail();
         billDetail.setQuantity(billDetailRequest.getQuantity());
         billDetail.setPriceDiscount(billDetailRequest.getPriceDiscount());
@@ -55,16 +63,65 @@ public class BillDetailService {
             if (updatedProductQuantity < 0) {
                 throw new RuntimeException("Insufficient stock for product: " + productDetail.getProduct().getName());
             }
-
             productDetail.setQuantity(updatedProductQuantity);
-            productDetailRepository.save(productDetail);  // Save updated ProductDetail
+            productDetailRepository.save(productDetail);
 
             billDetail.setProductDetail(productDetail);
         }
 
-        return billDetailRepository.save(billDetail);  // Save BillDetail
+        return billDetailRepository.save(billDetail);
     }
+    @Transactional
+    public BillDetail createOrUpdateBillDetail(BillDetailRequest billDetailRequest) {
+        // Check if BillDetail with the same idProductDetail and idBill already exists
+        Optional<BillDetail> existingBillDetail = billDetailRepository.findByIdBillAndIdProductDetail(
+                billDetailRequest.getIdBill(), billDetailRequest.getIdProductDetail());
 
+        if (existingBillDetail.isPresent()) {
+            // If it exists, update the existing BillDetail
+            BillDetail billDetail = existingBillDetail.get();
+            billDetail.setQuantity(billDetail.getQuantity() + billDetailRequest.getQuantity());
+            if (billDetailRequest.getPriceDiscount() != null) {
+                billDetail.setPriceDiscount(billDetailRequest.getPriceDiscount());
+            }
+            if (billDetailRequest.getNote() != null) {
+                billDetail.setNote(billDetailRequest.getNote());
+            }
+            billDetailRepository.save(billDetail);  // Save updated BillDetail
+            return billDetail;
+        } else {
+            // If it doesn't exist, create a new BillDetail
+            BillDetail billDetail = new BillDetail();
+            billDetail.setQuantity(billDetailRequest.getQuantity());
+            billDetail.setPriceDiscount(billDetailRequest.getPriceDiscount());
+            billDetail.setNote(billDetailRequest.getNote());
+            billDetail.setStatus(billDetailRequest.getStatus());
+
+            // Set relationships by fetching from the repository
+            if (billDetailRequest.getIdBill() != null) {
+                Bill bill = billRepository.findById(billDetailRequest.getIdBill())
+                        .orElseThrow(() -> new RuntimeException("Bill not found with id: " + billDetailRequest.getIdBill()));
+                billDetail.setBill(bill);
+            }
+
+            if (billDetailRequest.getIdProductDetail() != null) {
+                ProductDetail productDetail = productDetailRepository.findById(billDetailRequest.getIdProductDetail())
+                        .orElseThrow(() -> new RuntimeException("ProductDetail not found with id: " + billDetailRequest.getIdProductDetail()));
+
+                // Validate product stock and reduce the quantity accordingly
+                int updatedProductQuantity = productDetail.getQuantity() - billDetailRequest.getQuantity();
+                if (updatedProductQuantity < 0) {
+                    throw new RuntimeException("Insufficient stock for product: " + productDetail.getProduct().getName());
+                }
+                productDetail.setQuantity(updatedProductQuantity);
+                productDetailRepository.save(productDetail);  // Save updated ProductDetail
+
+                billDetail.setProductDetail(productDetail);
+            }
+
+            return billDetailRepository.save(billDetail);  // Save new BillDetail
+        }
+    }
     @Transactional
     public BillDetail updateBillDetail(BillDetailRequest billDetailRequest) {
         // Check if the BillDetail exists
@@ -147,17 +204,33 @@ public class BillDetailService {
     }
 
     // Delete BillDetails by product code
-    public void deleteBillDetailsByProductCode(String productCode) {
-        if (productCode == null || productCode.isEmpty()) {
-            throw new IllegalArgumentException("Product code must not be null or empty");
+    @Transactional
+    public void deleteBillDetailAndUpdateProduct(String productCode, String nameColor) {
+        // Find the BillDetail by productCode and nameColor
+        List<BillDetail> billDetails = billDetailRepository.findByProductCodeAndColorName(productCode, nameColor);
+        if (billDetails.isEmpty()) {
+            throw new RuntimeException("No BillDetail found with the given product code and color.");
         }
 
-        try {
-            billDetailRepository.deleteByProductCode(productCode);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("No BillDetails found for the given product code: " + productCode);
+        // Process each BillDetail
+        for (BillDetail billDetail : billDetails) {
+            ProductDetail productDetail = billDetail.getProductDetail();
+            if (productDetail == null) {
+                throw new RuntimeException("ProductDetail not found for BillDetail.");
+            }
+
+            // Add the BillDetail's quantity back to the ProductDetail
+            int updatedProductQuantity = productDetail.getQuantity() + billDetail.getQuantity();
+            productDetail.setQuantity(updatedProductQuantity);
+
+            // Save the updated ProductDetail
+            productDetailRepository.save(productDetail);
+
+            // Delete the BillDetail
+            billDetailRepository.delete(billDetail);
         }
     }
+
 
     // Convert BillDetail to BillDetailResponse
     private BillDetailResponse convertToBillDetailResponse(BillDetail billDetail) {
