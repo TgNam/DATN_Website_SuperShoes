@@ -22,6 +22,7 @@ public class AddressRequest {
 
     @NotBlank(message = "Tên là bắt buộc")
     @Size(min = 2, max = 50, message = "Tên phải chứa ít nhất 2 ký tự không được vượt quá 50 ký tự")
+    @Pattern(regexp = "^[A-Za-zÀ-ỹ\\s]+$", message = "Tên không được chứa ký tự đặc biệt hoặc số")
     private String name;
 
     @NotBlank(message = "Số điện thoại là bắt buộc")

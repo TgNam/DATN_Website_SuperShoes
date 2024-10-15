@@ -28,22 +28,13 @@ public class BrandService {
         }
         return brandRepository.save(convertBrandRequestDTO(brandRequest));
     }
-    public boolean updateStatus(Long id){
-        try{
+    public Brand updateStatus(Long id, String status){
             Optional<Brand> brand = brandRepository.findById(id);
             if(!brand.isPresent()){
-                throw new RuntimeException("Brand null");
+                throw new RuntimeException("Id "+brand.get().getId()+" của hãng không tồn tại");
             }
-            String newStatus = brand.get().getStatus().equals(Status.ACTIVE.toString())  ? "INACTIVE" : "ACTIVE";
-            brand.get().setStatus(newStatus);
-            brandRepository.save(brand.get());
-            return true;
-        }catch (Exception e){
-            e.getMessage();
-            System.out.println(e.getMessage());
-            return false;
-        }
-
+            brand.get().setStatus(status);
+            return  brandRepository.save(brand.get());
     }
     public Brand convertBrandRequestDTO(BrandRequest brandRequest){
         Brand brand = Brand.builder()

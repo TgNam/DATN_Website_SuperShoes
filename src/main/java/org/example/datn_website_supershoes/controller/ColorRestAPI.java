@@ -1,12 +1,16 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.ColorRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.ColorResponse;
+import org.example.datn_website_supershoes.model.Color;
+import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.ColorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,14 +36,29 @@ public class ColorRestAPI {
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(@RequestParam("id") Long id){
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="status", required = false) String status
+    ){
         try{
-            if (colorService.updateStatus(id)){
-                return ResponseEntity.ok("OK");
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID kích cỡ không được để trống!")
+                                .build()
+                );
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("False");
+            if (status==null){
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Trạng thái không được để trống!")
+                                .build()
+                );
+            }
+            Color color = colorService.updateStatus(id, status);
+            return ResponseEntity.ok(color);
         }catch (RuntimeException e){
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -51,14 +70,15 @@ public class ColorRestAPI {
         }
     }
     @PostMapping("/create-color")
-    private ResponseEntity<?> createColor(@RequestBody ColorRequest ColorRequest){
+    private ResponseEntity<?> createColor(@RequestBody @Valid ColorRequest ColorRequest, BindingResult result){
         try {
-            if (colorService.createColor(ColorRequest) != null) {
-                return ResponseEntity.ok("Thêm màu "+ColorRequest.getCodeColor()+" thành công");
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("Thêm thất bại");
+            return ResponseEntity.ok(colorService.createColor(ColorRequest));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

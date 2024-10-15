@@ -32,21 +32,13 @@ public class ColorService {
         }
         return colorRepository.save(convertColorRequestDTO(ColorRequest));
     }
-    public boolean updateStatus(Long id){
-        try{
+    public Color updateStatus(Long id, String status){
             Optional<Color> color = colorRepository.findById(id);
             if(!color.isPresent()){
-                throw new RuntimeException("Color null");
+                throw new RuntimeException("Id "+color.get().getId()+" của màu sắc không tồn tại");
             }
-            String newStatus = color.get().getStatus().equals(Status.ACTIVE.toString())  ? "INACTIVE" : "ACTIVE";
-            color.get().setStatus(newStatus);
-            colorRepository.save(color.get());
-            return true;
-        }catch (Exception e){
-            e.getMessage();
-            System.out.println(e.getMessage());
-            return false;
-        }
+            color.get().setStatus(status);
+            return colorRepository.save(color.get());
 
     }
     public Color convertColorRequestDTO(ColorRequest ColorRequest){

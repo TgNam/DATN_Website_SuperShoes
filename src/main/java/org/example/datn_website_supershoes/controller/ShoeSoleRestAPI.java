@@ -1,13 +1,16 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.ShoeSoleRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.ShoeSoleResponse;
 import org.example.datn_website_supershoes.dto.response.ShoeSoleResponse;
+import org.example.datn_website_supershoes.model.ShoeSole;
 import org.example.datn_website_supershoes.service.ShoeSoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,14 +33,28 @@ public class ShoeSoleRestAPI {
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(@RequestParam("id") Long id){
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="status", required = false) String status){
         try{
-            if (shoeSoleService.updateStatus(id)){
-                return ResponseEntity.ok("OK");
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID kích cỡ không được để trống!")
+                                .build()
+                );
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("False");
+            if (status==null){
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Trạng thái không được để trống!")
+                                .build()
+                );
+            }
+            ShoeSole shoeSole = shoeSoleService.updateStatus(id, status);
+            return ResponseEntity.ok(shoeSole);
         }catch (RuntimeException e){
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -49,14 +66,16 @@ public class ShoeSoleRestAPI {
         }
     }
     @PostMapping("/create-shoeSole")
-    private ResponseEntity<?> createShoeSole(@RequestBody ShoeSoleRequest shoeSoleRequest){
+    private ResponseEntity<?> createShoeSole(@RequestBody @Valid ShoeSoleRequest shoeSoleRequest, BindingResult result){
         try {
-            if (shoeSoleService.createShoeSole(shoeSoleRequest) != null) {
-                return ResponseEntity.ok("Thêm loại đế thành công");
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
             }
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body("Thêm thất bại");
+            System.out.println(shoeSoleRequest);
+            return ResponseEntity.ok(shoeSoleService.createShoeSole(shoeSoleRequest));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
