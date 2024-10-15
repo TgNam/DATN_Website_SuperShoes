@@ -129,8 +129,9 @@ public class BillController {
             // Filtering by status if provided
             if (status != null && !status.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
+            } else {
+                p = criteriaBuilder.and(p, criteriaBuilder.notEqual(root.get("status"), "WAITING_FOR_PAYMENT"));
             }
-
             // Partial matching for codeBill (search by each letter)
             if (codeBill != null && !codeBill.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("codeBill"), "%" + codeBill + "%"));

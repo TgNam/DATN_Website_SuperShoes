@@ -21,6 +21,8 @@ public class BillDetailResponse {
 
     private String productCode;
 
+    private Long idColor;
+
     private byte[] imageByte;
 
     private String nameProduct;
