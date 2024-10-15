@@ -205,9 +205,9 @@ public class BillDetailService {
 
     // Delete BillDetails by product code
     @Transactional
-    public void deleteBillDetailAndUpdateProduct(String productCode, String nameColor) {
+    public void deleteBillDetailAndUpdateProduct(String productCode, String nameColor,String nameSize) {
         // Find the BillDetail by productCode and nameColor
-        List<BillDetail> billDetails = billDetailRepository.findByProductCodeAndColorName(productCode, nameColor);
+        List<BillDetail> billDetails = billDetailRepository.findByProductCodeAndColorName(productCode, nameColor,nameSize);
         if (billDetails.isEmpty()) {
             throw new RuntimeException("No BillDetail found with the given product code and color.");
         }
@@ -240,6 +240,7 @@ public class BillDetailService {
         response.setStatus(billDetail.getStatus());
         response.setPriceDiscount(billDetail.getPriceDiscount());
 
+
         Optional.ofNullable(billDetail.getProductDetail()).ifPresent(productDetail -> {
             Optional.ofNullable(productDetail.getProduct()).ifPresent(product -> {
                 // Calculate total amount
@@ -253,6 +254,9 @@ public class BillDetailService {
 
             Optional.ofNullable(productDetail.getColor()).ifPresent(color -> {
                 response.setNameColor(color.getName());
+            });
+            Optional.ofNullable(productDetail.getSize()).ifPresent(size -> {
+                response.setSizeName(size.getName());
             });
         });
 

@@ -37,4 +37,6 @@ public class BillDetailResponse {
 
     private BigDecimal priceDiscount;
 
+    private String sizeName;
+
 }

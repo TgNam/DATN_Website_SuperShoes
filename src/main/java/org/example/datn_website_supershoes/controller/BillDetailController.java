@@ -155,10 +155,14 @@ public class BillDetailController {
         }
     }
     @DeleteMapping("/delete-by-product-and-color")
-    public ResponseEntity<Map<String, Object>> deleteBillDetailByProductAndColor(@RequestParam String productCode, @RequestParam String nameColor) {
+    public ResponseEntity<Map<String, Object>> deleteBillDetailByProductAndColor(
+            @RequestParam String productCode,
+            @RequestParam String nameColor,
+            @RequestParam String nameSize) { // Added nameSize parameter
         Map<String, Object> response = new HashMap<>();
         try {
-            billDetailService.deleteBillDetailAndUpdateProduct(productCode, nameColor);
+            // Call the service method and pass the nameSize as well
+            billDetailService.deleteBillDetailAndUpdateProduct(productCode, nameColor, nameSize);
             response.put("EC", 0); // No error
             response.put("EM", "BillDetail deleted and product quantity updated successfully.");
         } catch (RuntimeException ex) {

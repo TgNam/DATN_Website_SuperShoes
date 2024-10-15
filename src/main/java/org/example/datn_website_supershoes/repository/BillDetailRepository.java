@@ -18,14 +18,15 @@ import java.util.Optional;
 public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
 
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.BillDetailResponse(" +
-            "bd.id, p.productCode,c.id, p.imageByte, p.name, c.name, bd.quantity, pd.price, bd.status, bd.priceDiscount) " +
+            "bd.id, p.productCode,c.id, p.imageByte, p.name, c.name, bd.quantity, pd.price, bd.status, b.priceDiscount,s.name) " +
             "FROM BillDetail bd " +
             "JOIN bd.productDetail pd " +
             "JOIN pd.product p " +
             "JOIN pd.color c " +
             "JOIN bd.bill b " +
+            "JOIN pd.size s " +
             "WHERE b.codeBill = :codeBill " +
-            "GROUP BY bd.id, p.productCode, p.imageByte, p.name, c.name, bd.quantity, pd.price, b.status " +
+            "GROUP BY bd.id, p.productCode,c.id, p.imageByte, p.name, c.name, bd.quantity, pd.price, b.status, b.priceDiscount,s.name " +
             "ORDER BY pd.createdAt DESC")
     List<BillDetailResponse> listBillDetailResponseByCodeBill(@Param("codeBill") String codeBill);
 
@@ -48,6 +49,6 @@ public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
     @Query("SELECT bd FROM BillDetail bd WHERE bd.bill.id = :idBill AND bd.productDetail.id = :idProductDetail")
     Optional<BillDetail> findByIdBillAndIdProductDetail(@Param("idBill") Long idBill, @Param("idProductDetail") Long idProductDetail);
 
-    @Query("SELECT bd FROM BillDetail bd WHERE bd.productDetail.product.productCode = :productCode AND bd.productDetail.color.name = :nameColor")
-    List<BillDetail> findByProductCodeAndColorName(@Param("productCode") String productCode, @Param("nameColor") String nameColor);
+    @Query("SELECT bd FROM BillDetail bd WHERE bd.productDetail.product.productCode = :productCode AND bd.productDetail.color.name = :nameColor AND bd.productDetail.size.name = :nameSize ")
+    List<BillDetail> findByProductCodeAndColorName(@Param("productCode") String productCode, @Param("nameColor") String nameColor,@Param("nameSize") String nameSize);
 }
