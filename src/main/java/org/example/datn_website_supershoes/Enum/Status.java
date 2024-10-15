@@ -12,5 +12,4 @@ public enum Status {
     WAITING_FOR_PAYMENT,
     EXPIRED,
     ENDED_EARLY,
-
 }

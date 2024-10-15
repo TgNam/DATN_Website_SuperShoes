@@ -5,7 +5,6 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Account;
-import org.example.datn_website_supershoes.model.AccountVoucher;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class VoucherService {
@@ -82,15 +80,29 @@ public class VoucherService {
         return voucherRepository.save(voucher);
     }
 
-
-    public void deleteVoucher(Long id) {
+    public VoucherResponse getVoucherById(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
 
-        accountVoucherRepository.deleteByVoucherId(id);
-        voucherRepository.delete(voucher);
+        if ("EXPIRED".equals(voucher.getStatus())) {
+            throw new RuntimeException("Không thể xem chi tiết voucher đã hết hạn.");
+        }
+
+        return convertToVoucherResponse(voucher);
     }
 
+    public Voucher deleteVoucher(Long id) {
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
+
+        if ("EXPIRED".equals(voucher.getStatus())) {
+            throw new RuntimeException("Voucher đã hết hạn, không thể thay đổi trạng thái");
+        }
+
+        voucher.setStatus(Status.EXPIRED.toString());
+        accountVoucherRepository.updateStatusByVoucherId(id, "INACTIVE");
+        return voucherRepository.save(voucher);
+    }
 
     public Voucher endVoucherEarly(Long id, Long userId) {
         Voucher voucher = voucherRepository.findById(id)

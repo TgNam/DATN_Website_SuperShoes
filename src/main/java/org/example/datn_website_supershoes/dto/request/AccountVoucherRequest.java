@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,9 +20,9 @@ public class AccountVoucherRequest {
 
     private Date dateOfUse;
 
-    private Long idAccount;
-
-    private Long idVoucher;
+    private List<Long> accountIds;
 
     private String status;
+
+    private VoucherRequest voucherRequest;
 }

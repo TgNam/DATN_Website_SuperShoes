@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.dto.request;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,17 +19,19 @@ import java.math.BigDecimal;
 @ToString
 public class BillDetailRequest {
 
-    private Long id;
+    @NotNull
+    private Long idBill;
 
+    @NotNull
+    private Long idProductDetail;
+
+    @NotNull
+    @Min(1)
     private Integer quantity;
 
     private BigDecimal priceDiscount;
 
     private String note;
-
-    private Long idBill;
-
-    private Long idProductDetail;
 
     private String status;
 }

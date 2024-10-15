@@ -6,10 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.example.datn_website_supershoes.model.ProductImage;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,6 +18,8 @@ import java.util.List;
 public class BillDetailResponse {
 
     private Long id;
+
+    private String productCode;
 
     private byte[] imageByte;
 
@@ -33,5 +33,6 @@ public class BillDetailResponse {
 
     private String status;
 
+    private BigDecimal priceDiscount;
 
 }

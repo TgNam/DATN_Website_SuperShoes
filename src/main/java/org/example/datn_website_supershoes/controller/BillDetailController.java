@@ -1,7 +1,10 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
+import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
@@ -68,8 +69,11 @@ public class BillDetailController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createBillDetail(@RequestBody BillDetail billDetail) {
-        BillDetail createdBillDetail = billDetailService.createBillDetail(billDetail);
+    public ResponseEntity<Map<String, Object>> createBillDetail(@Valid @RequestBody BillDetailRequest billDetailRequest) {
+        // Convert BillDetailRequest to BillDetail entity
+        BillDetail createdBillDetail = billDetailService.createBillDetail(billDetailRequest);
+
+        // Create response map
         Map<String, Object> response = new HashMap<>();
         response.put("DT", createdBillDetail);
         response.put("EC", 0);
@@ -78,16 +82,48 @@ public class BillDetailController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateBillDetail(@PathVariable Long id, @RequestBody BillDetail billDetailDetails) {
-        BillDetail updatedBillDetail = billDetailService.updateBillDetail(id, billDetailDetails);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedBillDetail);
-        response.put("EC", 0);
-        response.put("EM", "BillDetail updated successfully");
 
-        return ResponseEntity.ok(response);
+    @PutMapping("/update")
+    public ResponseEntity<Map<String, Object>> updateBillDetail(@Valid @RequestBody BillDetailRequest billDetailRequest) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Update BillDetail
+            BillDetail updatedBillDetail = billDetailService.updateBillDetail(billDetailRequest);
+
+            // Success response
+            response.put("DT", updatedBillDetail);
+            response.put("EC", 0); // EC = 0: No error
+            response.put("EM", "BillDetail updated successfully");
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException ex) {
+            // Handle runtime exceptions like insufficient stock, BillDetail not found, etc.
+            response.put("DT", null);
+            response.put("EC", 1); // EC = 1: Error code for runtime errors
+            response.put("EM", ex.getMessage()); // Provide specific error message
+
+            // Log the exception (you can use any logger, such as log4j or slf4j)
+            System.err.println("Error occurred: " + ex.getMessage());
+            ex.printStackTrace(); // Log stack trace for debugging purposes
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (Exception ex) {
+            // Handle unexpected errors
+            response.put("DT", null);
+            response.put("EC", 2); // EC = 2: Error code for unexpected errors
+            response.put("EM", "An unexpected error occurred");
+
+            // Log the unexpected error for further investigation
+            System.err.println("Unexpected error: " + ex.getMessage());
+            ex.printStackTrace();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
+
+
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteBillDetail(@PathVariable Long id) {
@@ -98,4 +134,27 @@ public class BillDetailController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting BillDetail");
         }
     }
+    @DeleteMapping("/delete-by-product-code")
+    public ResponseEntity<?> deleteBillDetailsByProductCode(@RequestParam("productCode") String productCode) {
+        try {
+            billDetailService.deleteBillDetailsByProductCode(productCode);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(Response.builder()
+                            .status(HttpStatus.OK.toString())
+                            .mess("Delete success")
+                            .build()
+                    );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Response.builder()
+                            .status(HttpStatus.NOT_FOUND.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+
 }
