@@ -12,13 +12,12 @@ import org.example.datn_website_supershoes.model.PromotionDetail;
 import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -60,6 +59,33 @@ public class PromotionService {
         promotionRepository.saveAll(expiredDiscounts);
     }
 
+    public Promotion updateStatus(Long id, boolean aBoolean){
+        Date now = new Date();  // Sử dụng Date thay vì LocalDateTime
+        Optional<Promotion> promotionOptional = promotionRepository.findPromotionByIdAndStatus(id,Arrays.asList(Status.ONGOING.toString(),Status.UPCOMING.toString(),Status.ENDING_SOON.toString()));
+
+        // Kiểm tra nếu promotion không tồn tại
+        if (!promotionOptional.isPresent()) {
+            throw new RuntimeException("Id " + id + " của đợt giảm giá không nằm trong trạng thái đang sắp diễn ra, đang diễn ra, kết thúc sớm");
+        }
+
+        String newStatus;
+
+        // So sánh thời gian sử dụng Date thay vì LocalDateTime
+        if (aBoolean && promotionOptional.get().getStartAt().after(now) && promotionOptional.get().getEndAt().after(now)) {
+            newStatus = Status.UPCOMING.toString();
+        } else if (aBoolean && promotionOptional.get().getStartAt().before(now) && promotionOptional.get().getEndAt().after(now)) {
+            newStatus = Status.ONGOING.toString();
+        } else {
+            newStatus = Status.ENDING_SOON.toString();
+        }
+
+        // Cập nhật trạng thái của promotion
+        promotionOptional.get().setStatus(newStatus);
+        // Lưu lại promotion đã được cập nhật
+        Promotion promotion = promotionRepository.save(promotionOptional.get());
+        promotionDetailService.updateStatusPromotionDetail(promotion.getId(),promotion.getStatus());
+        return promotion;
+    }
     public List<PromotionResponse> getAllPromotion() {
         return promotionRepository.listPromotionResponse();
     }
