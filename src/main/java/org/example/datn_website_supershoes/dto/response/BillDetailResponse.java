@@ -21,6 +21,8 @@ public class BillDetailResponse {
 
     private String productCode;
 
+    private Long idColor;
+
     private byte[] imageByte;
 
     private String nameProduct;
@@ -34,5 +36,7 @@ public class BillDetailResponse {
     private String status;
 
     private BigDecimal priceDiscount;
+
+    private String sizeName;
 
 }

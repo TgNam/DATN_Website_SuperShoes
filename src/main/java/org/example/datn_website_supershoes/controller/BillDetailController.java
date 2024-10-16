@@ -4,7 +4,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
-import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,30 +36,45 @@ public class BillDetailController {
             @RequestParam(value = "sort", defaultValue = "createdAt") String sortField,
             @RequestParam(value = "sortDirection", defaultValue = "DESC") String sortDirection
     ) {
+        // Create the specification for filtering
         Specification<BillDetail> spec = (root, query, criteriaBuilder) -> {
-            Predicate p = criteriaBuilder.conjunction();
+            Predicate predicate = criteriaBuilder.conjunction();
 
             if (status != null && !status.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("status"), status));
             }
 
             if (codeBill != null && !codeBill.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("bill").get("codeBill"), codeBill));
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("bill").get("codeBill"), codeBill));
             }
 
             if (quantity != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("quantity"), quantity));
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("quantity"), quantity));
             }
 
-            return p;
+            return predicate;
         };
 
-        // Set the sorting direction
-        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        // Validate and set the sorting direction
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.fromString(sortDirection);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort direction");
+        }
+
+        // Validate the sort field
+        List<String> validSortFields = Arrays.asList("createdAt", "status", "quantity", "codeBill"); // Add valid fields here
+        if (!validSortFields.contains(sortField)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort field");
+        }
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
 
+        // Call the service method to get the filtered results
         return billDetailService.getBillDetails(spec, pageable);
     }
+
 
     @GetMapping("/detail/{id}")
     public ResponseEntity<BillDetail> getBillDetailById(@PathVariable Long id) {
@@ -69,15 +83,21 @@ public class BillDetailController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createBillDetail(@Valid @RequestBody BillDetailRequest billDetailRequest) {
-        // Convert BillDetailRequest to BillDetail entity
-        BillDetail createdBillDetail = billDetailService.createBillDetail(billDetailRequest);
-
-        // Create response map
+    public ResponseEntity<Map<String, Object>> createOrUpdateBillDetail(@Valid @RequestBody BillDetailRequest billDetailRequest) {
         Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdBillDetail);
-        response.put("EC", 0);
-        response.put("EM", "BillDetail added successfully");
+        try {
+            // Attempt to create or update the BillDetail
+            BillDetail billDetail = billDetailService.createOrUpdateBillDetail(billDetailRequest);
+            response.put("DT", billDetail);
+            response.put("EC", 0); // No error
+            response.put("EM", "BillDetail processed successfully");
+        } catch (RuntimeException ex) {
+            // If an error occurs, return the error message
+            response.put("DT", null);
+            response.put("EC", 1); // Error code
+            response.put("EM", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
 
         return ResponseEntity.ok(response);
     }
@@ -134,26 +154,23 @@ public class BillDetailController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting BillDetail");
         }
     }
-    @DeleteMapping("/delete-by-product-code")
-    public ResponseEntity<?> deleteBillDetailsByProductCode(@RequestParam("productCode") String productCode) {
+    @DeleteMapping("/delete-by-product-and-color")
+    public ResponseEntity<Map<String, Object>> deleteBillDetailByProductAndColor(
+            @RequestParam String productCode,
+            @RequestParam String nameColor,
+            @RequestParam String nameSize) { // Added nameSize parameter
+        Map<String, Object> response = new HashMap<>();
         try {
-            billDetailService.deleteBillDetailsByProductCode(productCode);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(Response.builder()
-                            .status(HttpStatus.OK.toString())
-                            .mess("Delete success")
-                            .build()
-                    );
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(Response.builder()
-                            .status(HttpStatus.NOT_FOUND.toString())
-                            .mess(e.getMessage())
-                            .build()
-                    );
+            // Call the service method and pass the nameSize as well
+            billDetailService.deleteBillDetailAndUpdateProduct(productCode, nameColor, nameSize);
+            response.put("EC", 0); // No error
+            response.put("EM", "BillDetail deleted and product quantity updated successfully.");
+        } catch (RuntimeException ex) {
+            response.put("EC", 1); // Error code
+            response.put("EM", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+        return ResponseEntity.ok(response);
     }
 
 

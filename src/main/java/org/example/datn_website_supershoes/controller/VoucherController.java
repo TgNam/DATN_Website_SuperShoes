@@ -16,24 +16,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -108,17 +94,16 @@ public class VoucherController {
     public ResponseEntity<?> createVoucher(@RequestBody @NotNull VoucherRequest voucherRequest,
                                            @RequestParam(required = false) Long userId) {
         try {
-            Long defaultUserId = 1L;  // ID mặc định cho người tạo
-            Long creatorId = (userId != null) ? userId : defaultUserId;
-            return ResponseEntity.ok(voucherService.createVoucher(voucherRequest, creatorId));
+            Long creatorId = Optional.ofNullable(userId).orElse(1L);  // Default to user ID 1
+            Voucher createdVoucher = voucherService.createVoucher(voucherRequest, creatorId);
+            VoucherResponse response = convertToVoucherResponse(createdVoucher);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+            return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Response.builder()
                             .status(HttpStatus.CONFLICT.toString())
                             .mess(e.getMessage())
-                            .build()
-                    );
+                            .build());
         }
     }
 
@@ -127,18 +112,16 @@ public class VoucherController {
                                            @RequestBody VoucherRequest voucherRequest,
                                            @RequestParam(required = false) Long userId) {
         try {
-            Long defaultUserId = 1L;
-            Long updaterId = (userId != null) ? userId : defaultUserId;
+            Long updaterId = Optional.ofNullable(userId).orElse(1L);
             Voucher updatedVoucher = voucherService.updateVoucher(id, voucherRequest, updaterId);
-            return ResponseEntity.ok(updatedVoucher);
+            VoucherResponse response = convertToVoucherResponse(updatedVoucher);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
                             .status(HttpStatus.NOT_FOUND.toString())
                             .mess(e.getMessage())
-                            .build()
-                    );
+                            .build());
         }
     }
 
@@ -148,14 +131,15 @@ public class VoucherController {
         try {
             VoucherResponse voucherResponse = voucherService.getVoucherById(id);
             if ("EXPIRED".equals(voucherResponse.getStatus())) {
-                throw new RuntimeException("Không thể xem voucher đã hết hạn.");
+                throw new RuntimeException("Cannot view voucher that has expired.");
             }
             return ResponseEntity.ok(voucherResponse);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder()
-                    .status(HttpStatus.BAD_REQUEST.toString())
-                    .mess(e.getMessage())
-                    .build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Response.builder()
+                            .status(HttpStatus.BAD_REQUEST.toString())
+                            .mess(e.getMessage())
+                            .build());
         }
     }
 
@@ -166,13 +150,11 @@ public class VoucherController {
             VoucherResponse response = convertToVoucherResponse(updatedVoucher);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
                             .status(HttpStatus.NOT_FOUND.toString())
                             .mess(e.getMessage())
-                            .build()
-                    );
+                            .build());
         }
     }
 
@@ -180,17 +162,15 @@ public class VoucherController {
     public ResponseEntity<?> endVoucherEarly(@PathVariable("id") Long id,
                                              @RequestParam(value = "userId", required = false) Long userId) {
         try {
-            Voucher updatedVoucher = voucherService.endVoucherEarly(id, userId != null ? userId : 1);
+            Voucher updatedVoucher = voucherService.endVoucherEarly(id, Optional.ofNullable(userId).orElse(1L));
             VoucherResponse response = convertToVoucherResponse(updatedVoucher);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
                             .status(HttpStatus.NOT_FOUND.toString())
                             .mess(e.getMessage())
-                            .build()
-                    );
+                            .build());
         }
     }
 
@@ -198,17 +178,15 @@ public class VoucherController {
     public ResponseEntity<?> reactivateVoucher(@PathVariable("id") Long id,
                                                @RequestParam(value = "userId", required = false) Long userId) {
         try {
-            Voucher updatedVoucher = voucherService.reactivateVoucher(id, userId != null ? userId : 1);
+            Voucher updatedVoucher = voucherService.reactivateVoucher(id, Optional.ofNullable(userId).orElse(1L));
             VoucherResponse response = convertToVoucherResponse(updatedVoucher);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
                             .status(HttpStatus.NOT_FOUND.toString())
                             .mess(e.getMessage())
-                            .build()
-                    );
+                            .build());
         }
     }
 
@@ -221,8 +199,7 @@ public class VoucherController {
                     .mess("Checked and updated expired vouchers successfully.")
                     .build());
         } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
                             .mess(e.getMessage())
