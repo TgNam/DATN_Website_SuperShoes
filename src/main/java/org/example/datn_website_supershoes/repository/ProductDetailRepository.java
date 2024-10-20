@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Size;
@@ -52,4 +53,18 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "where p.id IN :idProducts")
     List<ProductDetailResponseByNam> findProductDetailRequests(@Param("idProducts") List<Long> idProducts);
     Optional<ProductDetail> findById(Long idProductDetail);
+
+    Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail,String Status);
+    @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
+            "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
+            "pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice) " +
+            "FROM ProductDetail pd " +
+            "INNER JOIN pd.product p " +
+            "INNER JOIN pd.color c " +
+            "INNER JOIN pd.size s " +
+            "LEFT JOIN pd.promotionDetail prod ON prod.status = 'ONGOING' " +
+            "LEFT JOIN prod.promotion pro " +
+            "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE'")
+    List<ProductPromotionResponse> findProductPromotion();
+
 }

@@ -51,7 +51,7 @@ public class BillRestApi {
         }
     }
     @PostMapping("/create-billByEmployee")
-    private ResponseEntity<?> createSize(@RequestParam(value ="displayBills", required = false) List<String> displayBills){
+    private ResponseEntity<?> createBillByEmployee(@RequestParam(value ="displayBills", required = false) List<String> displayBills){
         try {
             return ResponseEntity
                     .ok(billByEmployeeService.createBillByEmployee(displayBills));

@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
 import jakarta.transaction.Transactional;
+import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
 import org.example.datn_website_supershoes.model.Bill;
@@ -29,6 +30,8 @@ public class BillDetailService {
 
     @Autowired
     private ProductDetailRepository productDetailRepository;
+
+    private static final int MIN_QUANTITY_PRODUCT_DETAIL = 1;
 
     // Method to create a new BillDetail using BillDetailRequest
     @Transactional
@@ -262,4 +265,40 @@ public class BillDetailService {
 
         return response;
     }
+    //dùng cho bán hàng
+    public void createBillDetailByIdBill(String codeBill, List<Long> idProductDetail){
+        Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
+        Integer newQuantity = 0;
+        if (!billOptional.isPresent()){
+            throw new RuntimeException("Mã hóa đơn  "+codeBill+"  không tồn tại trong hệ thống.");
+        }
+        for (Long id : idProductDetail){
+            BillDetail billDetail = new BillDetail();
+            Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(id, Status.ACTIVE.toString());
+            if (!productDetailOptional.isPresent()){
+                throw new RuntimeException("Id "+id+" của sản phẩm không tồn tại trong hệ thống.");
+            } else if (productDetailOptional.get().getQuantity() < MIN_QUANTITY_PRODUCT_DETAIL) {
+                throw new RuntimeException("Sản phẩm "+productDetailOptional.get().getProduct().getName()+" đang hết hàng.");
+            }else if (productDetailOptional.get().getQuantity() > MIN_QUANTITY_PRODUCT_DETAIL) {
+                newQuantity = productDetailOptional.get().getQuantity() - MIN_QUANTITY_PRODUCT_DETAIL;
+                billDetail.setProductDetail(productDetailOptional.get());
+                billDetail.setBill(billOptional.get());
+                billDetail.setQuantity(1);
+                billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
+                billDetailRepository.save(billDetail);
+                productDetailOptional.get().setQuantity(newQuantity);
+                productDetailRepository.save(productDetailOptional.get());
+            }else{
+                billDetail.setProductDetail(productDetailOptional.get());
+                billDetail.setBill(billOptional.get());
+                billDetail.setQuantity(1);
+                billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
+                billDetailRepository.save(billDetail);
+                productDetailOptional.get().setQuantity(newQuantity);
+                productDetailOptional.get().setStatus(Status.INACTIVE.toString());
+                productDetailRepository.save(productDetailOptional.get());
+            }
+        }
+    }
+
 }
