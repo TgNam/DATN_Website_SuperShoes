@@ -25,7 +25,7 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
             "FROM Bill b " +
             "WHERE b.codeBill = :codeBill")
     Optional<BillSummaryResponse> findBillSummaryByCodeBill(@Param("codeBill") String codeBill);
-
+    //dùng cho bán hàng
     @Query("SELECT b FROM Bill b WHERE b.codeBill = :codeBill")
     Optional<Bill> findByCodeBill(@Param("codeBill") String codeBill);
 

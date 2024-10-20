@@ -1,10 +1,7 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
-import org.example.datn_website_supershoes.dto.response.AccountResponse;
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
-import org.example.datn_website_supershoes.dto.response.ProductResponse;
+import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.service.ProductDetailService;
@@ -118,12 +115,25 @@ public class ProductDetailController {
         return ResponseEntity.ok(productDetails);
     }
     @GetMapping("/filterListProductDetail")
-    public List<ProductDetailResponseByNam> getAllAccountSearch(
+    public List<ProductDetailResponseByNam> getAllProductDetailSearch(
             @RequestParam("idProducts") List<Long> idProducts,
             @RequestParam("search") String search,
             @RequestParam("nameSize") String nameSize,
             @RequestParam("nameColor") String nameColor,
             @RequestParam("priceRange") String priceRange) {
         return productDetailService.filterListProductDetail(idProducts,search,nameSize,nameColor,priceRange);
+    }
+    @GetMapping("/listProductPromotion")
+    public ResponseEntity<?> getProductPromotion() {
+        List<ProductPromotionResponse> productDetails = productDetailService.findProductPromotion();
+        return ResponseEntity.ok(productDetails);
+    }
+    @GetMapping("/filterListProductPromotion")
+    public List<ProductPromotionResponse> getAllProductPromotionSearch(
+            @RequestParam("search") String search,
+            @RequestParam("nameSize") String nameSize,
+            @RequestParam("nameColor") String nameColor,
+            @RequestParam("priceRange") String priceRange) {
+        return productDetailService.filterListProductPromotion(search,nameSize,nameColor,priceRange);
     }
 }

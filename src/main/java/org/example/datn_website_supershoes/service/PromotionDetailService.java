@@ -41,6 +41,14 @@ public class PromotionDetailService {
             promotionDetailRepository.save(pd);
         }
     }
+    public void updateStatusPromotionDetail(Long idPromotion,String status){
+        List<PromotionDetail>  promotionDetails = promotionDetailRepository.findPromotionDetailByIdPromotionAndStatuses(idPromotion,Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
+        for (PromotionDetail pd : promotionDetails){
+            pd.setStatus(status);
+            promotionDetailRepository.save(pd);
+        }
+    }
+
     public List<PromotionDetail> createPromotionDetail(Promotion promotion,List<PromotionDetailRequest> promotionDetailRequest) {
         for (PromotionDetailRequest request : promotionDetailRequest){
             Optional<PromotionDetail> promotionDetailOptional = promotionDetailRepository.findPromotionDetailByIdProductDetailAndStatuses(

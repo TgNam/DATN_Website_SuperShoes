@@ -9,6 +9,7 @@ import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Promotion;
+import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,32 @@ public class PromotionRestAPI {
             return ResponseEntity.ok(promotion);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PutMapping("/updateStatus")
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
+    ){
+        try{
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID đợt giảm giá không được để trống!")
+                                .build()
+                );
+            }
+            Promotion promotion = promotionService.updateStatus(id,aBoolean);
+            return ResponseEntity.ok(promotion);
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
     }
 }
