@@ -61,10 +61,6 @@ public class Bill extends BaseEntity {
     @Column
     private BigDecimal totalAmount;
 
-    @OneToOne
-    @JoinColumn(name = "guest_id")
-    private Guest guest;
-
     @JsonBackReference(value = "billReference")
     @ManyToOne
     @JoinColumn(name = "voucher_id")
