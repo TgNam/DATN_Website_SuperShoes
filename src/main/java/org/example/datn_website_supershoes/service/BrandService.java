@@ -28,12 +28,13 @@ public class BrandService {
         }
         return brandRepository.save(convertBrandRequestDTO(brandRequest));
     }
-    public Brand updateStatus(Long id, String status){
+    public Brand updateStatus(Long id, boolean aBoolean){
             Optional<Brand> brand = brandRepository.findById(id);
             if(!brand.isPresent()){
                 throw new RuntimeException("Id "+brand.get().getId()+" của hãng không tồn tại");
             }
-            brand.get().setStatus(status);
+        String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
+            brand.get().setStatus(newStatus);
             return  brandRepository.save(brand.get());
     }
     public Brand convertBrandRequestDTO(BrandRequest brandRequest){

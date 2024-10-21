@@ -31,12 +31,13 @@ public class SizeService {
             }
             return sizeRepository.save(convertSizeRequestDTO(sizeRequest));
     }
-    public Size updateStatus(Long id, String status){
+    public Size updateStatus(Long id, boolean aBoolean){
             Optional<Size> sizeOt = sizeRepository.findById(id);
             if(!sizeOt.isPresent()){
                 throw new RuntimeException("Id "+sizeOt.get().getId()+" của kích cỡ không tồn tại");
             }
-            sizeOt.get().setStatus(status);
+        String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
+            sizeOt.get().setStatus(newStatus);
             Size size = sizeRepository.save(sizeOt.get());
             return size;
 

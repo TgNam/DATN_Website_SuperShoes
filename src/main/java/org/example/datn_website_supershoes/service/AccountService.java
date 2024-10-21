@@ -1,11 +1,13 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Role;
+import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.accountWithPassword.AccountWithPassword;
 import org.example.datn_website_supershoes.dto.request.AccountUpdateRequest;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.model.Account;
+import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -57,7 +59,17 @@ public class AccountService {
         account.setStatus(accountRequest.getStatus());
         return accountRepository.save(account);
     }
+    public Account updateStatus(Long idAccount, boolean aBoolean){
+        Optional<Account> accountOt = accountRepository.findById(idAccount);
+        if(!accountOt.isPresent()){
+            throw new RuntimeException("Id "+accountOt.get().getId()+" của tài khoản không tồn tại");
+        }
+        String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
+        accountOt.get().setStatus(newStatus);
+        Account account = accountRepository.save(accountOt.get());
+        return account;
 
+    }
     public List<AccountResponse> getAllAccountCustomerActive() {
         return accountRepository.listCustomerResponseByStatus(Role.CUSTOMER.toString());
     }

@@ -6,6 +6,7 @@ import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Account;
+import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -78,7 +79,32 @@ public class AccountRestAPI {
                     );
         }
     }
-
+    @PutMapping("/updateStatus")
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
+    ){
+        try{
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID tài khoản không được để trống!")
+                                .build()
+                );
+            }
+            Account account = accountService.updateStatus(id,aBoolean);
+            return ResponseEntity.ok(account);
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 
     @GetMapping("/list-accounts-customer")
     public List<AccountResponse> getAllAccount() {

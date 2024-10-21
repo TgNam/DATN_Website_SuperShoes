@@ -49,9 +49,10 @@ public class AddressService {
         Address addressRe =addressRepository.save(address);
         AddressResponse addressResponse = AddressResponse.builder()
                 .id(addressRe.getId())
-                .name(addressRe.getName())
+                .codeCity(addressRe.getCodeCity())
+                .codeDistrict(addressRe.getCodeDistrict())
+                .codeWard(addressRe.getCodeWard())
                 .address(addressRe.getAddress())
-                .phoneNumber(addressRe.getPhoneNumber())
                 .idAccount(addressRe.getAccount().getId())
                 .type(addressRe.getType())
                 .status(addressRe.getStatus())
@@ -63,14 +64,16 @@ public class AddressService {
         Address address = addressRepository.findById(idAddress)
                 .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại!"));
         address.setAddress(addressRequest.getAddress());
-        address.setName(addressRequest.getName());
-        address.setPhoneNumber(addressRequest.getPhoneNumber());
+        address.setCodeCity(addressRequest.getCodeCity());
+        address.setCodeDistrict(addressRequest.getCodeDistrict());
+        address.setCodeWard(addressRequest.getCodeWard());
         Address addressRe =addressRepository.save(address);
         AddressResponse addressResponse = AddressResponse.builder()
                 .id(addressRe.getId())
-                .name(addressRe.getName())
+                .codeCity(addressRe.getCodeCity())
+                .codeDistrict(addressRe.getCodeDistrict())
+                .codeWard(addressRe.getCodeWard())
                 .address(addressRe.getAddress())
-                .phoneNumber(addressRe.getPhoneNumber())
                 .idAccount(addressRe.getAccount().getId())
                 .type(addressRe.getType())
                 .status(addressRe.getStatus())
@@ -106,9 +109,10 @@ public class AddressService {
         Address address = addressRepository.save(addressA);
                 AddressResponse addressResponse = AddressResponse.builder()
                         .id(address.getId())
-                        .name(address.getName())
+                        .codeCity(address.getCodeCity())
+                        .codeDistrict(address.getCodeDistrict())
+                        .codeWard(address.getCodeWard())
                         .address(address.getAddress())
-                        .phoneNumber(address.getPhoneNumber())
                         .idAccount(address.getAccount().getId())
                         .type(address.getType())
                         .status(address.getStatus())
@@ -131,10 +135,14 @@ public class AddressService {
             // Bước 4: Lấy tất cả các địa chỉ còn lại theo tài khoản
             List<AddressResponse> remainingAddresses = addressRepository.listAddressResponseByidAccount(address.getAccount().getId());
 
-            // Bước 5: Nếu còn địa chỉ và địa chỉ đầu tiên có type = 0, chuyển thành type = 1
+            // Bước 5: Nếu còn địa chỉ và không có địa chỉ nào có type = 1, chuyển địa chỉ đầu tiên thành type = 1
             if (!remainingAddresses.isEmpty()) {
-                AddressResponse firstAddress = remainingAddresses.get(0);
-                if (firstAddress.getType() == 0) {
+                boolean hasType1 = remainingAddresses.stream().anyMatch(addr -> addr.getType() == 1);
+
+                // Nếu không có địa chỉ nào có type = 1
+                if (!hasType1) {
+                    AddressResponse firstAddress = remainingAddresses.get(0);
+
                     // Tìm lại đối tượng trong DB để chỉnh sửa
                     Address firstAddressEntity = addressRepository.findById(firstAddress.getId())
                             .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ đầu tiên!"));
@@ -149,11 +157,14 @@ public class AddressService {
         } else {
             throw new RuntimeException("Lỗi: Địa chỉ chưa được xóa!");
         }
+
+        // Tạo response cho địa chỉ đã xóa
         AddressResponse addressResponse = AddressResponse.builder()
                 .id(address.getId())
-                .name(address.getName())
+                .codeCity(address.getCodeCity())
+                .codeDistrict(address.getCodeDistrict())
+                .codeWard(address.getCodeWard())
                 .address(address.getAddress())
-                .phoneNumber(address.getPhoneNumber())
                 .idAccount(address.getAccount().getId())
                 .type(address.getType())
                 .status(address.getStatus())
@@ -162,12 +173,14 @@ public class AddressService {
     }
 
 
+
     public Address convertAddressRequesDTO(AddressRequest addressRequest){
         Account account = accountRepository.findById(addressRequest.getIdAccount()).get();
         Address address = Address.builder()
-                .name(addressRequest.getName())
+                .codeCity(addressRequest.getCodeCity())
+                .codeDistrict(addressRequest.getCodeDistrict())
+                .codeWard(addressRequest.getCodeWard())
                 .address(addressRequest.getAddress())
-                .phoneNumber(addressRequest.getPhoneNumber())
                 .account(account)
                 .build();
         address.setStatus(Status.ACTIVE.toString());

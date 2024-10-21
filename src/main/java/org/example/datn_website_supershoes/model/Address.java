@@ -22,13 +22,17 @@ import lombok.Setter;
 public class Address extends BaseEntity {
 
     @Column
-    private String name;
+    private String codeCity;
 
     @Column
-    private String phoneNumber;
+    private String codeDistrict;
+
+    @Column
+    private String codeWard;
 
     @Column
     private String address;
+
     @Column
     private Integer type;
     @JsonBackReference(value = "accountAddressReference")
