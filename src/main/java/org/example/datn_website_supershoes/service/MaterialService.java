@@ -28,12 +28,13 @@ public class MaterialService {
         }
         return materialRepository.save(convertMaterialRequestDTO(materialRequest));
     }
-    public Material updateStatus(Long id, String status){
+    public Material updateStatus(Long id, boolean aBoolean){
             Optional<Material> material = materialRepository.findById(id);
             if(!material.isPresent()){
                 throw new RuntimeException("Id "+material.get().getId()+" của chất liệu không tồn tại");
             }
-            material.get().setStatus(status);
+        String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
+            material.get().setStatus(newStatus);
             return materialRepository.save(material.get());
     }
     public Material convertMaterialRequestDTO(MaterialRequest MaterialRequest){

@@ -20,14 +20,14 @@ public class AddressRequest {
     @NotNull(message = "id của tài khoản không được để trống")
     private Long idAccount;
 
-    @NotBlank(message = "Tên là bắt buộc")
-    @Size(min = 2, max = 50, message = "Tên phải chứa ít nhất 2 ký tự không được vượt quá 50 ký tự")
-    @Pattern(regexp = "^[A-Za-zÀ-ỹ\\s]+$", message = "Tên không được chứa ký tự đặc biệt hoặc số")
-    private String name;
+    @NotBlank(message = "Mã thành phố là bắt buộc")
+    private String codeCity;
 
-    @NotBlank(message = "Số điện thoại là bắt buộc")
-    @Pattern(regexp = "^0[0-9]{9,10}$", message = "Số điện thoại phải bắt đầu bằng số 0 và có từ 10 đến 11 số")
-    private String phoneNumber;
+    @NotBlank(message = "Mã tỉnh thành là bắt buộc")
+    private String codeDistrict;
+
+    @NotBlank(message = "Mã huyện/ phường/ xã là bắt buộc")
+    private String codeWard;
 
     @NotBlank(message = "Địa chỉ là bắt buộc")
     @Size(min = 2, max = 100, message = "Tên phải chứa ít nhất 2 ký tự không được vượt quá 100 ký tự")

@@ -46,7 +46,7 @@ public class SizeRestAPI {
     @PutMapping("/update-status")
     private ResponseEntity<?> updateStatus(
             @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="status", required = false) String status
+            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
     ){
         try{
             if (id == null) {
@@ -57,15 +57,7 @@ public class SizeRestAPI {
                                 .build()
                 );
             }
-            if (status==null){
-                return ResponseEntity.badRequest().body(
-                        Response.builder()
-                                .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: Trạng thái không được để trống!")
-                                .build()
-                );
-            }
-            Size size  = sizeService.updateStatus(id,status);
+            Size size  = sizeService.updateStatus(id,aBoolean);
             return ResponseEntity.ok(size);
         }catch (RuntimeException e){
             return ResponseEntity

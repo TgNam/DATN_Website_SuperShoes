@@ -35,25 +35,17 @@ public class ShoeSoleRestAPI {
     @PutMapping("/update-status")
     private ResponseEntity<?> updateStatus(
             @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="status", required = false) String status){
+            @RequestParam(value ="aBoolean", required = false) boolean aBoolean){
         try{
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
                                 .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: ID kích cỡ không được để trống!")
+                                .mess("Lỗi: ID loại đế giày không được để trống!")
                                 .build()
                 );
             }
-            if (status==null){
-                return ResponseEntity.badRequest().body(
-                        Response.builder()
-                                .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: Trạng thái không được để trống!")
-                                .build()
-                );
-            }
-            ShoeSole shoeSole = shoeSoleService.updateStatus(id, status);
+            ShoeSole shoeSole = shoeSoleService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(shoeSole);
         }catch (RuntimeException e){
             return ResponseEntity
