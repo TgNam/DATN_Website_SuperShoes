@@ -59,8 +59,10 @@ public class Voucher extends BaseEntity {
     @Column
     private Date endAt;
 
+    // Set default value to false for isPrivate
     @Column
-    private Boolean isPrivate; // true = Riêng tư, false = Công khai
+    @Builder.Default
+    private Boolean isPrivate = false;
 
     @JsonIgnore
     @JsonManagedReference(value = "accountVoucherReference")
@@ -71,4 +73,9 @@ public class Voucher extends BaseEntity {
     @JsonManagedReference(value = "billReference")
     @OneToMany(mappedBy = "voucher")
     private List<Bill> bill;
+
+    // Modified getter to handle null values
+    public boolean getIsPrivate() {
+        return this.isPrivate != null && this.isPrivate;
+    }
 }

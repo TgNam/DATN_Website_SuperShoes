@@ -232,40 +232,8 @@ public class BillController {
                         .body("Bill with code " + codeBill + " not found.");
             }
 
-            // Update fields only if they are present in the request
-            if (billRequest.getNameCustomer() != null) {
-                bill.setNameCustomer(billRequest.getNameCustomer());
-            }
-            if (billRequest.getPhoneNumber() != null) {
-                bill.setPhoneNumber(billRequest.getPhoneNumber());
-            }
-            if (billRequest.getAddress() != null) {
-                bill.setAddress(billRequest.getAddress());
-            }
-            if (billRequest.getNote() != null) {
-                bill.setNote(billRequest.getNote());
-            }
-            if (billRequest.getType() != null) {
-                bill.setType(billRequest.getType());
-            }
-            if (billRequest.getDeliveryDate() != null) {
-                bill.setDeliveryDate(billRequest.getDeliveryDate());
-            }
-            if (billRequest.getReceiveDate() != null) {
-                bill.setReceiveDate(billRequest.getReceiveDate());
-            }
-            if (billRequest.getTotalMerchandise() != null) {
-                bill.setTotalMerchandise(billRequest.getTotalMerchandise());
-            }
-            if (billRequest.getPriceDiscount() != null) {
-                bill.setPriceDiscount(billRequest.getPriceDiscount());
-            }
-            if (billRequest.getTotalAmount() != null) {
-                bill.setTotalAmount(billRequest.getTotalAmount());
-            }
-            if (billRequest.getStatus() != null) {
-                bill.setStatus(billRequest.getStatus());
-            }
+            // Update fields using helper method
+            updateBillFields(bill, billRequest);
 
             // Save the updated bill
             Bill updatedBill = billService.save(bill);
@@ -280,6 +248,43 @@ public class BillController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error updating bill with code " + codeBill);
+        }
+    }
+
+    // Helper method to update only non-null fields
+    private void updateBillFields(Bill bill, BillRequest billRequest) {
+        if (billRequest.getNameCustomer() != null) {
+            bill.setNameCustomer(billRequest.getNameCustomer());
+        }
+        if (billRequest.getPhoneNumber() != null) {
+            bill.setPhoneNumber(billRequest.getPhoneNumber());
+        }
+        if (billRequest.getAddress() != null) {
+            bill.setAddress(billRequest.getAddress());
+        }
+        if (billRequest.getNote() != null) {
+            bill.setNote(billRequest.getNote());
+        }
+        if (billRequest.getType() != null) {
+            bill.setType(billRequest.getType());
+        }
+        if (billRequest.getDeliveryDate() != null) {
+            bill.setDeliveryDate(billRequest.getDeliveryDate());
+        }
+        if (billRequest.getReceiveDate() != null) {
+            bill.setReceiveDate(billRequest.getReceiveDate());
+        }
+        if (billRequest.getTotalMerchandise() != null) {
+            bill.setTotalMerchandise(billRequest.getTotalMerchandise());
+        }
+        if (billRequest.getPriceDiscount() != null) {
+            bill.setPriceDiscount(billRequest.getPriceDiscount());
+        }
+        if (billRequest.getTotalAmount() != null) {
+            bill.setTotalAmount(billRequest.getTotalAmount());
+        }
+        if (billRequest.getStatus() != null) {
+            bill.setStatus(billRequest.getStatus());
         }
     }
 

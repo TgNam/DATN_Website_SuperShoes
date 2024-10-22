@@ -130,9 +130,9 @@ public class VoucherService {
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
         // Restrict access to expired vouchers
-        if ("EXPIRED".equals(voucher.getStatus())) {
-            throw new RuntimeException("Cannot view expired voucher details.");
-        }
+//        if ("EXPIRED".equals(voucher.getStatus())) {
+//            throw new RuntimeException("Cannot view expired voucher details.");
+//        }
 
         // Convert the voucher entity to a VoucherResponse DTO
         VoucherResponse voucherResponse = convertToVoucherResponse(voucher);
