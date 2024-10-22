@@ -40,8 +40,6 @@ public class BillResponse {
 
     private BigDecimal totalAmount;
 
-    private Long idGuest;
-
     private Long idVoucher;
 
     private String nameVoucher;

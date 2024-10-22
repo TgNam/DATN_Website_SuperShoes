@@ -26,11 +26,9 @@ public class BillService {
         Bill bill = billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new RuntimeException("Bill not found with code: " + codeBill));
 
-        // Update the status and note fields
         bill.setStatus(status);
         bill.setNote(note);
 
-        // Save the updated bill
         billRepository.save(bill);
     }
 

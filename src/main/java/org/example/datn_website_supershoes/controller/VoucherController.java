@@ -130,9 +130,9 @@ public class VoucherController {
     public ResponseEntity<?> getVoucher(@PathVariable Long id) {
         try {
             VoucherResponse voucherResponse = voucherService.getVoucherById(id);
-            if ("EXPIRED".equals(voucherResponse.getStatus())) {
-                throw new RuntimeException("Cannot view voucher that has expired.");
-            }
+//            if ("EXPIRED".equals(voucherResponse.getStatus())) {
+//                throw new RuntimeException("Cannot view voucher that has expired.");
+//            }
             return ResponseEntity.ok(voucherResponse);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
