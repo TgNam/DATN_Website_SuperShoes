@@ -3,10 +3,12 @@ package org.example.datn_website_supershoes.service;
 import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
+import org.example.datn_website_supershoes.dto.response.BillDetailOrderResponse;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
+import org.example.datn_website_supershoes.repository.BillDetailByEmployeeRepository;
 import org.example.datn_website_supershoes.repository.BillDetailRepository;
 import org.example.datn_website_supershoes.repository.BillRepository;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
@@ -30,7 +32,8 @@ public class BillDetailService {
 
     @Autowired
     private ProductDetailRepository productDetailRepository;
-
+    @Autowired
+    private BillDetailByEmployeeRepository billDetailByEmployeeRepository;
     private static final int MIN_QUANTITY_PRODUCT_DETAIL = 1;
 
     // Method to create a new BillDetail using BillDetailRequest
@@ -267,38 +270,61 @@ public class BillDetailService {
     }
     //dùng cho bán hàng
     public void createBillDetailByIdBill(String codeBill, List<Long> idProductDetail){
+        // Tìm kiếm hóa đơn theo mã hóa đơn
         Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
-        Integer newQuantity = 0;
+
+        // Kiểm tra hóa đơn theo mã hóa đơn có tồn tại hay không
         if (!billOptional.isPresent()){
-            throw new RuntimeException("Mã hóa đơn  "+codeBill+"  không tồn tại trong hệ thống.");
+            throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
         }
+
+        Bill bill = billOptional.get();
+
+        // Thực hiện thêm hóa đơn chi tiết
         for (Long id : idProductDetail){
+            // Tạo hóa đơn chi tiết mới
             BillDetail billDetail = new BillDetail();
+
+            // Tìm hóa đơn chi tiết theo id hóa đơn và id sản phẩm chi tiết
+            Optional<BillDetail> billDetailOptional = billDetailRepository.findByIdBillAndIdProductDetail(bill.getId(), id);
+
+            // Tìm kiếm sản phẩm chi tiết theo id và trạng thái
             Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(id, Status.ACTIVE.toString());
+
+            // Kiểm tra sản phẩm có tồn tại không
             if (!productDetailOptional.isPresent()){
-                throw new RuntimeException("Id "+id+" của sản phẩm không tồn tại trong hệ thống.");
-            } else if (productDetailOptional.get().getQuantity() < MIN_QUANTITY_PRODUCT_DETAIL) {
-                throw new RuntimeException("Sản phẩm "+productDetailOptional.get().getProduct().getName()+" đang hết hàng.");
-            }else if (productDetailOptional.get().getQuantity() > MIN_QUANTITY_PRODUCT_DETAIL) {
-                newQuantity = productDetailOptional.get().getQuantity() - MIN_QUANTITY_PRODUCT_DETAIL;
-                billDetail.setProductDetail(productDetailOptional.get());
-                billDetail.setBill(billOptional.get());
+                throw new RuntimeException("Id " + id + " của sản phẩm không tồn tại trong hệ thống.");
+            }
+
+            ProductDetail productDetail = productDetailOptional.get();
+
+            // Kiểm tra số lượng sản phẩm
+            if (productDetail.getQuantity() < MIN_QUANTITY_PRODUCT_DETAIL) {
+                throw new RuntimeException("Sản phẩm " + productDetail.getProduct().getName() + " đang hết hàng.");
+            }
+
+            // Cập nhật số lượng sản phẩm chi tiết
+            Integer newProductQuantity = productDetail.getQuantity() - MIN_QUANTITY_PRODUCT_DETAIL;
+            productDetail.setQuantity(newProductQuantity);
+            if (newProductQuantity <= 0) {
+                productDetail.setStatus(Status.INACTIVE.toString());
+            }
+            productDetailRepository.save(productDetail);
+
+            // Cập nhật hoặc thêm mới hóa đơn chi tiết
+            if (billDetailOptional.isPresent()){
+                BillDetail existingBillDetail = billDetailOptional.get();
+                existingBillDetail.setQuantity(existingBillDetail.getQuantity() + 1);
+                billDetailRepository.save(existingBillDetail);
+            } else {
+                billDetail.setProductDetail(productDetail);
+                billDetail.setBill(bill);
                 billDetail.setQuantity(1);
                 billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                 billDetailRepository.save(billDetail);
-                productDetailOptional.get().setQuantity(newQuantity);
-                productDetailRepository.save(productDetailOptional.get());
-            }else{
-                billDetail.setProductDetail(productDetailOptional.get());
-                billDetail.setBill(billOptional.get());
-                billDetail.setQuantity(1);
-                billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
-                billDetailRepository.save(billDetail);
-                productDetailOptional.get().setQuantity(newQuantity);
-                productDetailOptional.get().setStatus(Status.INACTIVE.toString());
-                productDetailRepository.save(productDetailOptional.get());
             }
         }
     }
+
 
 }
