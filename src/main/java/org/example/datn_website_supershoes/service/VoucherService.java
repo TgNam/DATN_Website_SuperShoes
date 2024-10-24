@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+
 @Service
 public class VoucherService {
 
@@ -42,7 +43,7 @@ public class VoucherService {
         return voucherRepository.count(spec);
     }
 
-    // Create Voucher Service
+
     public Voucher createVoucher(VoucherRequest voucherRequest, Long userId) {
         if (voucherRequest.getIsPrivate() && (voucherRequest.getAccountIds() == null || voucherRequest.getAccountIds().isEmpty())) {
             throw new IllegalArgumentException("For private vouchers, account IDs must be provided.");
@@ -52,19 +53,18 @@ public class VoucherService {
         voucher.setCodeVoucher(generateVoucherCode());
         Date currentDate = new Date();
 
-        // Set the creator details
+
         Account creator = accountRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         voucher.setCreatedBy(creator.getName());
 
 
-        // Set the voucher status based on start/end date
         updateVoucherStatus(voucher, currentDate);
 
         Voucher savedVoucher = voucherRepository.save(voucher);
 
-        // Associate accounts with private vouchers
+
         if (voucher.getIsPrivate()) {
             saveAccountVouchers(savedVoucher, voucherRequest.getAccountIds());
         }
@@ -72,7 +72,7 @@ public class VoucherService {
         return savedVoucher;
     }
 
-    // Associate accounts with private vouchers
+
     private void saveAccountVouchers(Voucher voucher, List<Long> accountIds) {
         accountIds.forEach(accountId -> {
             Account account = accountRepository.findById(accountId)
@@ -86,68 +86,57 @@ public class VoucherService {
 
     @Transactional
     public Voucher updateVoucher(Long id, VoucherRequest voucherRequest, Long userId) {
-        // Fetch the voucher by ID
+
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
-        // Ensure the voucher is not expired
+
         if (voucher.getStatus().equals(Status.EXPIRED.toString())) {
             throw new RuntimeException("Cannot update an expired voucher.");
         }
 
-        // Fetch the user who is updating the voucher
+
         Account updater = accountRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Preserve fields that should not be overwritten
+
         String[] ignoredProperties = {"id", "createdAt", "createdBy", "status", "codeVoucher"};
         BeanUtils.copyProperties(voucherRequest, voucher, ignoredProperties);
         voucher.setUpdatedBy(updater.getName());
 
-        // Handle the change of voucher type
+
         if (!voucherRequest.getIsPrivate() && voucher.getIsPrivate()) {
-            // Voucher type changed from private to public
+
             System.out.println("Changing voucher from private to public. Deleting account associations...");
-            accountVoucherRepository.deleteByVoucherId(id); // Remove all account associations immediately
-            voucher.setIsPrivate(false); // Set the voucher as public
-            voucherRequest.setAccountIds(null); // Set accountIds to null since it's no longer private
+            accountVoucherRepository.deleteByVoucherId(id);
+            voucher.setIsPrivate(false);
+            voucherRequest.setAccountIds(null);
         } else if (voucherRequest.getIsPrivate()) {
-            // Voucher remains private, update the account associations
-            accountVoucherRepository.deleteByVoucherId(id); // Remove old associations
-            saveAccountVouchers(voucher, voucherRequest.getAccountIds()); // Save new associations
+
+            accountVoucherRepository.deleteByVoucherId(id);
+            saveAccountVouchers(voucher, voucherRequest.getAccountIds());
         }
 
-        // Save the updated voucher details
+
         Voucher updatedVoucher = voucherRepository.save(voucher);
 
         return updatedVoucher;
     }
 
-
-    // Get Voucher by ID with detailed response
     public VoucherResponse getVoucherById(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
-
-        // Restrict access to expired vouchers
 //        if ("EXPIRED".equals(voucher.getStatus())) {
 //            throw new RuntimeException("Cannot view expired voucher details.");
 //        }
-
-        // Convert the voucher entity to a VoucherResponse DTO
         VoucherResponse voucherResponse = convertToVoucherResponse(voucher);
-
-        // If the voucher is private, populate the accountIds
         if (voucher.getIsPrivate()) {
             List<Long> accountIds = accountVoucherRepository.findAccountIdsByVoucherId(id);
             voucherResponse.setAccountIds(accountIds);
         }
-
         return voucherResponse;
     }
 
-
-    // Delete (expire) voucher
     public Voucher deleteVoucher(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
@@ -161,7 +150,6 @@ public class VoucherService {
         return voucherRepository.save(voucher);
     }
 
-    // End voucher early
     public Voucher endVoucherEarly(Long id, Long userId) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
@@ -175,7 +163,7 @@ public class VoucherService {
         return voucherRepository.save(voucher);
     }
 
-    // Reactivate voucher
+
     public Voucher reactivateVoucher(Long id, Long userId) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
@@ -195,7 +183,7 @@ public class VoucherService {
         return voucherRepository.save(voucher);
     }
 
-    // Scheduled task to expire vouchers
+
     @Scheduled(cron = "0 0 0 * * *")
     public void checkAndExpireVouchers() {
         List<Voucher> vouchers = voucherRepository.findAll();
@@ -209,7 +197,7 @@ public class VoucherService {
         });
     }
 
-    // Update voucher status based on start and end dates
+
     private void updateVoucherStatus(Voucher voucher, Date currentDate) {
         if (voucher.getStartAt().after(currentDate)) {
             voucher.setStatus(Status.UPCOMING.toString());
@@ -220,14 +208,14 @@ public class VoucherService {
         }
     }
 
-    // Convert voucher to response DTO
+
     private VoucherResponse convertToVoucherResponse(Voucher voucher) {
         VoucherResponse response = new VoucherResponse();
         BeanUtils.copyProperties(voucher, response);
         return response;
     }
 
-    // Convert request DTO to voucher entity
+
     private Voucher convertVoucherRequestDTO(VoucherRequest voucherRequest) {
         return Voucher.builder()
                 .codeVoucher(voucherRequest.getCodeVoucher())

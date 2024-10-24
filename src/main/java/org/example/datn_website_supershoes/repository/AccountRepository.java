@@ -33,5 +33,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
         """)
     List<AccountResponse> listEmployeeResponseByStatus( @Param("role") String role);
 
-
+    @Query("SELECT a.email FROM Account a WHERE a.id IN :customerIds")
+    List<String> findEmailsByCustomerIds(@Param("customerIds") List<Long> customerIds);
 }

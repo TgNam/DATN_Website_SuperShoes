@@ -110,4 +110,11 @@ public class AccountService {
         account.setStatus(accountRequest.getStatus());
         return new AccountWithPassword(account, password);
     }
+    public List<String> findEmailsByCustomerIds(List<Long> customerIds) {
+        if (customerIds == null || customerIds.isEmpty()) {
+            throw new IllegalArgumentException("Customer IDs list cannot be empty.");
+        }
+        return accountRepository.findEmailsByCustomerIds(customerIds);
+    }
+
 }
