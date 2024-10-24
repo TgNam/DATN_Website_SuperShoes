@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class VoucherService {
@@ -34,10 +36,39 @@ public class VoucherService {
     @Autowired
     private AccountVoucherRepository accountVoucherRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(VoucherService.class);
+
     private String generateVoucherCode() {
         int length = 6 + (int) (Math.random() * 3);
         return RandomStringUtils.randomAlphanumeric(length).toUpperCase();
     }
+
+    @Transactional
+    @Scheduled(cron = "0 * * * * *")  // Runs every minute to check for status updates
+    public void updateVoucherStatuses() {
+        List<Voucher> vouchers = voucherRepository.findAll();
+        Date now = new Date();
+
+        for (Voucher voucher : vouchers) {
+            String oldStatus = voucher.getStatus();
+
+            if (voucher.getStartAt().after(now)) {
+                voucher.setStatus(Status.UPCOMING.toString());
+            } else if (voucher.getStartAt().before(now) && voucher.getEndAt().after(now)) {
+                voucher.setStatus(Status.ONGOING.toString());
+            } else if (voucher.getEndAt().before(now)) {
+                voucher.setStatus(Status.EXPIRED.toString());
+            }
+
+            if (!oldStatus.equals(voucher.getStatus())) {
+                logger.info("Voucher {} status changed from {} to {}", voucher.getCodeVoucher(), oldStatus, voucher.getStatus());
+            }
+
+            voucherRepository.save(voucher);
+        }
+    }
+
+
 
     public long countVouchers(Specification<Voucher> spec) {
         return voucherRepository.count(spec);

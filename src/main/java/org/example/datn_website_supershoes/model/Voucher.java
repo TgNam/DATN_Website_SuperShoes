@@ -59,7 +59,6 @@ public class Voucher extends BaseEntity {
     @Column
     private Date endAt;
 
-    // Set default value to false for isPrivate
     @Column
     @Builder.Default
     private Boolean isPrivate = false;
@@ -74,7 +73,7 @@ public class Voucher extends BaseEntity {
     @OneToMany(mappedBy = "voucher")
     private List<Bill> bill;
 
-    // Modified getter to handle null values
+
     public boolean getIsPrivate() {
         return this.isPrivate != null && this.isPrivate;
     }
