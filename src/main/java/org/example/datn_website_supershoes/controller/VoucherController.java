@@ -30,6 +30,23 @@ public class VoucherController {
     @Autowired
     private VoucherService voucherService;
 
+    @PutMapping("/update-statuses")
+    public ResponseEntity<?> updateVoucherStatusesManually() {
+        try {
+            voucherService.updateVoucherStatuses();
+            return ResponseEntity.ok(Response.builder()
+                    .status(HttpStatus.OK.toString())
+                    .mess("Voucher statuses updated successfully.")
+                    .build());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                            .mess(e.getMessage())
+                            .build());
+        }
+    }
+
     @GetMapping("/list-voucher")
     public ResponseEntity<Map<String, Object>> getAllVouchers(
             @RequestParam(value = "status", required = false) String status,
@@ -212,4 +229,5 @@ public class VoucherController {
         BeanUtils.copyProperties(voucher, response);
         return response;
     }
+
 }
