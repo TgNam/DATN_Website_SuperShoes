@@ -4,7 +4,6 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.BrandRequest;
 import org.example.datn_website_supershoes.dto.response.BrandResponse;
 import org.example.datn_website_supershoes.model.Brand;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.repository.BrandRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

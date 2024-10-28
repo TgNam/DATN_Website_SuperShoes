@@ -1,7 +1,6 @@
 package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
-import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.PayBill;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

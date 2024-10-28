@@ -1,12 +1,7 @@
 package org.example.datn_website_supershoes.controller;
 
-import jakarta.validation.constraints.NotNull;
-import org.example.datn_website_supershoes.dto.request.AccountRequest;
-import org.example.datn_website_supershoes.dto.request.CartRequest;
 import org.example.datn_website_supershoes.dto.response.CartResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.Account;
-import org.example.datn_website_supershoes.model.Cart;
 import org.example.datn_website_supershoes.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

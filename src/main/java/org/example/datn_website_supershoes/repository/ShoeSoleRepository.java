@@ -1,9 +1,7 @@
 package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.ShoeSoleResponse;
-import org.example.datn_website_supershoes.dto.response.SizeResponse;
 import org.example.datn_website_supershoes.model.ShoeSole;
-import org.example.datn_website_supershoes.model.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

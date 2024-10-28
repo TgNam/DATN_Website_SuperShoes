@@ -1,7 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
 import org.example.datn_website_supershoes.dto.response.BillDetailOrderResponse;
-import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.service.BillDetailByEmployeeService;
 import org.example.datn_website_supershoes.service.BillDetailService;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/billDetailByEmployee")

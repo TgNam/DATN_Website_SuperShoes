@@ -1,15 +1,10 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
-import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
-import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
-import org.example.datn_website_supershoes.dto.request.PromotionRequest;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Promotion;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

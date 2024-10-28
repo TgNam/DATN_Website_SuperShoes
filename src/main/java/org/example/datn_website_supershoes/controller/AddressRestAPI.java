@@ -1,11 +1,9 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.example.datn_website_supershoes.dto.request.AddressRequest;
 import org.example.datn_website_supershoes.dto.response.AddressResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.Address;
 import org.example.datn_website_supershoes.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,11 +31,11 @@ public class AddressRestAPI {
                 return ResponseEntity.badRequest().body(errors);
             }
             return ResponseEntity.ok().body(addressService.createAddress(addressRequest));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException e){
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+                    .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
-                            .status(HttpStatus.NOT_FOUND.toString())
+                            .status(HttpStatus.CONFLICT.toString())
                             .mess(e.getMessage())
                             .build()
                     );
@@ -56,14 +54,13 @@ public class AddressRestAPI {
                 );
             }
             return ResponseEntity.ok().body(addressService.listAddressResponseByidAccount(idAccount));
-        }catch (RuntimeException e) {
+        }catch (RuntimeException e){
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            Response.builder()
-                                    .status(HttpStatus.NOT_FOUND.toString())
-                                    .mess(e.getMessage())
-                                    .build()
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
                     );
         }
     }
@@ -74,21 +71,69 @@ public class AddressRestAPI {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
                                 .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: ID tài khoản không được để trống!")
+                                .mess("Lỗi: ID địa chỉ của tài khoản không được để trống!")
                                 .build()
                 );
             }
             return ResponseEntity.ok().body(addressService.findAddressById(idAddress));
-        }catch (RuntimeException e) {
+        }catch (RuntimeException e){
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            Response.builder()
-                                    .status(HttpStatus.NOT_FOUND.toString())
-                                    .mess(e.getMessage())
-                                    .build()
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
                     );
         }
+    }
+    @GetMapping("/findAccountAddress")
+    public ResponseEntity<?> findAccountAddress(@RequestParam(value ="idAccount", required = false) Long idAccount) {
+        try {
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID tài khoản không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(addressService.findAccountAddressResponseByTypeAndIdAccount(idAccount));
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @GetMapping("/getAccountAddress")
+    public ResponseEntity<?> getAccountAddresses() {
+        try {
+            return ResponseEntity.ok().body(addressService.listAccountAddressResponseByType());
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @GetMapping("/getAccountAddressSearch")
+    public List<AddressResponse> getAccountAddressesSearch(
+            @RequestParam("search") String search) {
+
+        String searchLower = search.trim().toLowerCase();
+        return addressService.listAccountAddressResponseByType().stream()
+                .filter(addressRequest -> {
+                    String accountName = addressRequest.getNameAccount().toLowerCase();
+                    String accountPhone = addressRequest.getPhoneNumber().toLowerCase();
+                    return accountName.contains(searchLower) || accountPhone.contains(searchLower);
+                })
+                .collect(Collectors.toList());
     }
     @PutMapping("/updateAddress")
     public ResponseEntity<?> updateAddress(
@@ -114,11 +159,11 @@ public class AddressRestAPI {
             }
 
             return ResponseEntity.ok().body(addressService.updateAddress(addressId, addressRequest));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException e){
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+                    .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
-                            .status(HttpStatus.NOT_FOUND.toString())
+                            .status(HttpStatus.CONFLICT.toString())
                             .mess(e.getMessage())
                             .build()
                     );
@@ -139,14 +184,13 @@ public class AddressRestAPI {
             AddressResponse addressResponse = addressService.updateAddressType(addressId);
             return ResponseEntity.ok()
                     .body(addressResponse);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException e){
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            Response.builder()
-                                    .status(HttpStatus.NOT_FOUND.toString())
-                                    .mess(e.getMessage())
-                                    .build()
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
                     );
         }
 
@@ -168,14 +212,13 @@ public class AddressRestAPI {
 
             return ResponseEntity.ok()
                     .body(addressService.deleteAddress(addressId));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException e){
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            Response.builder()
-                                    .status(HttpStatus.NOT_FOUND.toString())
-                                    .mess(e.getMessage())
-                                    .build()
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
                     );
         }
     }

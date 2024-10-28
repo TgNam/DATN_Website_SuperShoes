@@ -2,7 +2,6 @@ package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Product;
-import org.example.datn_website_supershoes.model.Voucher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
