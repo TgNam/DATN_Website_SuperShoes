@@ -4,9 +4,7 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ColorRequest;
 import org.example.datn_website_supershoes.dto.response.ColorResponse;
 import org.example.datn_website_supershoes.model.Color;
-import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.repository.ColorRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

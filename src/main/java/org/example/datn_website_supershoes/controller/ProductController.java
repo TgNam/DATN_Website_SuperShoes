@@ -1,10 +1,7 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
-import org.example.datn_website_supershoes.dto.response.AccountResponse;
-import org.example.datn_website_supershoes.dto.response.ColorResponse;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
-import org.example.datn_website_supershoes.dto.response.SizeResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.repository.BrandRepository;
 import org.example.datn_website_supershoes.repository.CategoryRepository;

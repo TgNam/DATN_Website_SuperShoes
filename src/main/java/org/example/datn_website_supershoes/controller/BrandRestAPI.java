@@ -2,12 +2,9 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.BrandRequest;
-import org.example.datn_website_supershoes.dto.request.SizeRequest;
 import org.example.datn_website_supershoes.dto.response.BrandResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.dto.response.SizeResponse;
 import org.example.datn_website_supershoes.model.Brand;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -3,12 +3,8 @@ package org.example.datn_website_supershoes.service;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ShoeSoleRequest;
 import org.example.datn_website_supershoes.dto.response.ShoeSoleResponse;
-import org.example.datn_website_supershoes.model.Category;
 import org.example.datn_website_supershoes.model.ShoeSole;
-import org.example.datn_website_supershoes.model.ShoeSole;
-import org.example.datn_website_supershoes.repository.CategoryRepository;
 import org.example.datn_website_supershoes.repository.ShoeSoleRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,10 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
-import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
-import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Product;
-import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.BrandRepository;
 import org.example.datn_website_supershoes.repository.CategoryRepository;
 import org.example.datn_website_supershoes.repository.MaterialRepository;

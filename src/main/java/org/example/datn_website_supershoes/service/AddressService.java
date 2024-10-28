@@ -23,8 +23,16 @@ public class AddressService {
     public List<AddressResponse> listAddressResponseByidAccount(Long idAccount){
         return addressRepository.listAddressResponseByidAccount(idAccount);
     }
+    public List<AddressResponse> listAccountAddressResponseByType(){
+        return addressRepository.listAccountAddressResponseByType(Status.ACTIVE.toString());
+    }
     public  Address findAddressById(Long idAddress){
         Address address = addressRepository.findById(idAddress)
+                .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại!"));
+        return address;
+    }
+    public  AddressResponse findAccountAddressResponseByTypeAndIdAccount(Long idAccount){
+        AddressResponse address = addressRepository.findAccountAddressResponseByTypeAndIdAccount(Status.ACTIVE.toString(),idAccount)
                 .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại!"));
         return address;
     }
@@ -59,6 +67,7 @@ public class AddressService {
                 .build();
         return addressResponse;
     }
+
 
     public AddressResponse updateAddress(Long idAddress, AddressRequest addressRequest){
         Address address = addressRepository.findById(idAddress)

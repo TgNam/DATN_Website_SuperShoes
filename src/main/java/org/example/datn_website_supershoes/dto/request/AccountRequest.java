@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.datn_website_supershoes.dto.customs.MinAge;
 
 import java.util.Date;
 
@@ -32,7 +33,7 @@ public class AccountRequest {
 
     private Integer gender;  // Có thể dùng giá trị 1: Nam, 2: Nữ, 3: Khác
 
-    @Past(message = "Vui lòng nhập ngày sinh hợp lệ (trước ngày hiện tại)")
+    @MinAge(value = 18, message = "Bạn phải ít nhất 18 tuổi")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date birthday;
 

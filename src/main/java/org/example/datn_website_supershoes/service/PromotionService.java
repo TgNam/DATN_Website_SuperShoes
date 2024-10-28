@@ -1,18 +1,12 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
-import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
-import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionRequest;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
-import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Promotion;
-import org.example.datn_website_supershoes.model.PromotionDetail;
-import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

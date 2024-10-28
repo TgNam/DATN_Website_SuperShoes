@@ -2,13 +2,11 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
-import org.example.datn_website_supershoes.dto.request.PromotionRequest;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

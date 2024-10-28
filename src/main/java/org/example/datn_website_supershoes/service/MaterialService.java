@@ -4,9 +4,7 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.MaterialRequest;
 import org.example.datn_website_supershoes.dto.response.MaterialResponse;
 import org.example.datn_website_supershoes.model.Material;
-import org.example.datn_website_supershoes.model.Material;
 import org.example.datn_website_supershoes.repository.MaterialRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -5,7 +5,6 @@ import org.example.datn_website_supershoes.dto.request.MaterialRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.MaterialResponse;
 import org.example.datn_website_supershoes.model.Material;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.MaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

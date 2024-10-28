@@ -1,17 +1,11 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
-import org.example.datn_website_supershoes.dto.request.BillRequest;
-import org.example.datn_website_supershoes.dto.request.SizeRequest;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Bill;
-import org.example.datn_website_supershoes.model.BillDetail;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.BillByEmployeeRepository;
-import org.example.datn_website_supershoes.repository.BillDetailByEmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

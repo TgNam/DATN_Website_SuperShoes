@@ -1,8 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
-import org.example.datn_website_supershoes.dto.request.SizeRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.service.BillByEmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/billByEmployee")

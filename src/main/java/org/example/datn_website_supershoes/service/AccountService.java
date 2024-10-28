@@ -3,11 +3,9 @@ package org.example.datn_website_supershoes.service;
 import org.example.datn_website_supershoes.Enum.Role;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.accountWithPassword.AccountWithPassword;
-import org.example.datn_website_supershoes.dto.request.AccountUpdateRequest;
-import org.example.datn_website_supershoes.dto.request.AccountRequest;
+import org.example.datn_website_supershoes.dto.request.*;
 import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.model.Account;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,7 +19,9 @@ import java.util.Optional;
 public class AccountService {
 
     @Autowired
-    AccountRepository accountRepository;
+    private AccountRepository accountRepository;
+    @Autowired
+    private AddressService addressService;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -47,7 +47,56 @@ public class AccountService {
             throw new RuntimeException("Lỗi thêm tài khoản mới !");
         }
     }
-
+    public Account createAccountEmployee(EmployeeCreationRequest employeeCreationRequest) {
+        System.out.println(employeeCreationRequest.getAccountRequest().getEmail());
+        Optional<Account> accountOP = accountRepository.findByEmail(employeeCreationRequest.getAccountRequest().getEmail());
+        if (accountOP.isPresent()) {
+            throw new RuntimeException("Email " + employeeCreationRequest.getAccountRequest().getEmail() + " đã tồn tại trong hệ thống. Vui lòng sử dụng email khác.");
+        }
+        AccountWithPassword accountWithPassword = convertAccountRequestDTO(employeeCreationRequest.getAccountRequest());
+        Account account = accountRepository.save(accountWithPassword.getAccount());
+        if (account != null){
+            String password = accountWithPassword.getPassword();
+            emailService.sendEmail(
+                    account.getEmail(),
+                    "Mật khẩu của tài khoản: " + account.getEmail(),
+                    "MK của bạn là: "+password);
+            AddressRequest addressRequest = AddressRequest.builder()
+                    .idAccount(account.getId())
+                    .codeCity(employeeCreationRequest.getAddressRequest().getCodeCity())
+                    .codeDistrict(employeeCreationRequest.getAddressRequest().getCodeDistrict())
+                    .codeWard(employeeCreationRequest.getAddressRequest().getCodeWard())
+                    .address(employeeCreationRequest.getAddressRequest().getAddress())
+                    .build();
+            addressService.createAddress(addressRequest);
+            return account;
+        }else {
+            throw new RuntimeException("Lỗi thêm tài khoản mới !");
+        }
+    }
+    public Account updateAccountEmployee(Long idAccount,Long idAddress, EmployeeUpdateRequest employeeUpdateRequest) {
+        Account account = accountRepository.findById(idAccount).orElseGet(() -> {
+            throw new RuntimeException("Tài khoản không tồn tại");
+        });
+        account.setName(employeeUpdateRequest.getAccountRequest().getName());
+        account.setPhoneNumber(employeeUpdateRequest.getAccountRequest().getPhoneNumber());
+        account.setGender(employeeUpdateRequest.getAccountRequest().getGender());
+        account.setBirthday(employeeUpdateRequest.getAccountRequest().getBirthday());
+        Account UpdateAccount = accountRepository.save(account);
+        if (UpdateAccount != null){
+            AddressRequest addressRequest = AddressRequest.builder()
+                    .idAccount(account.getId())
+                    .codeCity(employeeUpdateRequest.getAddressRequest().getCodeCity())
+                    .codeDistrict(employeeUpdateRequest.getAddressRequest().getCodeDistrict())
+                    .codeWard(employeeUpdateRequest.getAddressRequest().getCodeWard())
+                    .address(employeeUpdateRequest.getAddressRequest().getAddress())
+                    .build();
+            addressService.updateAddress(idAddress,addressRequest);
+            return UpdateAccount;
+        }else {
+            throw new RuntimeException("Lỗi thêm tài khoản mới !");
+        }
+    }
     public Account updateAccount(Long idAccount, AccountUpdateRequest accountRequest) {
         Account account = accountRepository.findById(idAccount).orElseGet(() -> {
             throw new RuntimeException("Tài khoản không tồn tại");
@@ -56,7 +105,6 @@ public class AccountService {
         account.setPhoneNumber(accountRequest.getPhoneNumber());
         account.setGender(accountRequest.getGender());
         account.setBirthday(accountRequest.getBirthday());
-        account.setStatus(accountRequest.getStatus());
         return accountRepository.save(account);
     }
     public Account updateStatus(Long idAccount, boolean aBoolean){
