@@ -2,9 +2,12 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.constraints.NotNull;
 import org.example.datn_website_supershoes.dto.request.AccountVoucherRequest;
+import org.example.datn_website_supershoes.dto.request.EmailRequest;
 import org.example.datn_website_supershoes.dto.response.AccountVoucherResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.service.AccountService;
 import org.example.datn_website_supershoes.service.AccountVoucherService;
+import org.example.datn_website_supershoes.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/account-voucher")
@@ -26,6 +27,65 @@ public class AccountVoucherController {
 
     @Autowired
     private AccountVoucherService accountVoucherService;
+
+    @Autowired
+    private AccountService accountService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @PostMapping("/emails")
+    public ResponseEntity<?> getEmailsByCustomerIds(@RequestBody Map<String, List<Long>> customerIdsMap) {
+        // Check if customerIdsMap contains the key "customerIds"
+        if (!customerIdsMap.containsKey("customerIds")) {
+            return ResponseEntity.badRequest().body("Missing 'customerIds' key in the request body.");
+        }
+
+        List<Long> customerIds = customerIdsMap.get("customerIds");
+
+        // Validate if customerIds list is not empty
+        if (customerIds == null || customerIds.isEmpty()) {
+            return ResponseEntity.badRequest().body("Customer IDs list is empty or null.");
+        }
+
+        try {
+            List<String> emails = accountService.findEmailsByCustomerIds(customerIds);
+
+            // Check if emails were found
+            if (emails == null || emails.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No emails found for the provided customer IDs.");
+            }
+
+            return ResponseEntity.ok(Map.of("emails", emails));
+
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving emails: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/send-email")
+    public ResponseEntity<?> sendEmail(@RequestBody EmailRequest emailRequest) {
+        try {
+            // Handle multiple recipients if the 'to' field contains commas
+            List<String> recipients;
+            if (emailRequest.getTo().contains(",")) {
+                // Split by commas and convert to a list
+                recipients = Arrays.asList(emailRequest.getTo().split(","));
+            } else {
+                // Single recipient case
+                recipients = Collections.singletonList(emailRequest.getTo());
+            }
+
+            // Send email
+            emailService.sendEmailVoucher(recipients, emailRequest.getSubject(), emailRequest.getBody());
+            return ResponseEntity.ok("Email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send email: " + e.getMessage());
+        }
+    }
+
 
     @GetMapping()
     public ResponseEntity<Map<String, Object>> getAllAccountVouchers() {
