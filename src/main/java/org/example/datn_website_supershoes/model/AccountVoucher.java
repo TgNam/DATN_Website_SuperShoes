@@ -39,4 +39,8 @@ public class AccountVoucher extends BaseEntity {
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", nullable = false)
+    private Date createdAt;
+
 }
