@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,20 +86,34 @@ public class VoucherService {
         voucher.setCodeVoucher(generateVoucherCode());
         Date currentDate = new Date();
 
-
         Account creator = accountRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         voucher.setCreatedBy(creator.getName());
 
-
         updateVoucherStatus(voucher, currentDate);
 
+        // Save the voucher in the repository
         Voucher savedVoucher = voucherRepository.save(voucher);
 
-
+        // If the voucher is private, save associated AccountVouchers with ACTIVE status
         if (voucher.getIsPrivate()) {
-            saveAccountVouchers(savedVoucher, voucherRequest.getAccountIds());
+            List<AccountVoucher> accountVouchers = voucherRequest.getAccountIds().stream()
+                    .map(accountId -> {
+                        Account account = accountRepository.findById(accountId)
+                                .orElseThrow(() -> new RuntimeException("Account not found for ID: " + accountId));
+
+                        AccountVoucher accountVoucher = new AccountVoucher();
+                        accountVoucher.setVoucher(savedVoucher);
+                        accountVoucher.setAccount(account); // Set the Account entity
+                        accountVoucher.setStatus("ACTIVE"); // Set status to ACTIVE
+                        accountVoucher.setCreatedAt(currentDate); // Set current date as createdAt
+                        return accountVoucher;
+                    })
+                    .collect(Collectors.toList());
+
+            // Save all AccountVoucher entries in bulk
+            accountVoucherRepository.saveAll(accountVouchers);
         }
 
         return savedVoucher;
