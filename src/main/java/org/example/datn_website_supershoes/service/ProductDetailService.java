@@ -1,8 +1,8 @@
 package org.example.datn_website_supershoes.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
-import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
@@ -12,17 +12,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.example.datn_website_supershoes.model.ProductImage;
+
 
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class ProductDetailService {
     @Autowired
     private ProductDetailRepository productDetailRepository;
-
 
     public ProductDetail createProductDetail(ProductDetail productDetail) {
 
@@ -41,15 +44,22 @@ public class ProductDetailService {
         response.setId(productDetail.getId());
         response.setQuantity(productDetail.getQuantity() != null ? productDetail.getQuantity() : 0); // Cung cấp giá trị mặc định nếu null
         response.setPrice(productDetail.getPrice() != null ? productDetail.getPrice() : BigDecimal.ZERO); // Cung cấp giá trị mặc định nếu null
+        response.setDescription(productDetail.getDescription());
 
+        if (productDetail.getProductImage() != null) {
+            response.setImageBytes(productDetail.getProductImage().stream()
+                    .map(ProductImage::getImageByte)
+                    .collect(Collectors.toList()));
+        }
 
         // Kiểm tra nếu Product không bị null
         if (productDetail.getProduct() != null) {
             Product product = productDetail.getProduct();
             response.setIdProduct(product.getId());
             response.setNameProduct(product.getName());
-            response.setImageByte(product.getImageByte());
+
             response.setGender(product.isGender());
+            response.setProductCode(product.getProductCode());
 
             // Chuyển tiếp các giá trị từ các đối tượng liên quan
             if (product.getBrand() != null) {
@@ -84,6 +94,8 @@ public class ProductDetailService {
 
         return response;
     }
+
+
 
 
     public Optional<ProductDetail> getProductByIdDetail(Long id) {
@@ -131,10 +143,8 @@ public class ProductDetailService {
     public List<ProductDetailResponseByNam> findProductDetailRequests(List<Long> idProducts) {
         return productDetailRepository.findProductDetailRequests(idProducts);
     }
-    public List<ProductPromotionResponse> findProductPromotion() {
-        return productDetailRepository.findProductPromotion();
-    }
-    public List<ProductDetailResponseByNam> filterListProductDetail(List<Long> idProducts, String search, String nameSize, String nameColor,String priceRange) {
+
+    public List<ProductDetailResponseByNam> filterListProductDetail(List<Long> idProducts, String search, String nameSize, String nameColor, String priceRange) {
         return productDetailRepository.findProductDetailRequests(idProducts).stream()
                 .filter(productDetailResponse -> productDetailResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
                 .filter(productDetailResponse -> productDetailResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
