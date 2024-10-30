@@ -2,7 +2,11 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
+import org.example.datn_website_supershoes.model.Brand;
+import org.example.datn_website_supershoes.model.Category;
+import org.example.datn_website_supershoes.model.Material;
 import org.example.datn_website_supershoes.model.Product;
+import org.example.datn_website_supershoes.model.ShoeSole;
 import org.example.datn_website_supershoes.repository.BrandRepository;
 import org.example.datn_website_supershoes.repository.CategoryRepository;
 import org.example.datn_website_supershoes.repository.MaterialRepository;
@@ -32,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/product")
@@ -42,27 +45,19 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private BrandRepository brandRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
     @Autowired
     private MaterialRepository materialRepository;
 
     @Autowired
     private ShoeSoleRepository shoeSoleRepository;
-//    @GetMapping
-//    public ResponseEntity<Map<String, Object>> getAllProduct() {
-//        List<ProductResponse> productList = productService.getAllProduct();
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("DT", productList);
-//        response.put("EC", 0);
-//        response.put("EM", "Get all products succeed");
-//        return ResponseEntity.ok(response);
-//    }
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private BrandRepository brandRepository;
+
+
 
     @GetMapping("/list-product")
     public ResponseEntity<Map<String, Object>> getAllProduct(
@@ -116,18 +111,27 @@ public class ProductController {
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createProduct(@RequestBody Product product) {
-        System.out.println("Product received: " + product);
+        // Tìm các đối tượng theo ID
+        Brand brand = brandRepository.findById(product.getBrand().getId())
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
+        Category category = categoryRepository.findById(product.getCategory().getId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        Material material = materialRepository.findById(product.getMaterial().getId())
+                .orElseThrow(() -> new RuntimeException("Material not found"));
+        ShoeSole shoeSole = shoeSoleRepository.findById(product.getShoeSole().getId())
+                .orElseThrow(() -> new RuntimeException("ShoeSole not found"));
 
+        // Thiết lập các đối tượng vào product
+        product.setBrand(brand);
+        product.setCategory(category);
+        product.setMaterial(material);
+        product.setShoeSole(shoeSole);
+
+        // Lưu sản phẩm
         ProductResponse createdProduct = productService.createProduct(product);
         System.out.println("Created product response: " + createdProduct);
-
-        if (createdProduct == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Unable to create product"));
-        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("DT", createdProduct);
@@ -136,6 +140,7 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> updateProduct(@PathVariable Long id, @RequestBody Product product) {
