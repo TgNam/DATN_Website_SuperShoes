@@ -26,12 +26,6 @@ public interface AccountVoucherRepository extends JpaRepository<AccountVoucher, 
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM AccountVoucher av WHERE av.voucher.id = :voucherId")
-    void deleteByVoucherId(@Param("voucherId") Long voucherId);
-
-
-    @Modifying
-    @Transactional
     @Query("UPDATE AccountVoucher av SET av.status = :status WHERE av.voucher.id = :voucherId")
     void updateStatusByVoucherId(@Param("voucherId") Long voucherId, @Param("status") String status);
 
