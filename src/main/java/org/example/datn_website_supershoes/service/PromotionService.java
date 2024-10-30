@@ -3,8 +3,11 @@ package org.example.datn_website_supershoes.service;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionRequest;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
+import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.model.Promotion;
+import org.example.datn_website_supershoes.model.PromotionDetail;
 import org.example.datn_website_supershoes.repository.PromotionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -112,4 +115,22 @@ public class PromotionService {
         return "PROMO" + randomCodePromotion.getCodePromotion();
     }
 
+    public PromotionDetailResponse getPromotionDetailResponse(Long idPromotion){
+        Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
+        if(!promotion.isPresent()){
+            throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
+        }
+        List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.findProductPromotionResponseByIdPromotion(promotion.get().getId());
+        PromotionDetailResponse promotionDetailResponse = new PromotionDetailResponse(promotion.get(), productPromotionResponses);
+        return promotionDetailResponse;
+    }
+    public PromotionDetailResponse getSearchPromotionDetailResponse(Long idPromotion,String search, String nameSize, String nameColor,String priceRange){
+        Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
+        if(!promotion.isPresent()){
+            throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
+        }
+        List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.filterListProductPromotion(promotion.get().getId(),search,nameSize,nameColor,priceRange);
+        PromotionDetailResponse promotionDetailResponse = new PromotionDetailResponse(promotion.get(), productPromotionResponses);
+        return promotionDetailResponse;
+    }
 }

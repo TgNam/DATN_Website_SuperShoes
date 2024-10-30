@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.repository;
 
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.PromotionDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,19 @@ public interface PromotionDetailRepository extends JpaRepository<PromotionDetail
     Optional<PromotionDetail> findPromotionDetailByIdProductDetailAndStatuses(@Param("idProductDetail") Long idProductDetail, @Param("statuses") List<String> statuses);
     @Query("select p from PromotionDetail p where p.promotion.id = :idPromotion and p.status IN (:statuses)")
     List<PromotionDetail> findPromotionDetailByIdPromotionAndStatuses(@Param("idPromotion") Long idPromotion, @Param("statuses") List<String> statuses);
+
+    @Query("""
+    SELECT new org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(
+    p.id, p.name, c.id, c.name, s.id, s.name, pd.id, prod.quantity, pd.price,
+    pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice
+    ) 
+    FROM PromotionDetail prod
+    INNER JOIN prod.promotion pro
+    INNER JOIN prod.productDetail pd
+    INNER JOIN pd.product p 
+    INNER JOIN pd.color c 
+    INNER JOIN pd.size s 
+    WHERE pro.id=:idPromotion
+    """)
+    List<ProductPromotionResponse> findProductByIdPromotion(@Param("idPromotion") Long idPromotion);
 }

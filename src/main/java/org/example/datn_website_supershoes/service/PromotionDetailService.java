@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PromotionDetailService {
@@ -23,7 +25,24 @@ public class PromotionDetailService {
     private PromotionDetailRepository promotionDetailRepository;
     @Autowired
     private ProductDetailRepository productDetailRepository;
+    @Autowired
+    private ProductDetailService productDetailService;
     //cập nhật trạng thái từ sắp diễn ra thành diễn ra
+    public List<ProductPromotionResponse> findProductPromotionResponseByIdPromotion(Long idPromotion){
+        return promotionDetailRepository.findProductByIdPromotion(idPromotion);
+    }
+    public List<ProductPromotionResponse> filterListProductPromotion(Long idPromotion,String search, String nameSize, String nameColor,String priceRange) {
+        return promotionDetailRepository.findProductByIdPromotion(idPromotion).stream()
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameColor().toLowerCase().contains(nameColor.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> {
+                    // Nếu promotionPrice không null, lọc theo promotionPrice, ngược lại lọc theo productDetailPrice
+                    BigDecimal priceToFilter = ProductPromotionResponse.getPromotionPrice() != null ? ProductPromotionResponse.getPromotionPrice() : ProductPromotionResponse.getProductDetailPrice();
+                    return productDetailService.filterByPriceRange(priceToFilter, priceRange);
+                })
+                .collect(Collectors.toList());
+    }
     public void updatePromotionDetailUpcoming(Long idPromotion){
         List<PromotionDetail>  promotionDetails = promotionDetailRepository.findPromotionDetailByIdPromotionAndStatuses(idPromotion,Arrays.asList(Status.UPCOMING.toString()));
         for (PromotionDetail pd : promotionDetails){

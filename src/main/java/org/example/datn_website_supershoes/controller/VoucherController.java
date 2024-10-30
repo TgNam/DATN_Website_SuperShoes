@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.dto.response.VoucherBillResponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.service.VoucherService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -229,5 +231,52 @@ public class VoucherController {
         BeanUtils.copyProperties(voucher, response);
         return response;
     }
-
+    @GetMapping("/getListVoucherBillPublic")
+    public List<VoucherBillResponse> findListVoucherByStatus(){
+        return voucherService.findListVoucherByStatusAndIsPublic();
+    }
+    @GetMapping("/getListVoucherBillPrivate")
+    public ResponseEntity<?> findListVoucherByStatusAndListIdVoucher(@RequestParam(value ="idAccount", required = false) Long idAccount){
+        try {
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID của tài khoản không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(voucherService.findListVoucherByStatusAndIsPrivate(idAccount));
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @GetMapping("/getFindVoucherBill")
+    public ResponseEntity<?> findVoucherByStatusAndIdVoucher(@RequestParam(value ="idVoucher", required = false) Long idVoucher){
+        try {
+            if (idVoucher == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID của phiếu giảm giá không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(voucherService.findVoucherByListIdAndStatus(idVoucher));
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 }

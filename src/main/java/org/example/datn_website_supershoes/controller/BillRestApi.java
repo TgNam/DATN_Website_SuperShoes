@@ -14,26 +14,28 @@ import java.util.List;
 public class BillRestApi {
     @Autowired
     private BillByEmployeeService billByEmployeeService;
+
     @GetMapping("/list-codeBill")
-    private ResponseEntity<?> findListCodeBillWaitingForPayment(){
-    try{
-        return ResponseEntity.ok(billByEmployeeService.getDisplayAndWaitingBills());
-    }catch (RuntimeException e) {
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(Response.builder()
-                        .status(HttpStatus.CONFLICT.toString())
-                        .mess(e.getMessage())
-                        .build()
-                );
-    }
+    private ResponseEntity<?> findListCodeBillWaitingForPayment() {
+        try {
+            return ResponseEntity.ok(billByEmployeeService.getDisplayAndWaitingBills());
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
 
     }
+
     @GetMapping("/sortDisplayBills")
     private ResponseEntity<?> sortDisplayBills(
-            @RequestParam(value ="displayBills", required = false) List<String> displayBills,
-            @RequestParam(value ="selectills", required = false) List<String> selectills
-    ){
+            @RequestParam(value = "displayBills", required = false) List<String> displayBills,
+            @RequestParam(value = "selectills", required = false) List<String> selectills
+    ) {
         try {
             return ResponseEntity
                     .ok(billByEmployeeService.sortDisplayBills(displayBills, selectills));
@@ -47,11 +49,35 @@ public class BillRestApi {
                     );
         }
     }
+
     @PostMapping("/create-billByEmployee")
-    private ResponseEntity<?> createBillByEmployee(@RequestParam(value ="displayBills", required = false) List<String> displayBills){
+    private ResponseEntity<?> createBillByEmployee(@RequestParam(value = "displayBills", required = false) List<String> displayBills) {
         try {
             return ResponseEntity
                     .ok(billByEmployeeService.createBillByEmployee(displayBills));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+    @GetMapping("/findBillRequestBycodeBill")
+    private ResponseEntity<?> findBillResponseByCodeBill(@RequestParam(value = "codeBill", required = false) String codeBill) {
+        try {
+            if (codeBill == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID mã hóa đơn không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok(billByEmployeeService.findBillResponseByCodeBill(codeBill));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
