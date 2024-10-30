@@ -216,7 +216,6 @@ public class AccountRestAPI {
                     );
         }
     }
-
     @GetMapping("/list-accounts-employee")
     public List<AccountResponse> getAllAccountEmployee() {
         return accountService.getAllAccountEmployeeActive();

@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.repository;
 
 
+import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.springframework.data.domain.Page;
@@ -27,4 +28,17 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
     @Query("SELECT b FROM Bill b WHERE b.codeBill = :codeBill")
     Optional<Bill> findByCodeBill(@Param("codeBill") String codeBill);
 
+    @Query("""
+            SELECT new org.example.datn_website_supershoes.dto.response.BillResponse(
+            b.id,b.codeBill,b.nameCustomer ,b.phoneNumber,b.address,
+            b.note,b.type,b.deliveryDate,b.receiveDate,b.totalMerchandise,
+            b.priceDiscount,b.totalAmount, v.id,v.codeVoucher,v.name, v.value,
+            cus.id,emp.id, emp.name, b.status , b.createdAt) 
+            FROM Bill b
+            LEFT JOIN b.voucher v
+            LEFT JOIN Account cus ON cus.id = b.customer.id
+            LEFT JOIN Account emp ON emp.id = b.employees.id
+            WHERE b.codeBill = :codeBill
+            """)
+    Optional<BillResponse> findBillResponseByCodeBill(@Param("codeBill") String codeBill);
 }

@@ -155,7 +155,7 @@ public class ProductDetailService {
                 .collect(Collectors.toList());
     }
 
-    private boolean filterByPriceRange(BigDecimal price, String priceRange) {
+    public boolean filterByPriceRange(BigDecimal price, String priceRange) {
         switch (priceRange) {
             case "under500":
                 // Dưới 500.000

@@ -1,10 +1,12 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.BillByEmployeeRepository;
+import org.example.datn_website_supershoes.repository.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,8 @@ public class BillByEmployeeService {
 
     @Autowired
     BillByEmployeeRepository billByEmployeeRepository;
-
+    @Autowired
+    BillRepository billRepository;
     @Autowired
     AccountRepository accountRepository;
     //Lấy tối đa 5 phần tử
@@ -155,8 +158,6 @@ public class BillByEmployeeService {
         return response;
     }
 
-
-
     public Map<String, List<String>> createBillByEmployee(List<String> displayBills) {
         // Tạo hóa đơn mới và lưu vào cơ sở dữ liệu
         Bill bill = billByEmployeeRepository.save(convertBill());
@@ -226,8 +227,13 @@ public class BillByEmployeeService {
         return response;
     }
 
-
-
+    public BillResponse findBillResponseByCodeBill(String codeBill){
+        Optional<BillResponse> billResponse = billRepository.findBillResponseByCodeBill(codeBill);
+        if(!billResponse.isPresent()){
+            throw new RuntimeException("Hóa đơn không còn tồn tại");
+        }
+        return billResponse.get();
+    }
 
     public static String generateRandomCode() {
         Random random = new Random();

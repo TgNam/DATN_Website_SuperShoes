@@ -31,4 +31,7 @@ public interface AccountVoucherRepository extends JpaRepository<AccountVoucher, 
 
     @Query("SELECT av.account.id FROM AccountVoucher av WHERE av.voucher.id = :voucherId")
     List<Long> findAccountIdsByVoucherId(@Param("voucherId") Long voucherId);
+
+    @Query("SELECT av.voucher.id FROM AccountVoucher av WHERE av.account.id = :idAccount")
+    List<Long> findIdVoucherByIdAccount(@Param("idAccount") Long idAccount);
 }

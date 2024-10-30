@@ -7,6 +7,7 @@ import org.example.datn_website_supershoes.dto.request.*;
 import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.repository.AccountRepository;
+import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,8 @@ public class AccountService {
     private AccountRepository accountRepository;
     @Autowired
     private AddressService addressService;
+    @Autowired
+    private AccountVoucherRepository accountVoucherRepository;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -121,6 +124,7 @@ public class AccountService {
     public List<AccountResponse> getAllAccountCustomerActive() {
         return accountRepository.listCustomerResponseByStatus(Role.CUSTOMER.toString());
     }
+
     public AccountResponse findAccountById(Long idAccount){
         Optional<Account> accountOP = accountRepository.findById(idAccount);
         if (!accountOP.isPresent()) {

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
+import org.example.datn_website_supershoes.dto.response.VoucherBillResponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.AccountVoucher;
@@ -18,12 +19,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.stream.Collectors;
+
 
 @Service
 public class VoucherService {
@@ -234,5 +242,20 @@ public class VoucherService {
 
     public Page<VoucherResponse> getVouchers(Specification<Voucher> spec, Pageable pageable) {
         return voucherRepository.findAll(spec, pageable).map(this::convertToVoucherResponse);
+    }
+
+    public List<VoucherBillResponse> findListVoucherByStatusAndIsPublic(){
+        return voucherRepository.findListVoucherByStatusAndIsPublic(Status.ONGOING.toString(),false);
+    }
+    public List<VoucherBillResponse> findListVoucherByStatusAndIsPrivate(Long idAccount){
+        List<Long> idVoucher = accountVoucherRepository.findIdVoucherByIdAccount(idAccount);
+        return voucherRepository.findListVoucherByListIdAndStatusAndPrivate(Status.ONGOING.toString(),idVoucher,true);
+    }
+    public VoucherBillResponse findVoucherByListIdAndStatus(Long idVoucher){
+        Optional<VoucherBillResponse> voucherBillResponse = voucherRepository.findVoucherByListIdAndStatus(Status.ONGOING.toString(),idVoucher);
+        if(!voucherBillResponse.isPresent()){
+            throw new RuntimeException("Phiếu giảm giá không tồn tại .");
+        }
+        return voucherBillResponse.get();
     }
 }
