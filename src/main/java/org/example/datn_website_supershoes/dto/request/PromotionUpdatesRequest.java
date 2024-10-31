@@ -12,9 +12,9 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PromotionCreationRequest {
+public class PromotionUpdatesRequest {
     @Valid
-    private List<ProductDetailPromoRequest> productDetailPromoRequest;
+    private List<PromotionDetailRequest> promotionDetailRequest;
     @Valid
-    private PromotionRequest promotionRequest;
+    private PromotionUpdateRequest promotionRequest;
 }
