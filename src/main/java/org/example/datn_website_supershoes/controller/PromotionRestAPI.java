@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
+import org.example.datn_website_supershoes.dto.request.PromotionUpdatesRequest;
 import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
@@ -85,7 +86,7 @@ public class PromotionRestAPI {
                 .collect(Collectors.toList());
     }
     @PostMapping("/createPromotion")
-    public ResponseEntity<?> createAccount(
+    public ResponseEntity<?> createPromotion(
             @RequestBody @Valid PromotionCreationRequest promotionCreationRequest,
             BindingResult result
     ) {
@@ -97,6 +98,30 @@ public class PromotionRestAPI {
                 return ResponseEntity.badRequest().body(errors);
             }
             Promotion promotion = promotionService.createPromotion(promotionCreationRequest);
+            return ResponseEntity.ok(promotion);
+        } catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PutMapping("/updatePromotion")
+    public ResponseEntity<?> updatePromotion(
+            @RequestBody @Valid PromotionUpdatesRequest promotionUpdatesRequest,
+            BindingResult result
+    ) {
+        try {
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            Promotion promotion = promotionService.updatePromotion(promotionUpdatesRequest);
             return ResponseEntity.ok(promotion);
         } catch (RuntimeException e){
             return ResponseEntity

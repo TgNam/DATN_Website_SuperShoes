@@ -3,6 +3,8 @@ package org.example.datn_website_supershoes.service;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionRequest;
+import org.example.datn_website_supershoes.dto.request.PromotionUpdateRequest;
+import org.example.datn_website_supershoes.dto.request.PromotionUpdatesRequest;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
@@ -90,12 +92,43 @@ public class PromotionService {
     public Promotion createPromotion(PromotionCreationRequest promotionCreationRequest) {
         promotionCreationRequest.getPromotionRequest().validateEndDates();
         Promotion promotion = promotionRepository.save(convertPromotionRequestDTO(promotionCreationRequest.getPromotionRequest()));
-        if (promotionCreationRequest.getPromotionDetailRequest() != null && !promotionCreationRequest.getPromotionDetailRequest().isEmpty()) {
-            promotionDetailService.createPromotionDetail(promotion, promotionCreationRequest.getPromotionDetailRequest());
+        if (promotionCreationRequest.getProductDetailPromoRequest() != null && !promotionCreationRequest.getProductDetailPromoRequest().isEmpty()) {
+            promotionDetailService.createPromotionDetail(promotion, promotionCreationRequest.getProductDetailPromoRequest());
         }
         return promotion;
     }
+    public Promotion updatePromotion (PromotionUpdatesRequest promotionUpdatesRequest){
+        try {
+            Optional<Promotion> promotionOptional = promotionRepository.findById(promotionUpdatesRequest.getPromotionRequest().getId());
+            if(!promotionOptional.isPresent()){
+                throw new RuntimeException("Đợt giảm giá không tồn tại!");
+            }
+            if(promotionOptional.get().getStatus().equals(Status.ENDING_SOON.toString())){
+                throw new RuntimeException("Vui lòng bật trạng thái ENDING_SOON lên trước khi thao tác");
+            }
+            if (promotionUpdatesRequest.getPromotionRequest().getStartAt() != null &&
+                    promotionOptional.get().getStartAt() != null) {
 
+                if (promotionUpdatesRequest.getPromotionRequest().getStartAt()
+                        .compareTo(promotionOptional.get().getStartAt()) < 0) {
+                    throw new RuntimeException("Ngày bắt đầu của yêu cầu cập nhật không thể sớm hơn ngày bắt đầu của khuyến mãi hiện tại.");
+                }
+            }
+            promotionUpdatesRequest.getPromotionRequest().validateEndDates();
+            promotionUpdatesRequest.getPromotionRequest().updatePromotionStatus();
+            promotionOptional.get().setStartAt(promotionUpdatesRequest.getPromotionRequest().getStartAt());
+            promotionOptional.get().setEndAt(promotionUpdatesRequest.getPromotionRequest().getEndAt());
+            promotionOptional.get().setStatus(promotionUpdatesRequest.getPromotionRequest().getStatus());
+            Promotion promotion = promotionRepository.save(promotionOptional.get());
+            if (promotionUpdatesRequest.getPromotionDetailRequest() != null && !promotionUpdatesRequest.getPromotionDetailRequest().isEmpty()) {
+                promotionDetailService.updatePromotionDetail(promotion, promotionUpdatesRequest.getPromotionDetailRequest());
+            }
+            return promotion;
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
     private Promotion convertPromotionRequestDTO(PromotionRequest promotionRequest) {
         String codePromotion = generatePromotionCode();
         Promotion promotion = Promotion.builder()
