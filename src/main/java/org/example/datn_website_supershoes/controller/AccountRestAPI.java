@@ -29,12 +29,12 @@ public class AccountRestAPI {
     @PostMapping("/create")
     public ResponseEntity<?> createAccount(@RequestBody @Valid AccountRequest accountRequest, BindingResult result) {
         try {
-        if (result.hasErrors()) {
-            List<String> errors = result.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
-        }
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
             Account account = accountService.createAccount(accountRequest);
             return ResponseEntity.ok(account);
         } catch (RuntimeException e) {
@@ -47,6 +47,7 @@ public class AccountRestAPI {
                     );
         }
     }
+
     @PostMapping("/createEmployee")
     public ResponseEntity<?> createEmployee(@RequestBody @Valid EmployeeCreationRequest employeeCreationRequest, BindingResult result) {
         try {
@@ -69,6 +70,7 @@ public class AccountRestAPI {
                     );
         }
     }
+
     @PutMapping("/updateEmployee")
     public ResponseEntity<?> updateEmployee(
             @RequestParam(value = "idAccount", required = false) Long idAccount,
@@ -100,7 +102,7 @@ public class AccountRestAPI {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            Account account = accountService.updateAccountEmployee(idAccount,idAddress,employeeUpdateRequest);
+            Account account = accountService.updateAccountEmployee(idAccount, idAddress, employeeUpdateRequest);
             return ResponseEntity.ok(account);
         } catch (RuntimeException e) {
             return ResponseEntity
@@ -112,6 +114,7 @@ public class AccountRestAPI {
                     );
         }
     }
+
     @PutMapping("/updateAccount")
     public ResponseEntity<?> updateAccount(
             @RequestParam(value = "idAccount", required = false) Long idAccount,
@@ -146,12 +149,13 @@ public class AccountRestAPI {
                     );
         }
     }
+
     @PutMapping("/updateStatus")
     private ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
-    ){
-        try{
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean
+    ) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -160,9 +164,9 @@ public class AccountRestAPI {
                                 .build()
                 );
             }
-            Account account = accountService.updateStatus(id,aBoolean);
+            Account account = accountService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(account);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -194,8 +198,9 @@ public class AccountRestAPI {
                 .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
+
     @GetMapping("/findAccounts")
-    public ResponseEntity<?> findAccounts(@RequestParam(value ="idAccount", required = false) Long idAccount) {
+    public ResponseEntity<?> findAccounts(@RequestParam(value = "idAccount", required = false) Long idAccount) {
         try {
             if (idAccount == null) {
                 return ResponseEntity.badRequest().body(
@@ -206,7 +211,7 @@ public class AccountRestAPI {
                 );
             }
             return ResponseEntity.ok().body(accountService.findAccountById(idAccount));
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -216,10 +221,12 @@ public class AccountRestAPI {
                     );
         }
     }
+
     @GetMapping("/list-accounts-employee")
     public List<AccountResponse> getAllAccountEmployee() {
         return accountService.getAllAccountEmployeeActive();
     }
+
     @GetMapping("/list-accounts-employee-search")
     public List<AccountResponse> getAllAccountEmployeeSearch(
             @RequestParam("search") String search,
@@ -235,8 +242,5 @@ public class AccountRestAPI {
                 .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
-
-
-
 
 }

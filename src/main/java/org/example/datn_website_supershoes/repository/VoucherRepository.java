@@ -29,6 +29,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long>, JpaSpec
             WHERE v.status = :status AND v.isPrivate = :isPrivate
             """)
     List<VoucherBillResponse> findListVoucherByStatusAndIsPublic(@Param("status") String status,@Param("isPrivate") Boolean isPrivate);
+
     @Query(value = """
             SELECT new org.example.datn_website_supershoes.dto.response.VoucherBillResponse(
             v.id, v.codeVoucher, v.name, 

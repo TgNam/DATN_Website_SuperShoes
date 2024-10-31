@@ -244,12 +244,14 @@ public class VoucherController {
         BeanUtils.copyProperties(voucher, response);
         return response;
     }
+
     @GetMapping("/getListVoucherBillPublic")
-    public List<VoucherBillResponse> findListVoucherByStatus(){
+    public List<VoucherBillResponse> findListVoucherByStatus() {
         return voucherService.findListVoucherByStatusAndIsPublic();
     }
+
     @GetMapping("/getListVoucherBillPrivate")
-    public ResponseEntity<?> findListVoucherByStatusAndListIdVoucher(@RequestParam(value ="idAccount", required = false) Long idAccount){
+    public ResponseEntity<?> findListVoucherByStatusAndListIdVoucher(@RequestParam(value = "idAccount", required = false) Long idAccount) {
         try {
             if (idAccount == null) {
                 return ResponseEntity.badRequest().body(
@@ -260,7 +262,7 @@ public class VoucherController {
                 );
             }
             return ResponseEntity.ok().body(voucherService.findListVoucherByStatusAndIsPrivate(idAccount));
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -270,8 +272,9 @@ public class VoucherController {
                     );
         }
     }
+
     @GetMapping("/getFindVoucherBill")
-    public ResponseEntity<?> findVoucherByStatusAndIdVoucher(@RequestParam(value ="idVoucher", required = false) Long idVoucher){
+    public ResponseEntity<?> findVoucherByStatusAndIdVoucher(@RequestParam(value = "idVoucher", required = false) Long idVoucher) {
         try {
             if (idVoucher == null) {
                 return ResponseEntity.badRequest().body(
@@ -282,7 +285,7 @@ public class VoucherController {
                 );
             }
             return ResponseEntity.ok().body(voucherService.findVoucherByListIdAndStatus(idVoucher));
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
