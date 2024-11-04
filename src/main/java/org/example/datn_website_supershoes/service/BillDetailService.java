@@ -252,7 +252,7 @@ public class BillDetailService {
                 BigDecimal totalAmount = productDetail.getPrice().multiply(BigDecimal.valueOf(billDetail.getQuantity()));
                 response.setTotalAmount(totalAmount);
 
-                response.setImageByte(product.getImageByte());
+//                response.setImageByte(productDetail.getImageByte());
                 response.setNameProduct(product.getName());
                 response.setProductCode(product.getProductCode());
             });

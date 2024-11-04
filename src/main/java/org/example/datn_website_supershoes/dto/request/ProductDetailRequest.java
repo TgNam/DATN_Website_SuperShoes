@@ -1,4 +1,4 @@
-package org.example.datn_website_supershoes.dto.request;
+package org.example.datn_website_supershoes.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,16 +14,14 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ProductDetailRequest {
 
-    private Long id;
-
-    private int quantity;
-
+    private Integer quantity;
     private BigDecimal price;
+    private String description;
 
-    private Long idProduct;
+    private Long productId;  // Chỉ gửi ID của Product
+    private Long sizeId;     // Chỉ gửi ID của Size
+    private Long colorId;    // Chỉ gửi ID của Color
 
-    private Long idSize;
-
-    private Long idColor;
-
+    private Long imageId;    // Chỉ gửi ID của Color
+    private byte[] imageByte;  // Danh sách hình ảnh Base64
 }

@@ -24,9 +24,11 @@ public class ProductImage extends BaseEntity {
     @Column(name = "image", columnDefinition = "LONGBLOB")
     private byte[] imageByte;
 
+
+
     @JsonBackReference(value = "productDetailProductImageReference")
     @ManyToOne
-    @JoinColumn(name = "id_productImage", referencedColumnName = "id")
+    @JoinColumn(name = "id_productDetail")
     private ProductDetail productDetail;
 
 }
