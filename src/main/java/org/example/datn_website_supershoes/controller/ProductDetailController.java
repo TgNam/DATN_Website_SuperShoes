@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 //import org.example.datn_website_supershoes.dto.request.ProductDetailRequest;
 import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.model.Product;
@@ -98,14 +99,10 @@ public class ProductDetailController {
                 Join<ProductDetail, Product> productJoin = root.join("product");
                 p = criteriaBuilder.and(p, criteriaBuilder.like(criteriaBuilder.lower(productJoin.get("productCode")), "%" + productCode.toLowerCase() + "%"));
             }
-
-            // Lọc theo category (truy vấn qua Product)
             if (categoryId != null) {
                 Join<ProductDetail, Product> productJoin = root.join("product");
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(productJoin.get("category").get("id"), categoryId));
             }
-
-            // Lọc theo brand (truy vấn qua Product)
             if (brandId != null) {
                 Join<ProductDetail, Product> productJoin = root.join("product");
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(productJoin.get("brand").get("id"), brandId));
@@ -129,6 +126,7 @@ public class ProductDetailController {
         Optional<ProductDetail> productDetail = productDetailService.getProductByIdDetail(id);
         return productDetail.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createProductDetail(@RequestBody ProductDetail productDetail) {
         Map<String, Object> response = new HashMap<>();

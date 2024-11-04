@@ -152,18 +152,7 @@ public class ProductDetailService {
                 .filter(productDetailResponse -> filterByPriceRange(productDetailResponse.getPrice(), priceRange))
                 .collect(Collectors.toList());
     }
-    public List<ProductPromotionResponse> filterListProductPromotion(String search, String nameSize, String nameColor,String priceRange) {
-        return productDetailRepository.findProductPromotion().stream()
-                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
-                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
-                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameColor().toLowerCase().contains(nameColor.trim().toLowerCase()))
-                .filter(ProductPromotionResponse -> {
-                    // Nếu promotionPrice không null, lọc theo promotionPrice, ngược lại lọc theo productDetailPrice
-                    BigDecimal priceToFilter = ProductPromotionResponse.getPromotionPrice() != null ? ProductPromotionResponse.getPromotionPrice() : ProductPromotionResponse.getProductDetailPrice();
-                    return filterByPriceRange(priceToFilter, priceRange);
-                })
-                .collect(Collectors.toList());
-    }
+
 
     public boolean filterByPriceRange(BigDecimal price, String priceRange) {
         switch (priceRange) {
