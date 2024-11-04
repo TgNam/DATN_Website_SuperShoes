@@ -99,14 +99,10 @@ public class ProductDetailController {
                 Join<ProductDetail, Product> productJoin = root.join("product");
                 p = criteriaBuilder.and(p, criteriaBuilder.like(criteriaBuilder.lower(productJoin.get("productCode")), "%" + productCode.toLowerCase() + "%"));
             }
-
-            // Lọc theo category (truy vấn qua Product)
             if (categoryId != null) {
                 Join<ProductDetail, Product> productJoin = root.join("product");
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(productJoin.get("category").get("id"), categoryId));
             }
-
-            // Lọc theo brand (truy vấn qua Product)
             if (brandId != null) {
                 Join<ProductDetail, Product> productJoin = root.join("product");
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(productJoin.get("brand").get("id"), brandId));
@@ -130,32 +126,31 @@ public class ProductDetailController {
         Optional<ProductDetail> productDetail = productDetailService.getProductByIdDetail(id);
         return productDetail.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    private void validateProductDetailFields(ProductDetail productDetail) {
+
+        if (productDetail.getDescription() == null) {
+            throw new RuntimeException("Description trong ProductDetail là null");
+        }
+//        if (productDetail.getProductImage() == null) {
+//            throw new RuntimeException("Image trong ProductDetail là null");
+//        }
+        if (productDetail.getPrice() == null) {
+            throw new RuntimeException("Price trong ProductDetail là null");
+        }
+        if (productDetail.getQuantity() == null) {
+            throw new RuntimeException("Quantity trong ProductDetail là null");
+        }
+    }
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createProductDetail(@RequestBody ProductDetail productDetail) {
         Map<String, Object> response = new HashMap<>();
 
         try {
+            validateProductDetailFields(productDetail);
             // Kiểm tra productDetail có phải là null không
             if (productDetail == null) {
                 response.put("EC", 1);
                 response.put("EM", "ProductDetail is null");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // Kiểm tra các thuộc tính của productDetail
-            if (productDetail.getProduct() == null) {
-                response.put("EC", 1);
-                response.put("EM", "Product is missing in ProductDetail");
-                return ResponseEntity.badRequest().body(response);
-            }
-            if (productDetail.getSize() == null) {
-                response.put("EC", 1);
-                response.put("EM", "Size is missing in ProductDetail");
-                return ResponseEntity.badRequest().body(response);
-            }
-            if (productDetail.getColor() == null) {
-                response.put("EC", 1);
-                response.put("EM", "Color is missing in ProductDetail");
                 return ResponseEntity.badRequest().body(response);
             }
 

@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/product")
@@ -122,37 +123,58 @@ public class ProductController {
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createProduct(@RequestBody Product product) {
         // Tìm các đối tượng theo ID
-        Brand brand = brandRepository.findById(product.getBrand().getId())
-                .orElseThrow(() -> new RuntimeException("Brand not found"));
-        Category category = categoryRepository.findById(product.getCategory().getId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        Material material = materialRepository.findById(product.getMaterial().getId())
-                .orElseThrow(() -> new RuntimeException("Material not found"));
-        ShoeSole shoeSole = shoeSoleRepository.findById(product.getShoeSole().getId())
-                .orElseThrow(() -> new RuntimeException("ShoeSole not found"));
-        // Lưu URL của ảnh thay vì file
-//        if (product.getImageByte() != null) {
-//            System.out.println("URL ảnh sản phẩm: " + product.getImageByte());
-//        }
-
-        // Thiết lập các đối tượng vào product
-        product.setBrand(brand);
-        product.setCategory(category);
-        product.setMaterial(material);
-        product.setShoeSole(shoeSole);
-
-        // Lưu sản phẩm
-        String generatedCode = generateProductCode(); // Hàm sinh mã
-        product.setProductCode(generatedCode);
-        ProductResponse createdProduct = productService.createProduct(product);
-        System.out.println("Created product response: " + createdProduct);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdProduct);
-        response.put("EC", 0);
-        response.put("EM", "Product added successfully");
+        try {
 
-        return ResponseEntity.ok(response);
+            if (product.getName() == null) {
+                response.put("EC", 1);
+                response.put("EM", "name is missing in Product");
+                return ResponseEntity.badRequest().body(response);
+            }
+            if (product.getImageByte() == null) {
+                response.put("EC", 1);
+                response.put("EM", "ImageByte is missing in Product");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            Brand brand = brandRepository.findById(product.getBrand().getId())
+                    .orElseThrow(() -> new RuntimeException("Brand not found"));
+            Category category = categoryRepository.findById(product.getCategory().getId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            Material material = materialRepository.findById(product.getMaterial().getId())
+                    .orElseThrow(() -> new RuntimeException("Material not found"));
+            ShoeSole shoeSole = shoeSoleRepository.findById(product.getShoeSole().getId())
+                    .orElseThrow(() ->   new RuntimeException("ShoeSole trong Product là null"));
+            // Lưu URL của ảnh thay vì file
+            if (product.getImageByte() != null) {
+                System.out.println("URL ảnh sản phẩm: " + product.getImageByte());
+            }
+
+            // Thiết lập các đối tượng vào product
+            product.setBrand(brand);
+            product.setCategory(category);
+            product.setMaterial(material);
+            product.setShoeSole(shoeSole);
+            product.setImageByte(product.getImageByte());
+            // Lưu sản phẩm
+            String generatedCode = generateProductCode(); // Hàm sinh mã
+            product.setProductCode(generatedCode);
+            ProductResponse createdProduct = productService.createProduct(product);
+            System.out.println("Created product response: " + createdProduct);
+
+
+            response.put("DT", createdProduct);
+            response.put("EC", 0);
+            response.put("EM", "Product added successfully");
+
+            return ResponseEntity.ok(response);
+        }catch (RuntimeException e) {
+            // Xử lý lỗi và phản hồi
+            response.put("EC", 1);
+            response.put("EM", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
     private String generateProductCode() {
         // Sử dụng UUID để tạo một mã duy nhất
@@ -235,15 +257,15 @@ public class ProductController {
     }
 
     // dùng cho sale sản phẩm
-//    @GetMapping("/listProduct")
-//    public List<ProductResponse> getAllAccount() {
-//        List<ProductResponse> productResponse = productService.findProductRequests();
-//        return productResponse;
-//    }
-//    @GetMapping("/listProductSearch")
-//    private List<ProductResponse> findSearch(@RequestParam("search") String search){
-//        return productService.findProductRequests().stream()
-//                .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-//                .collect(Collectors.toList());
-//    }
+    @GetMapping("/listProduct")
+    public List<ProductResponse> getAllAccount() {
+        List<ProductResponse> productResponse = productService.findProductRequests();
+        return productResponse;
+    }
+    @GetMapping("/listProductSearch")
+    private List<ProductResponse> findSearch(@RequestParam("search") String search){
+        return productService.findProductRequests().stream()
+                .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                .collect(Collectors.toList());
+    }
 }

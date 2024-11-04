@@ -33,6 +33,8 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+
+
     @Autowired
     private BrandRepository brandRepository;
 
@@ -47,6 +49,7 @@ public class ProductService {
 
 
 
+
 public ProductResponse createProduct(Product product) {
     // Lưu đối tượng Product vào cơ sở dữ liệu
     Product savedProduct = productRepository.save(product);
@@ -54,7 +57,6 @@ public ProductResponse createProduct(Product product) {
     // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
     return convertToProductResponse(savedProduct);
 }
-
 
     @Transactional
     public Product updateProduct(Long id, ProductRequest productRequest) {

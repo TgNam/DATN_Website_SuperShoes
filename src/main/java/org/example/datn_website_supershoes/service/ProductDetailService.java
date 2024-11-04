@@ -3,6 +3,7 @@ package org.example.datn_website_supershoes.service;
 import lombok.RequiredArgsConstructor;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
@@ -57,10 +58,9 @@ public class ProductDetailService {
             Product product = productDetail.getProduct();
             response.setIdProduct(product.getId());
             response.setNameProduct(product.getName());
-
             response.setGender(product.isGender());
             response.setProductCode(product.getProductCode());
-
+            response.setImageByte(product.getImageByte());
             // Chuyển tiếp các giá trị từ các đối tượng liên quan
             if (product.getBrand() != null) {
                 response.setIdBrand(product.getBrand().getId());
@@ -78,6 +78,7 @@ public class ProductDetailService {
                 response.setIdShoeSole(product.getShoeSole().getId());
                 response.setNameShoeSole(product.getShoeSole().getName());
             }
+
         }
 
         // Gán các giá trị khác nếu có
@@ -152,7 +153,18 @@ public class ProductDetailService {
                 .filter(productDetailResponse -> filterByPriceRange(productDetailResponse.getPrice(), priceRange))
                 .collect(Collectors.toList());
     }
-
+    public List<ProductPromotionResponse> filterListProductPromotion(String search, String nameSize, String nameColor, String priceRange) {
+        return productDetailRepository.findProductPromotion().stream()
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameColor().toLowerCase().contains(nameColor.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> {
+                    // Nếu promotionPrice không null, lọc theo promotionPrice, ngược lại lọc theo productDetailPrice
+                    BigDecimal priceToFilter = ProductPromotionResponse.getPromotionPrice() != null ? ProductPromotionResponse.getPromotionPrice() : ProductPromotionResponse.getProductDetailPrice();
+                    return filterByPriceRange(priceToFilter, priceRange);
+                })
+                .collect(Collectors.toList());
+    }
 
     public boolean filterByPriceRange(BigDecimal price, String priceRange) {
         switch (priceRange) {

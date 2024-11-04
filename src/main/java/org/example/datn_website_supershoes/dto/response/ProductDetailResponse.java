@@ -28,6 +28,8 @@ public class ProductDetailResponse {
 
     private String productCode;
 
+    private byte[] imageByte;
+
     private Long idSize;
 
     private String nameSize;
