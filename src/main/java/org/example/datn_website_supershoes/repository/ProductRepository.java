@@ -14,12 +14,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product> {
-
-
 @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductResponse(" +
         "p.id, p.name, p.productCode, p.imageByte, p.gender, " +
-        "b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status " +
-
+        "b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status" +
         ") " +
         "FROM Product p " +
         "JOIN p.brand b " +
