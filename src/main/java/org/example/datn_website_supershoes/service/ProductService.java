@@ -24,7 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 
-
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,6 +32,20 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private BrandRepository brandRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    @Autowired
+    private ShoeSoleRepository shoeSoleRepository;
+
+
 
 public ProductResponse createProduct(Product product) {
     // Lưu đối tượng Product vào cơ sở dữ liệu
