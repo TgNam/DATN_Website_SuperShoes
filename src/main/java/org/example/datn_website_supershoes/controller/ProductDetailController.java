@@ -3,15 +3,13 @@ package org.example.datn_website_supershoes.controller;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-//import org.example.datn_website_supershoes.dto.request.ProductDetailRequest;
-import org.example.datn_website_supershoes.dto.response.AccountResponse;
+
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
-import org.example.datn_website_supershoes.dto.response.ProductResponse;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
-import org.example.datn_website_supershoes.model.ProductImage;
 import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.repository.ColorRepository;
 import org.example.datn_website_supershoes.repository.ProductRepository;
@@ -34,11 +32,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -287,6 +281,20 @@ public class ProductDetailController {
 
     @Autowired
     private ProductImageService productImageService;
+
+    @GetMapping("/listProductPromotion")
+    public ResponseEntity<?> getProductPromotion() {
+        List<ProductPromotionResponse> productDetails = productDetailService.findProductPromotion();
+        return ResponseEntity.ok(productDetails);
+    }
+    @GetMapping("/filterListProductPromotion")
+    public List<ProductPromotionResponse> getAllProductPromotionSearch(
+            @RequestParam("search") String search,
+            @RequestParam("nameSize") String nameSize,
+            @RequestParam("nameColor") String nameColor,
+            @RequestParam("priceRange") String priceRange) {
+        return productDetailService.filterListProductPromotion(search,nameSize,nameColor,priceRange);
+    }
 
 }
 

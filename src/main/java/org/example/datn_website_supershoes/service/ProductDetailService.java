@@ -144,7 +144,9 @@ public class ProductDetailService {
     public List<ProductDetailResponseByNam> findProductDetailRequests(List<Long> idProducts) {
         return productDetailRepository.findProductDetailRequests(idProducts);
     }
-
+    public List<ProductPromotionResponse> findProductPromotion() {
+        return productDetailRepository.findProductPromotion();
+    }
     public List<ProductDetailResponseByNam> filterListProductDetail(List<Long> idProducts, String search, String nameSize, String nameColor, String priceRange) {
         return productDetailRepository.findProductDetailRequests(idProducts).stream()
                 .filter(productDetailResponse -> productDetailResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
