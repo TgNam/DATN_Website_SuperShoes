@@ -1,11 +1,18 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.PayBillRequest;
+import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
 import org.example.datn_website_supershoes.model.Account;
+import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.PayBill;
 import org.example.datn_website_supershoes.model.PaymentMethod;
+import org.example.datn_website_supershoes.repository.BillRepository;
 import org.example.datn_website_supershoes.repository.PayBillRepository;
+import org.example.datn_website_supershoes.repository.PaymentMethodRepository;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,10 +20,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PayBillService {
-
+    @Autowired
+    private BillRepository billRepository;
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
     private final PayBillRepository payBillRepository;
 
     // Constructor-based dependency injection
@@ -107,4 +118,38 @@ public class PayBillService {
         return response;
     }
 
+
+
+
+    //by Nam
+    public PayBill createPayBill(PayBillRequest payBillRequest){
+        Optional<Bill> billOptional = billRepository.findByCodeBill(payBillRequest.getCodeBill());
+        if (billOptional.isEmpty()){
+            throw new RuntimeException("Hóa đơn không tồn tại");
+        }
+        Optional<PaymentMethod> optionalPaymentMethod = paymentMethodRepository.findByType(payBillRequest.getType());
+        if(optionalPaymentMethod.isEmpty()){
+            throw new RuntimeException("Phương thức thanh toán không tồn tại");
+        }
+        UUID uuid = UUID.randomUUID();
+        PayBill payBill = PayBill.builder()
+                .amount(payBillRequest.getAmount())
+                .bill(billOptional.get())
+                .paymentMethod(optionalPaymentMethod.get())
+                .type(1)
+                .tradingCode("PD-"+uuid)
+                .build();
+        payBill.setStatus(Status.ACTIVE.toString());
+        return payBillRepository.save(payBill);
+    }
+    public void deletePayBillById(Long id){
+        Optional<PayBill> optionalPayBill = payBillRepository.findById(id);
+        if (optionalPayBill.isEmpty()){
+            throw new RuntimeException("Phương thức thanh toán không tồn tại");
+        }
+        payBillRepository.delete(optionalPayBill.get());
+    }
+    public List<PayBillOrderResponse> findPayBillOrderByCodeBill(String codeBill){
+        return payBillRepository.findByCodeBill(codeBill);
+    }
 }

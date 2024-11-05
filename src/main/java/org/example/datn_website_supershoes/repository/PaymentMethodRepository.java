@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+import java.util.Optional;
 @Repository
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
 
@@ -19,4 +19,6 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
             """)
     List<PaymentMethodResponse> listPaymentMethodResponseByStatus(@Param("status") String status);
+    Optional<PaymentMethod> findByMethodNameAndType(String methodName,Integer type);
+    Optional<PaymentMethod> findByType(Integer type);
 }

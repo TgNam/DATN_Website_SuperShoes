@@ -1,7 +1,13 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.dto.request.AccountRequest;
+import org.example.datn_website_supershoes.dto.request.PayBillRequest;
+import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
+import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.PayBill;
 import org.example.datn_website_supershoes.service.PayBillService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +18,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/pay-bill")
@@ -131,6 +136,73 @@ public class PayBillController {
             return ResponseEntity.status(HttpStatus.OK).body("PayBill deleted successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting PayBill");
+        }
+    }
+    @GetMapping("/listPayBill")
+    public ResponseEntity<?> findPayBillOrderByCodeBill(@RequestParam(value = "codeBill", required = false) String codeBill){
+        try {
+            if (codeBill == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Mã hóa đơn không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok(payBillService.findPayBillOrderByCodeBill(codeBill));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PostMapping("/createPayBill")
+    public ResponseEntity<?> createPayBill(@RequestBody @Valid PayBillRequest payBillRequest, BindingResult result){
+        try {
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            PayBill payBill = payBillService.createPayBill(payBillRequest);
+            return ResponseEntity.ok(payBill);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+
+    }
+    @DeleteMapping("/deletePayBill")
+    public ResponseEntity<?> deletePayBillById(@RequestParam(value = "id", required = false) Long id){
+        try {
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID thanh toán hóa đơn không được để trống!")
+                                .build()
+                );
+            }
+            payBillService.deletePayBillById(id);
+            return ResponseEntity.ok("Xóa thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
     }
 }
