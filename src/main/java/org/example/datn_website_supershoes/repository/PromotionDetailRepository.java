@@ -19,8 +19,8 @@ public interface PromotionDetailRepository extends JpaRepository<PromotionDetail
 
     @Query("""
     SELECT new org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(
-    p.id, p.name, c.id, c.name, s.id, s.name, pd.id, prod.quantity, pd.price,
-    pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice
+    p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price,
+    pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice, prod.quantity
     ) 
     FROM PromotionDetail prod
     INNER JOIN prod.promotion pro

@@ -15,6 +15,8 @@ public class BillDetailOrderResponse {
 
     private Long idBillDetail;
 
+    private BigDecimal priceDiscount;
+
     private Long idProduct;
 
     private String nameProduct;

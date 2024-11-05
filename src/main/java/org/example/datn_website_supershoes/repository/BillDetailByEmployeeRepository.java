@@ -12,7 +12,7 @@ import java.util.List;
 public interface BillDetailByEmployeeRepository extends JpaRepository<BillDetail, Long> {
     @Query(value = "SELECT " +
             "new org.example.datn_website_supershoes.dto.response.BillDetailOrderResponse( " +
-            "b.id,bd.id, p.id, p.name, c.id, c.name, s.id, s.name, pd.id, bd.quantity, pd.price, " +
+            "b.id,bd.id,bd.priceDiscount, p.id, p.name, c.id, c.name, s.id, s.name, pd.id, bd.quantity, pd.price, " +
             "pro.id, pro.codePromotion , pro.endAt, prod.id , prod.promotionPrice ) " +
             "FROM BillDetail bd " +
             "INNER JOIN bd.bill b  " +

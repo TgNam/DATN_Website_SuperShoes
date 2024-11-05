@@ -55,7 +55,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
     Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail,String Status);
     @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
             "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
-            "pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice) " +
+            "pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice, prod.quantity) " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
             "INNER JOIN pd.color c " +

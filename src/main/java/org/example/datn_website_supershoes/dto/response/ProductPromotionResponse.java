@@ -27,7 +27,7 @@ public class ProductPromotionResponse {
 
     private Long idProductDetail;
 
-    private Integer quantity;
+    private Integer quantityProductDetail;
 
     private BigDecimal productDetailPrice;
 
@@ -40,4 +40,6 @@ public class ProductPromotionResponse {
     private Long idPromotionDetail;
 
     private BigDecimal promotionPrice;
+
+    private Integer quantityPromotionDetail;
 }
