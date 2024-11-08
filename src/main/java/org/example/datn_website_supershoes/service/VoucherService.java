@@ -129,6 +129,9 @@ public class VoucherService {
         voucher.setQuantity(voucherRequest.getQuantity());
         voucher.setUpdatedBy(updater.getName());
 
+        Date currentDate = new Date();
+        updateVoucherStatus(voucher, currentDate);
+
         Voucher updatedVoucher = voucherRepository.save(voucher);
         return updatedVoucher;
     }

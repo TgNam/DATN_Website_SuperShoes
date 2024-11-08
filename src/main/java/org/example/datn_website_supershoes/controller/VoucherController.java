@@ -66,7 +66,7 @@ public class VoucherController {
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate,
             @RequestParam(value = "type", required = false) Integer type,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "5") int size
     ) {
         String trimmedSearchTerm = Optional.ofNullable(searchTerm)
                 .map(String::trim)
