@@ -55,4 +55,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long>, JpaSpec
             WHERE v.status = :status AND v.id =:id
             """)
     Optional<VoucherBillResponse> findVoucherByListIdAndStatus(@Param("status") String status, @Param("id") Long id);
+
+
+    Optional<Voucher> findByCodeVoucher(String codeVoucher);
 }

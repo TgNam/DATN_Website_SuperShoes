@@ -122,7 +122,7 @@ public class PayBillService {
 
 
     //by Nam
-    public PayBill createPayBill(PayBillRequest payBillRequest){
+    public PayBill createPayBill(PayBillRequest payBillRequest,Integer type,String status){
         Optional<Bill> billOptional = billRepository.findByCodeBill(payBillRequest.getCodeBill());
         if (billOptional.isEmpty()){
             throw new RuntimeException("Hóa đơn không tồn tại");
@@ -136,10 +136,10 @@ public class PayBillService {
                 .amount(payBillRequest.getAmount())
                 .bill(billOptional.get())
                 .paymentMethod(optionalPaymentMethod.get())
-                .type(1)
+                .type(type)
                 .tradingCode("PD-"+uuid)
                 .build();
-        payBill.setStatus(Status.ACTIVE.toString());
+        payBill.setStatus(status);
         return payBillRepository.save(payBill);
     }
     public void deletePayBillById(Long id){

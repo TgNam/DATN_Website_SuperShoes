@@ -12,8 +12,8 @@ import java.util.List;
 public interface BillDetailByEmployeeRepository extends JpaRepository<BillDetail, Long> {
     @Query(value = "SELECT " +
             "new org.example.datn_website_supershoes.dto.response.BillDetailOrderResponse( " +
-            "b.id,bd.id,bd.priceDiscount, p.id, p.name, c.id, c.name, s.id, s.name, pd.id, bd.quantity, pd.price, " +
-            "pro.id, pro.codePromotion , pro.endAt, prod.id , prod.promotionPrice ) " +
+            "b.id,bd.id,bd.priceDiscount, bd.quantity, p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
+            "pro.id, pro.codePromotion,pro.value , pro.endAt, prod.id , prod.quantity ) " +
             "FROM BillDetail bd " +
             "INNER JOIN bd.bill b  " +
             "INNER JOIN bd.productDetail pd  " +

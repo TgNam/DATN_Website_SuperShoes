@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.PayBillRequest;
 import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
@@ -169,7 +170,7 @@ public class PayBillController {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            PayBill payBill = payBillService.createPayBill(payBillRequest);
+            PayBill payBill = payBillService.createPayBill(payBillRequest,1, Status.ACTIVE.toString());
             return ResponseEntity.ok(payBill);
         } catch (RuntimeException e) {
             return ResponseEntity

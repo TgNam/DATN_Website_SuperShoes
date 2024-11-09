@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
+import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
@@ -294,6 +295,28 @@ public class ProductDetailController {
             @RequestParam("nameColor") String nameColor,
             @RequestParam("priceRange") String priceRange) {
         return productDetailService.filterListProductPromotion(search,nameSize,nameColor,priceRange);
+    }
+    @GetMapping("/findProductDetailByIdProductDetail")
+    public ResponseEntity<?> findProductDetailByIdProductDetail(@RequestParam(value = "idProductDetail", required = false) Long idProductDetail){
+        try {
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Id sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok(productDetailService.findProductDetailByIdProductDetail(idProductDetail));
+        }catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
     }
 
 }
