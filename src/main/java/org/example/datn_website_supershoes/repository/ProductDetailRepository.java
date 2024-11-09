@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+
 @Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Long>, JpaSpecificationExecutor<ProductDetail> {
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponse(" +
@@ -52,12 +53,14 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "JOIN pd.size s " +
             "where p.id IN :idProducts")
     List<ProductDetailResponseByNam> findProductDetailRequests(@Param("idProducts") List<Long> idProducts);
+
     Optional<ProductDetail> findById(Long idProductDetail);
 
-    Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail,String Status);
+    Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail, String Status);
+
     @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
             "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
-            "pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice) " +
+            "pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice, pro.value) " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
             "INNER JOIN pd.color c " +
@@ -66,5 +69,6 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "LEFT JOIN prod.promotion pro " +
             "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE'")
     List<ProductPromotionResponse> findProductPromotion();
+
 
 }
