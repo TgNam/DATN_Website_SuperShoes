@@ -21,6 +21,6 @@ public class BillHistoryRequest {
 
     private Long accountId;
 
-    private String status; // Optional: If needed to track the status when creating a history entry
+    private String status;
 
 }

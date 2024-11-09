@@ -1,7 +1,7 @@
 package org.example.datn_website_supershoes.repository;
 
+import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
-import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.PayBill;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +27,17 @@ public interface PayBillRepository extends JpaRepository<PayBill, Long> {
     List<PayBillResponse> listPayBillResponseByCodeBill(@Param("codeBill") String codeBill);
 
 
-
     Page<PayBill> findAll(Specification<PayBill> spec, Pageable pageable);
+
+    @Query("""
+            SELECT new org.example.datn_website_supershoes.dto.response.PayBillOrderResponse(
+            pb.id,pb.tradingCode,pb.amount,pb.type,
+            pb.status,pm.id,pm.methodName,pm.type,
+            pm.status,b.id,b.codeBill,b.totalMerchandise,b.priceDiscount,b.totalAmount)
+            FROM PayBill pb 
+            INNER JOIN pb.bill b 
+            INNER JOIN pb.paymentMethod pm WHERE b.codeBill=:codeBill And pb.status = 'ACTIVE'
+            """)
+    List<PayBillOrderResponse> findByCodeBill(@Param("codeBill") String codeBill);
 
 }

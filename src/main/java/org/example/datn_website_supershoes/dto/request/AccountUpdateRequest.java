@@ -28,6 +28,4 @@ public class AccountUpdateRequest {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date birthday;
 
-    @NotBlank(message = "Trạng thái tài khoản là bắt buộc")
-    private String status;
 }

@@ -28,7 +28,7 @@ public class ProductPromotionResponse {
 
     private Long idProductDetail;
 
-    private Integer quantity;
+    private Integer quantityProductDetail;
 
     private BigDecimal productDetailPrice;
 
@@ -36,12 +36,16 @@ public class ProductPromotionResponse {
 
     private String codePromotion;
 
+    private Double value;
+
     private Date endAtByPromotion;
 
     private Long idPromotionDetail;
 
-    private BigDecimal promotionPrice;
+    private Integer quantityPromotionDetail;
 
     private Double  promotionValue;
+
+
 
 }

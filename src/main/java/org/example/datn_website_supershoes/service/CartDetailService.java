@@ -2,22 +2,17 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.CartDetailRequest;
-import org.example.datn_website_supershoes.dto.request.CartRequest;
 import org.example.datn_website_supershoes.dto.response.CartDetailResponse;
-import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Cart;
 import org.example.datn_website_supershoes.model.CartDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.CartDetailRepository;
 import org.example.datn_website_supershoes.repository.CartRepository;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CartDetailService {

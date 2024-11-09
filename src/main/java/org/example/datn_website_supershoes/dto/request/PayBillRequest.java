@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,19 +18,10 @@ import java.math.BigDecimal;
 @Builder
 @ToString
 public class PayBillRequest {
-
-    private Long id;
-
+    @NotNull(message = "Giá tiền là bắt buộc")
     private BigDecimal amount;
-
-    private String tradingCode;
-
-    private String note;
-
-    private Long idBill;
-
-    private Long idPaymentMethod;
-
-    private String status;
-
+    @NotBlank(message = "Mã hóa đơn là bắt buộc")
+    private String codeBill;
+    @NotNull(message = "Phương thức thanh toán là bắt buộc")
+    private Integer type;
 }

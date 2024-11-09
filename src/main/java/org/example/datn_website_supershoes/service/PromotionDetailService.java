@@ -1,14 +1,14 @@
 package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
-import org.example.datn_website_supershoes.dto.request.PromotionRequest;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PromotionDetailService {
@@ -25,7 +26,23 @@ public class PromotionDetailService {
     private PromotionDetailRepository promotionDetailRepository;
     @Autowired
     private ProductDetailRepository productDetailRepository;
+    @Autowired
+    private ProductDetailService productDetailService;
     //cập nhật trạng thái từ sắp diễn ra thành diễn ra
+    public List<ProductPromotionResponse> findProductPromotionResponseByIdPromotion(Long idPromotion){
+        return promotionDetailRepository.findProductByIdPromotion(idPromotion);
+    }
+    public List<ProductPromotionResponse> filterListProductPromotion(Long idPromotion,String search, String nameSize, String nameColor,String priceRange) {
+        return promotionDetailRepository.findProductByIdPromotion(idPromotion).stream()
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameColor().toLowerCase().contains(nameColor.trim().toLowerCase()))
+                .filter(ProductPromotionResponse -> {
+                    BigDecimal priceToFilter =  ProductPromotionResponse.getProductDetailPrice();
+                    return productDetailService.filterByPriceRange(priceToFilter, priceRange);
+                })
+                .collect(Collectors.toList());
+    }
     public void updatePromotionDetailUpcoming(Long idPromotion){
         List<PromotionDetail>  promotionDetails = promotionDetailRepository.findPromotionDetailByIdPromotionAndStatuses(idPromotion,Arrays.asList(Status.UPCOMING.toString()));
         for (PromotionDetail pd : promotionDetails){
@@ -49,8 +66,8 @@ public class PromotionDetailService {
         }
     }
 
-    public List<PromotionDetail> createPromotionDetail(Promotion promotion,List<PromotionDetailRequest> promotionDetailRequest) {
-        for (PromotionDetailRequest request : promotionDetailRequest){
+    public List<PromotionDetail> createPromotionDetail(Promotion promotion,List<ProductDetailPromoRequest> productDetailPromoRequest) {
+        for (ProductDetailPromoRequest request : productDetailPromoRequest){
             Optional<PromotionDetail> promotionDetailOptional = promotionDetailRepository.findPromotionDetailByIdProductDetailAndStatuses(
                     request.getIdProductDetail(),
                     Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
@@ -60,24 +77,48 @@ public class PromotionDetailService {
                 promotionDetailRepository.save(promotionDetail);
             }
         }
-        List<PromotionDetail> promotionDetails = promotionDetailRepository.saveAll(convertPromotionDetailRequestDTO(promotion,promotionDetailRequest));
+        List<PromotionDetail> promotionDetails = promotionDetailRepository.saveAll(convertPromotionDetailRequestDTO(promotion,productDetailPromoRequest));
         return promotionDetails;
     }
 
+    public void updatePromotionDetail(Promotion promotion,List<PromotionDetailRequest> promotionDetailRequests) {
+        try{
+            for (PromotionDetailRequest request : promotionDetailRequests){
+                //Tìm kiếm đợt giảm giá chi tiết cần sửa bởi id
+                Optional<PromotionDetail> optionalPromotionDetail = promotionDetailRepository.findById(request.getIdPromotionDetail());
+                //Tìm kiếm đợt giảm giá chi tiết bởi id sản phẩm chi tiết và trạng thái
+                Optional<PromotionDetail> promotionDetailOptional = promotionDetailRepository.findPromotionDetailByIdProductDetailAndStatuses(
+                        optionalPromotionDetail.get().getProductDetail().getId(),
+                        Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
+                //Nếu tìm thấy đợt giảm giá bởi id sản phẩm chi tiết và trạng thái thì trạng thái chuyển sang FINISHED
+                if (promotionDetailOptional.isPresent()){
+                    PromotionDetail promotionDetail = promotionDetailOptional.get();
+                    promotionDetail.setStatus(Status.FINISHED.toString());
+                    promotionDetailRepository.save(promotionDetail);
+                }
+                optionalPromotionDetail.get().setQuantity(request.getQuantity());
+                if(request.getQuantity()==0){
+                    optionalPromotionDetail.get().setStatus(Status.FINISHED.toString());
+                }else{
+                    optionalPromotionDetail.get().setStatus(promotion.getStatus());
+                }
+                promotionDetailRepository.save(optionalPromotionDetail.get());
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
 
-    private List<PromotionDetail> convertPromotionDetailRequestDTO(Promotion promotion,List<PromotionDetailRequest> promotionDetailRequest) {
+    private List<PromotionDetail> convertPromotionDetailRequestDTO(Promotion promotion,List<ProductDetailPromoRequest> productDetailPromoRequest) {
         List<PromotionDetail> promotionDetails = new ArrayList<>();
-        for (PromotionDetailRequest request : promotionDetailRequest){
+        for (ProductDetailPromoRequest request : productDetailPromoRequest){
             Optional<ProductDetail> productDetail = productDetailRepository.findById(request.getIdProductDetail());
             if (!productDetail.isPresent()){
                 throw new RuntimeException("Id "+productDetail.get().getId()+" của sản phẩm chi tiết không tồn tại trên hệ thống.");
             }
-            // Tính toán giá khuyến mãi
-            BigDecimal promotionPrice = productDetail.get().getPrice().multiply(BigDecimal.valueOf(1 - promotion.getValue() / 100));
             // Tạo đối tượng PromotionDetail
             PromotionDetail promotionDetail = new PromotionDetail();
             promotionDetail.setQuantity(request.getQuantity());
-            promotionDetail.setPromotionPrice(promotionPrice);
             promotionDetail.setProductDetail(productDetail.get());
             promotionDetail.setPromotion(promotion);
             promotionDetail.setStatus(Status.UPCOMING.toString());

@@ -5,7 +5,6 @@ import org.example.datn_website_supershoes.dto.request.ColorRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.ColorResponse;
 import org.example.datn_website_supershoes.model.Color;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.ColorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

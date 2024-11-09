@@ -1,15 +1,12 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
-import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
-import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
-import org.example.datn_website_supershoes.dto.request.PromotionRequest;
+import org.example.datn_website_supershoes.dto.request.PromotionUpdatesRequest;
+import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Promotion;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +27,49 @@ public class PromotionRestAPI {
     public List<PromotionResponse> getAllPromotion(){
         return promotionService.getAllPromotion();
     }
+    @GetMapping("/getPromotionDetailResponse")
+    public ResponseEntity<?> getPromotionDetailResponse(
+            @RequestParam(value ="idPromotion", required = false) Long idPromotion
+    ){
+        try {
+            if (idPromotion == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID đợt giảm giá không được để trống!")
+                                .build()
+                );
+            }
+            PromotionDetailResponse promotionDetailResponse = promotionService.getPromotionDetailResponse(idPromotion);
+            return ResponseEntity.ok(promotionDetailResponse);
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @GetMapping("/getSearchPromotionDetailResponse")
+    public ResponseEntity<?> getAllPromotionDetailResponseSearch(
+            @RequestParam(value ="idPromotion", required = false) Long idPromotion,
+            @RequestParam("search") String search,
+            @RequestParam("nameSize") String nameSize,
+            @RequestParam("nameColor") String nameColor,
+            @RequestParam("priceRange") String priceRange) {
+        if (idPromotion == null) {
+            return ResponseEntity.badRequest().body(
+                    Response.builder()
+                            .status(HttpStatus.BAD_REQUEST.toString())
+                            .mess("Lỗi: ID đợt giảm giá không được để trống!")
+                            .build()
+            );
+        }
+        PromotionDetailResponse promotionDetailResponse = promotionService.getSearchPromotionDetailResponse(idPromotion,search,nameSize,nameColor,priceRange);
+        return ResponseEntity.ok(promotionDetailResponse);
+    }
     @GetMapping("/listSearchPromotion")
     public List<PromotionResponse> getAllPromotionSearch(
             @RequestParam("search") String search,
@@ -46,7 +86,7 @@ public class PromotionRestAPI {
                 .collect(Collectors.toList());
     }
     @PostMapping("/createPromotion")
-    public ResponseEntity<?> createAccount(
+    public ResponseEntity<?> createPromotion(
             @RequestBody @Valid PromotionCreationRequest promotionCreationRequest,
             BindingResult result
     ) {
@@ -59,8 +99,38 @@ public class PromotionRestAPI {
             }
             Promotion promotion = promotionService.createPromotion(promotionCreationRequest);
             return ResponseEntity.ok(promotion);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PutMapping("/updatePromotion")
+    public ResponseEntity<?> updatePromotion(
+            @RequestBody @Valid PromotionUpdatesRequest promotionUpdatesRequest,
+            BindingResult result
+    ) {
+        try {
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            Promotion promotion = promotionService.updatePromotion(promotionUpdatesRequest);
+            return ResponseEntity.ok(promotion);
+        } catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
     }
     @PutMapping("/updateStatus")

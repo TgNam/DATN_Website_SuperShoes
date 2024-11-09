@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.ShoeSoleRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.ShoeSoleResponse;
-import org.example.datn_website_supershoes.dto.response.ShoeSoleResponse;
 import org.example.datn_website_supershoes.model.ShoeSole;
 import org.example.datn_website_supershoes.service.ShoeSoleService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Date;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -24,5 +26,7 @@ public class BillHistoryResponse {
     private Long idAccount;
 
     private String status;
+
+    private Date createdAt;
 
 }

@@ -42,7 +42,11 @@ public class BillResponse {
 
     private Long idVoucher;
 
+    private String codeVoucher;
+
     private String nameVoucher;
+
+    private Double value;
 
     private Long idCustomer;
 

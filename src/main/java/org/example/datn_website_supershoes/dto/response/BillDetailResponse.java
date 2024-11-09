@@ -39,4 +39,6 @@ public class BillDetailResponse {
 
     private String sizeName;
 
+    private BigDecimal totalMerchandise;
+
 }

@@ -1,26 +1,31 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
+import org.example.datn_website_supershoes.dto.response.BillDetailOrderResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.service.BillDetailByEmployeeService;
 import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/billDetailByEmployee")
 public class BillDetailRestAPI {
     @Autowired
     private BillDetailService billDetailService;
+    @Autowired
+    private BillDetailByEmployeeService billDetailByEmployeeService;
     @PostMapping("/createBillDetailByEmployee")
     private ResponseEntity<?> createBillDetailByEmployee(
             @RequestParam(value ="codeBill", required = false) String codeBill,
-            @RequestParam(value ="idProductDetail", required = false) List<Long> idProductDetail
+            @RequestBody @Valid List<ProductDetailPromoRequest> productDetail, BindingResult result
     ){
         try {
             if (codeBill == null) {
@@ -31,15 +36,13 @@ public class BillDetailRestAPI {
                                 .build()
                 );
             }
-            if (idProductDetail==null){
-                return ResponseEntity.badRequest().body(
-                        Response.builder()
-                                .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: Sản phẩm không được để trống!")
-                                .build()
-                );
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
             }
-            billDetailService.createBillDetailByIdBill(codeBill,idProductDetail);
+            billDetailService.createBillDetailByIdBill(codeBill,productDetail);
             return ResponseEntity
                     .ok("Thêm sản phẩm vào giỏ hàng thành công!");
         } catch (RuntimeException e) {
@@ -51,5 +54,18 @@ public class BillDetailRestAPI {
                             .build()
                     );
         }
+    }
+    @GetMapping("/detail")
+    public ResponseEntity<?> getBillByCodeBill(@RequestParam(value ="codeBill", required = false) String codeBill) {
+        if (codeBill==null){
+            return ResponseEntity.badRequest().body(
+                    Response.builder()
+                            .status(HttpStatus.BAD_REQUEST.toString())
+                            .mess("Lỗi: Mã hóa đơn không được để trống!")
+                            .build()
+            );
+        }
+        List<BillDetailOrderResponse> billDetailOrderResponses = billDetailByEmployeeService.getBillDetailsByCodeBill(codeBill);
+        return ResponseEntity.ok(billDetailOrderResponses);
     }
 }

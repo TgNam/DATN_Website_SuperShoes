@@ -1,16 +1,29 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
-import org.example.datn_website_supershoes.dto.response.*;
+import lombok.RequiredArgsConstructor;
+
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
+import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
+import org.example.datn_website_supershoes.model.Size;
+import org.example.datn_website_supershoes.repository.ColorRepository;
+import org.example.datn_website_supershoes.repository.ProductRepository;
+import org.example.datn_website_supershoes.repository.SizeRepository;
 import org.example.datn_website_supershoes.service.ProductDetailService;
+import org.example.datn_website_supershoes.service.ProductImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,48 +35,79 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/productDetail")
 public class ProductDetailController {
+
     @Autowired
     private ProductDetailService productDetailService;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private SizeRepository sizeRepository;
+
+    @Autowired
+    private ColorRepository colorRepository;
 
     @GetMapping("/list-productDetail")
     public ResponseEntity<Map<String, Object>> getAllProductDetail(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "category", required = false) Long categoryId,
             @RequestParam(value = "brand", required = false) Long brandId,
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "productCode", required = false) String productCode,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size
-    ) {  // Tạo Specification cho các tiêu chí tìm kiếm
+            @RequestParam(value = "size", defaultValue = "300") int size
+    ) {
         Specification<ProductDetail> spec = (root, query, criteriaBuilder) -> {
             Predicate p = criteriaBuilder.conjunction();
-
             if (status != null && !status.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             }
+            if (id != null) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("id"), id));
+            }
+            if (productId != null) {
+                Join<ProductDetail, Product> productJoin = root.join("product");
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(productJoin.get("id"), productId));
+            }
             if (name != null && !name.isEmpty()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("name"), name));
+                Join<ProductDetail, Product> productJoin = root.join("product");
+                p = criteriaBuilder.and(p, criteriaBuilder.like(criteriaBuilder.lower(productJoin.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+            if (productCode != null && !productCode.trim().isEmpty()) {
+                Join<ProductDetail, Product> productJoin = root.join("product");
+                p = criteriaBuilder.and(p, criteriaBuilder.like(criteriaBuilder.lower(productJoin.get("productCode")), "%" + productCode.toLowerCase() + "%"));
             }
             if (categoryId != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("category").get("id").as(String.class), "%" + categoryId + "%"));
+                Join<ProductDetail, Product> productJoin = root.join("product");
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(productJoin.get("category").get("id"), categoryId));
             }
             if (brandId != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("brand").get("id").as(String.class), "%" + brandId + "%"));
+                Join<ProductDetail, Product> productJoin = root.join("product");
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(productJoin.get("brand").get("id"), brandId));
             }
-
             return p;
         };
 
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductDetailResponse> productDetailList = productDetailService.getAllProductDetail(spec, pageable);
+
         Map<String, Object> response = new HashMap<>();
         response.put("DT", productDetailList);
         response.put("EC", 0);
@@ -71,26 +115,130 @@ public class ProductDetailController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/detail/{id}")
     public ResponseEntity<ProductDetail> getProductById(@PathVariable Long id) {
         Optional<ProductDetail> productDetail = productDetailService.getProductByIdDetail(id);
         return productDetail.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    private void validateProductDetailFields(ProductDetail productDetail) {
 
+        if (productDetail.getDescription() == null) {
+            throw new RuntimeException("Description trong ProductDetail là null");
+        }
+//        if (productDetail.getProductImage() == null) {
+//            throw new RuntimeException("Image trong ProductDetail là null");
+//        }
+        if (productDetail.getPrice() == null) {
+            throw new RuntimeException("Price trong ProductDetail là null");
+        }
+        if (productDetail.getQuantity() == null) {
+            throw new RuntimeException("Quantity trong ProductDetail là null");
+        }
+    }
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createProductDetail(@RequestBody ProductDetail productDetail) {
-        ProductDetail createdProduct = productDetailService.createProductDetail(productDetail);
         Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdProduct);
+
+        try {
+            validateProductDetailFields(productDetail);
+            // Kiểm tra productDetail có phải là null không
+            if (productDetail == null) {
+                response.put("EC", 1);
+                response.put("EM", "ProductDetail is null");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Tìm kiếm và thiết lập các đối tượng
+            Product product = productRepository.findById(productDetail.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+            Size size = sizeRepository.findById(productDetail.getSize().getId())
+                    .orElseThrow(() -> new RuntimeException("Size not found"));
+            Color color = colorRepository.findById(productDetail.getColor().getId())
+                    .orElseThrow(() -> new RuntimeException("Color not found"));
+
+            String generatedCode = generateProductCode(); // Hàm sinh mã
+            product.setProductCode(generatedCode);
+            productDetail.setProduct(product);
+            productDetail.setSize(size);
+            productDetail.setColor(color);
+
+
+            // Lưu ProductDetail
+            ProductDetail createdProductDetail = productDetailService.createProductDetail(productDetail);
+
+            // Tạo phản hồi thành công
+            response.put("DT", createdProductDetail);
+            response.put("EC", 0);  // Mã lỗi: 0 cho thành công
+            response.put("EM", "ProductDetail added successfully");
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            // Xử lý lỗi và phản hồi
+            response.put("EC", 1);
+            response.put("EM", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Map<String, Object>> updateProductDetail(@PathVariable Long id, @RequestBody ProductDetail productDetail) {
+        // Tìm sản phẩm hiện tại bằng ID
+        Optional<ProductDetail> existingProductOpt = productDetailService.getProductByIdDetail(id);
+
+        if (!existingProductOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("EC", 1, "EM", "ProductDetail not found"));
+        }
+
+        // Lấy sản phẩm hiện tại
+        ProductDetail existingProduct = existingProductOpt.get();
+
+        // Cập nhật các trường nếu có
+        if (productDetail.getStatus() != null) {
+            existingProduct.setStatus(productDetail.getStatus());
+        }
+        if (productDetail.getQuantity() != null) {
+            existingProduct.setQuantity(productDetail.getQuantity());
+        }
+        if (productDetail.getPrice() != null) {
+            existingProduct.setPrice(productDetail.getPrice());
+        }
+        if (productDetail.getDescription() != null) {
+            existingProduct.setDescription(productDetail.getDescription());
+        }
+
+        // Gọi phương thức updateProductDetail với ID và đối tượng ProductDetail
+        ProductDetail updatedProductDetail = productDetailService.updateProductDetail(id, existingProduct);
+
+        // Tạo phản hồi JSON
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", updatedProductDetail);
         response.put("EC", 0);
-        response.put("EM", "ProductDetail added successfully");
+        response.put("EM", "ProductDetail updated successfully");
 
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateProductDetail(@PathVariable Long id, @RequestBody ProductDetail productDetail) {
-        ProductDetail updateProductDetail = productDetailService.updateProductDetail(id, productDetail);
+
+    @PutMapping("/updateStatus/{id}")
+    public ResponseEntity<Map<String, Object>> updateProductDetailStatus(@PathVariable Long id, @RequestBody ProductDetail productDetail) {
+        // Tìm sản phẩm hiện tại bằng ID
+        Optional<ProductDetail> existingProductOpt = productDetailService.getProductByIdDetail(id);
+
+        if (!existingProductOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Lấy sản phẩm hiện tại
+        ProductDetail existingProduct = existingProductOpt.get();
+
+        // Chỉ cập nhật trạng thái
+        existingProduct.setStatus(productDetail.getStatus()); // Cập nhật chỉ trường trạng thái
+
+        // Lưu sản phẩm đã được cập nhật
+        ProductDetail updateProductDetail = productDetailService.createProductDetail(existingProduct);
+
         Map<String, Object> response = new HashMap<>();
         response.put("DT", updateProductDetail);
         response.put("EC", 0);
@@ -98,6 +246,7 @@ public class ProductDetailController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteProductDetail(@PathVariable Long id) {
@@ -114,6 +263,7 @@ public class ProductDetailController {
         List<ProductDetailResponseByNam> productDetails = productDetailService.findProductDetailRequests(idProducts);
         return ResponseEntity.ok(productDetails);
     }
+
     @GetMapping("/filterListProductDetail")
     public List<ProductDetailResponseByNam> getAllProductDetailSearch(
             @RequestParam("idProducts") List<Long> idProducts,
@@ -121,8 +271,18 @@ public class ProductDetailController {
             @RequestParam("nameSize") String nameSize,
             @RequestParam("nameColor") String nameColor,
             @RequestParam("priceRange") String priceRange) {
-        return productDetailService.filterListProductDetail(idProducts,search,nameSize,nameColor,priceRange);
+        return productDetailService.filterListProductDetail(idProducts, search, nameSize, nameColor, priceRange);
     }
+
+    private String generateProductCode() {
+        // Sử dụng UUID để tạo một mã duy nhất
+        return UUID.randomUUID().toString();
+    }
+
+
+    @Autowired
+    private ProductImageService productImageService;
+
     @GetMapping("/listProductPromotion")
     public ResponseEntity<?> getProductPromotion() {
         List<ProductPromotionResponse> productDetails = productDetailService.findProductPromotion();
@@ -136,4 +296,32 @@ public class ProductDetailController {
             @RequestParam("priceRange") String priceRange) {
         return productDetailService.filterListProductPromotion(search,nameSize,nameColor,priceRange);
     }
+    @GetMapping("/findProductDetailByIdProductDetail")
+    public ResponseEntity<?> findProductDetailByIdProductDetail(@RequestParam(value = "idProductDetail", required = false) Long idProductDetail){
+        try {
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Id sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok(productDetailService.findProductDetailByIdProductDetail(idProductDetail));
+        }catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
 }
+
+
+
+
+

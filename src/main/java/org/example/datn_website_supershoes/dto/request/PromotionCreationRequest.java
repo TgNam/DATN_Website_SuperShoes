@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class PromotionCreationRequest {
     @Valid
-    private List<PromotionDetailRequest> promotionDetailRequest;
+    private List<ProductDetailPromoRequest> productDetailPromoRequest;
     @Valid
     private PromotionRequest promotionRequest;
 }

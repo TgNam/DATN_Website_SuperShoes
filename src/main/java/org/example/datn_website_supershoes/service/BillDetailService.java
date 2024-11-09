@@ -3,13 +3,14 @@ package org.example.datn_website_supershoes.service;
 import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
+import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
-import org.example.datn_website_supershoes.repository.BillDetailRepository;
-import org.example.datn_website_supershoes.repository.BillRepository;
-import org.example.datn_website_supershoes.repository.ProductDetailRepository;
+import org.example.datn_website_supershoes.model.PromotionDetail;
+import org.example.datn_website_supershoes.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +18,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class BillDetailService {
 
@@ -30,8 +33,10 @@ public class BillDetailService {
 
     @Autowired
     private ProductDetailRepository productDetailRepository;
-
-    private static final int MIN_QUANTITY_PRODUCT_DETAIL = 1;
+    @Autowired
+    private PromotionDetailRepository promotionDetailRepository;
+    @Autowired
+    private BillDetailByEmployeeRepository billDetailByEmployeeRepository;
 
     // Method to create a new BillDetail using BillDetailRequest
     @Transactional
@@ -74,6 +79,7 @@ public class BillDetailService {
 
         return billDetailRepository.save(billDetail);
     }
+
     @Transactional
     public BillDetail createOrUpdateBillDetail(BillDetailRequest billDetailRequest) {
         // Check if BillDetail with the same idProductDetail and idBill already exists
@@ -125,6 +131,7 @@ public class BillDetailService {
             return billDetailRepository.save(billDetail);  // Save new BillDetail
         }
     }
+
     @Transactional
     public BillDetail updateBillDetail(BillDetailRequest billDetailRequest) {
         // Check if the BillDetail exists
@@ -208,9 +215,9 @@ public class BillDetailService {
 
     // Delete BillDetails by product code
     @Transactional
-    public void deleteBillDetailAndUpdateProduct(String productCode, String nameColor,String nameSize) {
+    public void deleteBillDetailAndUpdateProduct(String productCode, String nameColor, String nameSize) {
         // Find the BillDetail by productCode and nameColor
-        List<BillDetail> billDetails = billDetailRepository.findByProductCodeAndColorName(productCode, nameColor,nameSize);
+        List<BillDetail> billDetails = billDetailRepository.findByProductCodeAndColorName(productCode, nameColor, nameSize);
         if (billDetails.isEmpty()) {
             throw new RuntimeException("No BillDetail found with the given product code and color.");
         }
@@ -242,63 +249,189 @@ public class BillDetailService {
         response.setQuantity(billDetail.getQuantity());
         response.setStatus(billDetail.getStatus());
         response.setPriceDiscount(billDetail.getPriceDiscount());
-
-
-        Optional.ofNullable(billDetail.getProductDetail()).ifPresent(productDetail -> {
-            Optional.ofNullable(productDetail.getProduct()).ifPresent(product -> {
-                // Calculate total amount
-                BigDecimal totalAmount = productDetail.getPrice().multiply(BigDecimal.valueOf(billDetail.getQuantity()));
-                response.setTotalAmount(totalAmount);
-
-                response.setImageByte(product.getImageByte());
-                response.setNameProduct(product.getName());
-                response.setProductCode(product.getProductCode());
-            });
-
-            Optional.ofNullable(productDetail.getColor()).ifPresent(color -> {
-                response.setNameColor(color.getName());
-            });
-            Optional.ofNullable(productDetail.getSize()).ifPresent(size -> {
-                response.setSizeName(size.getName());
-            });
-        });
+        response.setTotalMerchandise(billDetail.getBill().getTotalMerchandise());
+        response.setTotalAmount(billDetail.getBill().getTotalAmount());
 
         return response;
     }
+
     //dùng cho bán hàng
-    public void createBillDetailByIdBill(String codeBill, List<Long> idProductDetail){
-        Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
-        Integer newQuantity = 0;
-        if (!billOptional.isPresent()){
-            throw new RuntimeException("Mã hóa đơn  "+codeBill+"  không tồn tại trong hệ thống.");
-        }
-        for (Long id : idProductDetail){
-            BillDetail billDetail = new BillDetail();
-            Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(id, Status.ACTIVE.toString());
-            if (!productDetailOptional.isPresent()){
-                throw new RuntimeException("Id "+id+" của sản phẩm không tồn tại trong hệ thống.");
-            } else if (productDetailOptional.get().getQuantity() < MIN_QUANTITY_PRODUCT_DETAIL) {
-                throw new RuntimeException("Sản phẩm "+productDetailOptional.get().getProduct().getName()+" đang hết hàng.");
-            }else if (productDetailOptional.get().getQuantity() > MIN_QUANTITY_PRODUCT_DETAIL) {
-                newQuantity = productDetailOptional.get().getQuantity() - MIN_QUANTITY_PRODUCT_DETAIL;
-                billDetail.setProductDetail(productDetailOptional.get());
-                billDetail.setBill(billOptional.get());
-                billDetail.setQuantity(1);
-                billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
-                billDetailRepository.save(billDetail);
-                productDetailOptional.get().setQuantity(newQuantity);
-                productDetailRepository.save(productDetailOptional.get());
-            }else{
-                billDetail.setProductDetail(productDetailOptional.get());
-                billDetail.setBill(billOptional.get());
-                billDetail.setQuantity(1);
-                billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
-                billDetailRepository.save(billDetail);
-                productDetailOptional.get().setQuantity(newQuantity);
-                productDetailOptional.get().setStatus(Status.INACTIVE.toString());
+    public void createBillDetailByIdBill(String codeBill, List<ProductDetailPromoRequest> listProductDetail) {
+        try {
+            // Tìm kiếm hóa đơn theo mã hóa đơn
+            Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
+
+            // Kiểm tra hóa đơn theo mã hóa đơn có tồn tại hay không
+            if (!billOptional.isPresent()) {
+                throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
+            }
+
+            Bill bill = billOptional.get();
+
+            // Thực hiện thêm hóa đơn chi tiết
+            for (ProductDetailPromoRequest request : listProductDetail) {
+                // Tìm kiếm sản phẩm chi tiết theo id và trạng thái
+                Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(request.getIdProductDetail(), Status.ACTIVE.toString());
+
+                // Kiểm tra sản phẩm có tồn tại không
+                if (!productDetailOptional.isPresent()) {
+                    throw new RuntimeException("Id " + request.getIdProductDetail() + " của sản phẩm không tồn tại trong hệ thống.");
+                }
+
+                //Số lượng sản phẩm của sản phẩm chi tiết
+                int quantityProductDetail = productDetailOptional.get().getQuantity();
+
+                // Kiểm tra số lượng sản phẩm số lượng mua so với sản phẩm còn lại trong kho
+                if (request.getQuantity() > quantityProductDetail || quantityProductDetail <= 0) {
+                    throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " đang hết hàng.");
+                }
+
+                //Giá tiền sản phẩm
+                BigDecimal priceProduct = productDetailOptional.get().getPrice();
+
+                //Tìm kiếm sản phẩm có đang  sale hay không
+                Optional<ProductPromotionResponse> productPromotionResponse = productDetailRepository.findProductPromotionByIdProductDetail(request.getIdProductDetail());
+
+                //Kiểm tra xem nếu sản phẩm đang sale
+                if (productPromotionResponse.isPresent()) {
+                    System.out.println("//Kiểm tra xem nếu sản phẩm đang sale");
+                    //Tìm kiếm đợt giảm giá chi tiết
+                    Optional<PromotionDetail> promotionDetail = promotionDetailRepository.findByIdAndAndStatus(productPromotionResponse.get().getIdPromotionDetail(), Status.ONGOING.toString());
+                    //Số lượng sản phẩm sale
+                    int quantityProductPromotion = productPromotionResponse.get().getQuantityPromotionDetail();
+                    //Giá sản phẩm sau khi sale
+                    BigDecimal promotionPrice = productPromotionResponse.get().getProductDetailPrice()
+                            .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
+                            .setScale(2, RoundingMode.HALF_UP); // Làm tròn đến 2 chữ số thập phân
+                    //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
+                    if (request.getQuantity() <= quantityProductPromotion) {
+                        System.out.println("số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale" + request.getQuantity() + "" + quantityProductPromotion);
+                        // Tìm hóa đơn chi tiết theo id hóa đơn và id sản phẩm chi tiết, giá sản phẩm
+                        Optional<BillDetail> billDetailOptional = billDetailRepository.findByIdBillAndIdProductDetailAndPriceDiscount(bill.getId(), request.getIdProductDetail(), promotionPrice);
+                        System.out.println("Kiểm tra billDetailOptional ở số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale" + billDetailOptional.isPresent()+promotionPrice);
+                        //Kiểm tra xem trong bill đã tồn tại sản phẩm đó chưa
+                        if (billDetailOptional.isPresent()) {
+                            //Đã tồn tại sẽ công thêm số lượng
+                            BillDetail existingBillDetail = billDetailOptional.get();
+                            existingBillDetail.setQuantity(existingBillDetail.getQuantity() + request.getQuantity());
+                            billDetailRepository.save(existingBillDetail);
+                        } else {
+                            //Chưa tồn tại sẽ tạo hóa đơn chi tiết mới
+                            // Tạo hóa đơn chi tiết mới
+                            BillDetail billDetail = new BillDetail();
+                            billDetail.setProductDetail(productDetailOptional.get());
+                            billDetail.setBill(bill);
+                            billDetail.setQuantity(request.getQuantity());
+                            billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
+                            //Áp dụng giá sale
+                            billDetail.setPriceDiscount(promotionPrice);
+                            billDetailRepository.save(billDetail);
+                        }
+                        //Số lượng còn lại của sản phẩm sale
+                        Integer newPromotionQuantity = quantityProductPromotion - request.getQuantity();
+
+                        //Cập nhật số lượng cho sản phẩm sale
+                        promotionDetail.get().setQuantity(newPromotionQuantity);
+
+                        //Cập nhận lại số lượng giảm giá
+                        if (newPromotionQuantity <= 0) {
+                            promotionDetail.get().setStatus(Status.FINISHED.toString());
+                        }
+                        //Cập nhật lại sản phản phẩm sale
+                        promotionDetailRepository.save(promotionDetail.get());
+                    } else {
+                        System.out.println("Số lượng sản phẩm khách hàng mua lớn hơn số lượng đang sale: " + request.getQuantity() + " > " + quantityProductPromotion);
+
+                    // Số lượng bán lẻ khách hàng sẽ mua ngoài số lượng sale
+                        int retailQuantity = request.getQuantity() - quantityProductPromotion;
+
+                    // Tìm hóa đơn chi tiết cho sản phẩm với giá sale
+                        Optional<BillDetail> billDetailWithDiscount = billDetailRepository
+                                .findByIdBillAndIdProductDetailAndPriceDiscount(bill.getId(), request.getIdProductDetail(), promotionPrice);
+
+                    // Tìm hóa đơn chi tiết cho sản phẩm với giá gốc
+                        Optional<BillDetail> billDetailWithOriginalPrice = billDetailRepository
+                                .findByIdBillAndIdProductDetailAndPriceDiscount(bill.getId(), request.getIdProductDetail(), priceProduct);
+
+                    // Xử lý cho sản phẩm sale
+                        if (billDetailWithDiscount.isPresent()) {
+                            // Nếu hóa đơn chi tiết với giá sale đã tồn tại, cập nhật số lượng
+                            BillDetail existingBillDetail = billDetailWithDiscount.get();
+                            existingBillDetail.setQuantity(existingBillDetail.getQuantity() + quantityProductPromotion);
+                            billDetailRepository.save(existingBillDetail);
+                        } else {
+                            // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá sale
+                            BillDetail billDetail = new BillDetail();
+                            billDetail.setProductDetail(productDetailOptional.get());
+                            billDetail.setBill(bill);
+                            billDetail.setQuantity(quantityProductPromotion);
+                            billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
+                            billDetail.setPriceDiscount(promotionPrice);
+                            billDetailRepository.save(billDetail);
+                        }
+
+                        // Xử lý cho sản phẩm bán lẻ với giá gốc
+                        if (retailQuantity > 0) {
+                            if (billDetailWithOriginalPrice.isPresent()) {
+                                // Nếu hóa đơn chi tiết với giá gốc đã tồn tại, cập nhật số lượng
+                                BillDetail existingBillDetail = billDetailWithOriginalPrice.get();
+                                existingBillDetail.setQuantity(existingBillDetail.getQuantity() + retailQuantity);
+                                billDetailRepository.save(existingBillDetail);
+                            } else {
+                                // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá gốc
+                                BillDetail billDetail = new BillDetail();
+                                billDetail.setProductDetail(productDetailOptional.get());
+                                billDetail.setBill(bill);
+                                billDetail.setQuantity(retailQuantity);
+                                billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
+                                billDetail.setPriceDiscount(priceProduct);
+                                billDetailRepository.save(billDetail);
+                            }
+                        }
+
+                        // Cập nhật lại thông tin sản phẩm sale trong PromotionDetail
+                        promotionDetail.get().setQuantity(0);
+                        promotionDetail.get().setStatus(Status.FINISHED.toString());
+                        promotionDetailRepository.save(promotionDetail.get());
+
+                    }
+                }
+                //Trường hợp sản phẩm không sale
+                else {
+                    // Tìm hóa đơn chi tiết theo id hóa đơn và id sản phẩm chi tiết, giá sản phẩm
+                    Optional<BillDetail> billDetailOptional = billDetailRepository.findByIdBillAndIdProductDetailAndPriceDiscount(bill.getId(), request.getIdProductDetail(), priceProduct);
+                    //Kiểm tra xem sản phẩm đã có trong hóa đơn chưa
+                    if (billDetailOptional.isPresent()) {
+                        //Nếu có sẽ cộng số lượng mua
+                        BillDetail existingBillDetail = billDetailOptional.get();
+                        existingBillDetail.setQuantity(existingBillDetail.getQuantity() + request.getQuantity());
+                        billDetailRepository.save(existingBillDetail);
+                    } else {
+                        //Nếu không tồn tại sẽ tạo hóa đơn mới
+                        // Tạo hóa đơn chi tiết mới
+                        BillDetail billDetail = new BillDetail();
+                        billDetail.setProductDetail(productDetailOptional.get());
+                        billDetail.setBill(bill);
+                        billDetail.setQuantity(request.getQuantity());
+                        billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
+                        //Áp dụng giá gốc của sản phẩm
+                        billDetail.setPriceDiscount(productDetailOptional.get().getPrice());
+                        billDetailRepository.save(billDetail);
+                    }
+                }
+                //Số lượng còn lại của sản phẩm
+                Integer newProductQuantity = quantityProductDetail - request.getQuantity();
+                //Cập nhật số lượng cho sản phẩm
+                productDetailOptional.get().setQuantity(newProductQuantity);
+                //Nếu số lượng <= 0 thì chuyển productDetail sang trạng thái INACTIVE
+                if (newProductQuantity <= 0) {
+                    productDetailOptional.get().setStatus(Status.INACTIVE.toString());
+                }
+                //Cập nhật lại sản phẩm chi tiết
                 productDetailRepository.save(productDetailOptional.get());
             }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
         }
     }
-
 }

@@ -5,7 +5,6 @@ import org.example.datn_website_supershoes.dto.request.CategoryRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.CategoryResponse;
 import org.example.datn_website_supershoes.model.Category;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.CategoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;

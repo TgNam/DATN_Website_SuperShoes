@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,9 +20,15 @@ public class ProductDetailResponse {
 
     private BigDecimal price;
 
+    private String description;
+
     private Long idProduct;
 
     private String nameProduct;
+
+    private String productCode;
+
+    private byte[] imageByte;
 
     private Long idSize;
 
@@ -31,7 +38,7 @@ public class ProductDetailResponse {
 
     private String nameColor;
 
-    private byte[] imageByte;
+    private List<byte[]> imageBytes;
 
     private boolean gender;
 

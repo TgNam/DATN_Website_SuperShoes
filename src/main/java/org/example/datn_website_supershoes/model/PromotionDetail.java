@@ -22,9 +22,6 @@ import java.math.BigDecimal;
 public class PromotionDetail extends BaseEntity {
 
     @Column
-    private BigDecimal promotionPrice;
-
-    @Column
     private Integer quantity;
 
     @JsonBackReference(value = "productDetailPromotionDetailReference")

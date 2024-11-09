@@ -1,9 +1,10 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Predicate;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.dto.response.VoucherBillResponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.service.VoucherService;
@@ -16,12 +17,22 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/voucher")
@@ -108,10 +119,18 @@ public class VoucherController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createVoucher(@RequestBody @NotNull VoucherRequest voucherRequest,
+    public ResponseEntity<?> createVoucher(@RequestBody @Valid VoucherRequest voucherRequest,
+                                           BindingResult result,
                                            @RequestParam(required = false) Long userId) {
         try {
-            Long creatorId = Optional.ofNullable(userId).orElse(1L);  // Default to user ID 1
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+
+            Long creatorId = Optional.ofNullable(userId).orElse(1L);
             Voucher createdVoucher = voucherService.createVoucher(voucherRequest, creatorId);
             VoucherResponse response = convertToVoucherResponse(createdVoucher);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -142,14 +161,10 @@ public class VoucherController {
         }
     }
 
-
     @GetMapping("/detail/{id}")
     public ResponseEntity<?> getVoucher(@PathVariable Long id) {
         try {
             VoucherResponse voucherResponse = voucherService.getVoucherById(id);
-//            if ("EXPIRED".equals(voucherResponse.getStatus())) {
-//                throw new RuntimeException("Cannot view voucher that has expired.");
-//            }
             return ResponseEntity.ok(voucherResponse);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -230,4 +245,54 @@ public class VoucherController {
         return response;
     }
 
+    @GetMapping("/getListVoucherBillPublic")
+    public List<VoucherBillResponse> findListVoucherByStatus() {
+        return voucherService.findListVoucherByStatusAndIsPublic();
+    }
+
+    @GetMapping("/getListVoucherBillPrivate")
+    public ResponseEntity<?> findListVoucherByStatusAndListIdVoucher(@RequestParam(value = "idAccount", required = false) Long idAccount) {
+        try {
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID của tài khoản không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(voucherService.findListVoucherByStatusAndIsPrivate(idAccount));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+    @GetMapping("/getFindVoucherBill")
+    public ResponseEntity<?> findVoucherByStatusAndIdVoucher(@RequestParam(value = "idVoucher", required = false) Long idVoucher) {
+        try {
+            if (idVoucher == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID của phiếu giảm giá không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(voucherService.findVoucherByListIdAndStatus(idVoucher));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 }
