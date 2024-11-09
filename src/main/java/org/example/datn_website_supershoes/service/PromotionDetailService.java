@@ -38,8 +38,7 @@ public class PromotionDetailService {
                 .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
                 .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameColor().toLowerCase().contains(nameColor.trim().toLowerCase()))
                 .filter(ProductPromotionResponse -> {
-                    // Nếu promotionPrice không null, lọc theo promotionPrice, ngược lại lọc theo productDetailPrice
-                    BigDecimal priceToFilter = ProductPromotionResponse.getPromotionPrice() != null ? ProductPromotionResponse.getPromotionPrice() : ProductPromotionResponse.getProductDetailPrice();
+                    BigDecimal priceToFilter =  ProductPromotionResponse.getProductDetailPrice();
                     return productDetailService.filterByPriceRange(priceToFilter, priceRange);
                 })
                 .collect(Collectors.toList());
@@ -117,12 +116,9 @@ public class PromotionDetailService {
             if (!productDetail.isPresent()){
                 throw new RuntimeException("Id "+productDetail.get().getId()+" của sản phẩm chi tiết không tồn tại trên hệ thống.");
             }
-            // Tính toán giá khuyến mãi
-            BigDecimal promotionPrice = productDetail.get().getPrice().multiply(BigDecimal.valueOf(1 - promotion.getValue() / 100));
             // Tạo đối tượng PromotionDetail
             PromotionDetail promotionDetail = new PromotionDetail();
             promotionDetail.setQuantity(request.getQuantity());
-            promotionDetail.setPromotionPrice(promotionPrice);
             promotionDetail.setProductDetail(productDetail.get());
             promotionDetail.setPromotion(promotion);
             promotionDetail.setStatus(Status.UPCOMING.toString());

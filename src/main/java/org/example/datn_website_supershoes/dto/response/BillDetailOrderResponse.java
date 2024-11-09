@@ -17,6 +17,8 @@ public class BillDetailOrderResponse {
 
     private BigDecimal priceDiscount;
 
+    private Integer quantityBillDetail;
+
     private Long idProduct;
 
     private String nameProduct;
@@ -31,7 +33,7 @@ public class BillDetailOrderResponse {
 
     private Long idProductDetail;
 
-    private Integer quantity;
+    private Integer quantityProductDetail;
 
     private BigDecimal productDetailPrice;
 
@@ -39,9 +41,11 @@ public class BillDetailOrderResponse {
 
     private String codePromotion;
 
+    private Double value;
+
     private Date endAtByPromotion;
 
     private Long idPromotionDetail;
 
-    private BigDecimal promotionPrice;
+    private Integer quantityPromotionDetail;
 }

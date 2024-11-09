@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,4 +52,10 @@ public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
 
     @Query("SELECT bd FROM BillDetail bd WHERE bd.productDetail.product.productCode = :productCode AND bd.productDetail.color.name = :nameColor AND bd.productDetail.size.name = :nameSize ")
     List<BillDetail> findByProductCodeAndColorName(@Param("productCode") String productCode, @Param("nameColor") String nameColor,@Param("nameSize") String nameSize);
+
+    @Query("SELECT bd FROM BillDetail bd WHERE bd.bill.id = :idBill AND bd.productDetail.id = :idProductDetail AND bd.priceDiscount=:priceDiscount")
+    Optional<BillDetail> findByIdBillAndIdProductDetailAndPriceDiscount(@Param("idBill") Long idBill, @Param("idProductDetail") Long idProductDetail,@Param("priceDiscount") BigDecimal priceDiscount);
+
+    @Query("SELECT bd FROM BillDetail bd WHERE bd.bill.id = :idBill")
+    List<BillDetail> findByIdBill(@Param("idBill") Long idBill);
 }

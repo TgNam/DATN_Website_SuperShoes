@@ -59,7 +59,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
     Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail,String Status);
     @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
             "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
-            "pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice, prod.quantity) " +
+            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity) " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
             "INNER JOIN pd.color c " +
@@ -68,5 +68,17 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "LEFT JOIN prod.promotion pro " +
             "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE'")
     List<ProductPromotionResponse> findProductPromotion();
+
+    @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
+            "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
+            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity) " +
+            "FROM ProductDetail pd " +
+            "INNER JOIN pd.product p " +
+            "INNER JOIN pd.color c " +
+            "INNER JOIN pd.size s " +
+            "JOIN pd.promotionDetail prod ON prod.status = 'ONGOING' " +
+            "JOIN prod.promotion pro " +
+            "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE' AND pd.id=:idProductDetail")
+    Optional<ProductPromotionResponse> findProductPromotionByIdProductDetail(@Param("idProductDetail") Long idProductDetail);
 
 }

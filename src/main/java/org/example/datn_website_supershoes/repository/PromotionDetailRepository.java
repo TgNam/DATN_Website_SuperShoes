@@ -20,7 +20,7 @@ public interface PromotionDetailRepository extends JpaRepository<PromotionDetail
     @Query("""
     SELECT new org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(
     p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price,
-    pro.id, pro.codePromotion, pro.endAt, prod.id, prod.promotionPrice, prod.quantity
+    pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity
     ) 
     FROM PromotionDetail prod
     INNER JOIN prod.promotion pro
@@ -31,4 +31,6 @@ public interface PromotionDetailRepository extends JpaRepository<PromotionDetail
     WHERE pro.id=:idPromotion
     """)
     List<ProductPromotionResponse> findProductByIdPromotion(@Param("idPromotion") Long idPromotion);
+
+    Optional<PromotionDetail> findByIdAndAndStatus(Long id, String status);
 }

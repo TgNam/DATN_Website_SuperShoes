@@ -161,8 +161,7 @@ public class ProductDetailService {
                 .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameSize().toLowerCase().contains(nameSize.trim().toLowerCase()))
                 .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameColor().toLowerCase().contains(nameColor.trim().toLowerCase()))
                 .filter(ProductPromotionResponse -> {
-                    // Nếu promotionPrice không null, lọc theo promotionPrice, ngược lại lọc theo productDetailPrice
-                    BigDecimal priceToFilter = ProductPromotionResponse.getPromotionPrice() != null ? ProductPromotionResponse.getPromotionPrice() : ProductPromotionResponse.getProductDetailPrice();
+                    BigDecimal priceToFilter = ProductPromotionResponse.getProductDetailPrice();
                     return filterByPriceRange(priceToFilter, priceRange);
                 })
                 .collect(Collectors.toList());
@@ -183,6 +182,10 @@ public class ProductDetailService {
                 // Nếu không có điều kiện lọc, trả về true để không lọc
                 return true;
         }
+    }
+
+    public ProductDetail findProductDetailByIdProductDetail(Long idProductDetail) {
+        return productDetailRepository.findById(idProductDetail).get();
     }
 
 }
