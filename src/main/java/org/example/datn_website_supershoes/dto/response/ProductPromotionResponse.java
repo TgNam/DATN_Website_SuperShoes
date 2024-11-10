@@ -44,8 +44,6 @@ public class ProductPromotionResponse {
 
     private Integer quantityPromotionDetail;
 
-    private Double  promotionValue;
-
 
 
 }

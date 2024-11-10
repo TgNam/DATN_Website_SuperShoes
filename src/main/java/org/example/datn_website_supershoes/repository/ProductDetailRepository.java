@@ -1,6 +1,6 @@
 package org.example.datn_website_supershoes.repository;
 
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
+import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;
@@ -34,7 +34,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
     Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail,String Status);
     @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
             "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
-            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity,pro.value) " +
+            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity) " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
             "INNER JOIN pd.color c " +
@@ -46,7 +46,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
 
     @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
             "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
-            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity,pro.value) " +
+            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity) " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
             "INNER JOIN pd.color c " +
@@ -55,5 +55,23 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "JOIN prod.promotion pro " +
             "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE' AND pd.id=:idProductDetail")
     Optional<ProductPromotionResponse> findProductPromotionByIdProductDetail(@Param("idProductDetail") Long idProductDetail);
+
+    @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse(" +
+            "p.id, " +
+            "p.name, " +
+            "pd.price," +
+            "MIN(pd.price), " +
+            "MAX(pd.price), " +
+            "MIN(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END), " +
+            "MAX(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END)) " +
+            "FROM ProductDetail pd " +
+            "INNER JOIN pd.product p " +
+            "LEFT JOIN pd.promotionDetail prod ON prod.productDetail.id = pd.id " +
+            "LEFT JOIN prod.promotion pro " +
+            "WHERE p.status = 'ACTIVE' " +
+            "AND pd.status = 'ACTIVE' " +
+            "GROUP BY p.id, p.name, pd.price "+
+            "ORDER BY p.name")
+    List<ProductViewCustomerReponse> findProductPriceRangeWithPromotion();
 
 }
