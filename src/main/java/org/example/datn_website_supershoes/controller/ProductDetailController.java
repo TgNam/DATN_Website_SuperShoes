@@ -315,7 +315,7 @@ public class ProductDetailController {
                     );
         }
     }
-    @GetMapping("/product-price-range-promotion")
+    @GetMapping("/productPriceRangePromotion")
     public ResponseEntity<List<ProductViewCustomerReponse>> getProductPriceRangeWithPromotion() {
         List<ProductViewCustomerReponse> response = productDetailService.getProductPriceRangeWithPromotion();
         return ResponseEntity.ok(response);
