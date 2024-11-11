@@ -25,10 +25,6 @@ import java.util.Date;
 @Builder
 public class AccountVoucher extends BaseEntity {
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column
-    private Date dateOfUse;
-
     @JsonBackReference(value = "accountReference")
     @ManyToOne
     @JoinColumn(name = "id_account", referencedColumnName = "id")

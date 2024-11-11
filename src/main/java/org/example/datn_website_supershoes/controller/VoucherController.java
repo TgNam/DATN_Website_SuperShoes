@@ -66,7 +66,7 @@ public class VoucherController {
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate,
             @RequestParam(value = "type", required = false) Integer type,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "5") int size
     ) {
         String trimmedSearchTerm = Optional.ofNullable(searchTerm)
                 .map(String::trim)
@@ -217,23 +217,6 @@ public class VoucherController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Response.builder()
                             .status(HttpStatus.NOT_FOUND.toString())
-                            .mess(e.getMessage())
-                            .build());
-        }
-    }
-
-    @GetMapping("/check-expired")
-    public ResponseEntity<?> checkExpiredVouchers() {
-        try {
-            voucherService.checkAndExpireVouchers();
-            return ResponseEntity.ok(Response.builder()
-                    .status(HttpStatus.OK.toString())
-                    .mess("Checked and updated expired vouchers successfully.")
-                    .build());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Response.builder()
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
                             .mess(e.getMessage())
                             .build());
         }
