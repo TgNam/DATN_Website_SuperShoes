@@ -222,23 +222,6 @@ public class VoucherController {
         }
     }
 
-    @GetMapping("/check-expired")
-    public ResponseEntity<?> checkExpiredVouchers() {
-        try {
-            voucherService.checkAndExpireVouchers();
-            return ResponseEntity.ok(Response.builder()
-                    .status(HttpStatus.OK.toString())
-                    .mess("Checked and updated expired vouchers successfully.")
-                    .build());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Response.builder()
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
-                            .mess(e.getMessage())
-                            .build());
-        }
-    }
-
     private VoucherResponse convertToVoucherResponse(Voucher voucher) {
         VoucherResponse response = new VoucherResponse();
         BeanUtils.copyProperties(voucher, response);
