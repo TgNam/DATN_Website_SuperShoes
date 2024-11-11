@@ -4,10 +4,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
-import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
-import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
@@ -318,7 +315,11 @@ public class ProductDetailController {
                     );
         }
     }
-
+    @GetMapping("/productPriceRangePromotion")
+    public ResponseEntity<List<ProductViewCustomerReponse>> getProductPriceRangeWithPromotion() {
+        List<ProductViewCustomerReponse> response = productDetailService.getProductPriceRangeWithPromotion();
+        return ResponseEntity.ok(response);
+    }
 }
 
 

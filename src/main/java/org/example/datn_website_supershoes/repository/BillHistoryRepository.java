@@ -22,4 +22,8 @@ public interface BillHistoryRepository extends JpaRepository<BillHistory, Long> 
 
     @Query("SELECT bh FROM BillHistory bh WHERE bh.bill.id = :billId AND bh.bill.status = :status")
     List<BillHistory> findBillHistoryByBillIdAndStatus(@Param("billId") Long billId, @Param("status") String status);
+
+    @Query("SELECT bh FROM BillHistory bh JOIN bh.bill b WHERE b.codeBill = :codeBill ORDER BY bh.createdAt")
+    List<BillHistory> findBillHistoryByBillCode(@Param("codeBill") String codeBill);
+
 }

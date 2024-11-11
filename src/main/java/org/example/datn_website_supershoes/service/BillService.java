@@ -160,7 +160,10 @@ public class BillService {
 
         response.setId(bill.getId());
         response.setCodeBill(bill.getCodeBill());
-        response.setNameCustomer(bill.getNameCustomer());
+        if (bill.getCustomer() != null) {
+            response.setNameCustomer(bill.getCustomer().getName());
+        }
+
         response.setPhoneNumber(bill.getPhoneNumber());
         response.setAddress(bill.getAddress());
         response.setNote(bill.getNote());

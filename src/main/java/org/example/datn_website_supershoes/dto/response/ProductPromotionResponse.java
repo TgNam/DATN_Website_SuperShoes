@@ -13,6 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductPromotionResponse {
+
     private Long idProduct;
 
     private String nameProduct;
@@ -41,6 +42,8 @@ public class ProductPromotionResponse {
 
     private Long idPromotionDetail;
 
-
     private Integer quantityPromotionDetail;
+
+
+
 }

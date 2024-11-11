@@ -19,6 +19,16 @@ public class BillHistoryController {
     @Autowired
     private BillHistoryService billHistoryService;
 
+    @GetMapping("/viewHistory/{codeBill}")
+    public ResponseEntity<Map<String, Object>> getBillHistoryByBillCode(@PathVariable String codeBill) {
+        List<BillHistoryResponse> billHistoryList = billHistoryService.getBillHistoryByBillCode(codeBill);
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", billHistoryList);
+        response.put("EC", 0);
+        response.put("EM", "Get BillHistory by BillCode successfully");
+        return ResponseEntity.ok(response);
+    }
+
     // Create a new BillHistory
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createBillHistory(@RequestBody BillHistoryRequest billHistoryRequest) {

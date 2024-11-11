@@ -19,7 +19,7 @@ import java.util.Optional;
 public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
 
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.BillDetailResponse(" +
-            "bd.id, p.productCode,c.id, p.imageByte, p.name, c.name, bd.quantity, pd.price, bd.status, b.priceDiscount,s.name) " +
+            "bd.id, p.productCode,c.id, p.imageByte, p.name, c.name, bd.quantity, pd.price, bd.status, b.priceDiscount,s.name,b.totalMerchandise) " +
             "FROM BillDetail bd " +
             "JOIN bd.productDetail pd " +
             "JOIN pd.product p " +

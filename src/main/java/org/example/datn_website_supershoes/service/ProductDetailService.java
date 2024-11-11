@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
+import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
@@ -187,5 +188,7 @@ public class ProductDetailService {
     public ProductDetail findProductDetailByIdProductDetail(Long idProductDetail) {
         return productDetailRepository.findById(idProductDetail).get();
     }
-
+    public List<ProductViewCustomerReponse> getProductPriceRangeWithPromotion() {
+        return productDetailRepository.findProductPriceRangeWithPromotion();
+    }
 }

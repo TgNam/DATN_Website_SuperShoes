@@ -249,26 +249,8 @@ public class BillDetailService {
         response.setQuantity(billDetail.getQuantity());
         response.setStatus(billDetail.getStatus());
         response.setPriceDiscount(billDetail.getPriceDiscount());
-
-
-        Optional.ofNullable(billDetail.getProductDetail()).ifPresent(productDetail -> {
-            Optional.ofNullable(productDetail.getProduct()).ifPresent(product -> {
-                // Calculate total amount
-                BigDecimal totalAmount = productDetail.getPrice().multiply(BigDecimal.valueOf(billDetail.getQuantity()));
-                response.setTotalAmount(totalAmount);
-
-//                response.setImageByte(productDetail.getImageByte());
-                response.setNameProduct(product.getName());
-                response.setProductCode(product.getProductCode());
-            });
-
-            Optional.ofNullable(productDetail.getColor()).ifPresent(color -> {
-                response.setNameColor(color.getName());
-            });
-            Optional.ofNullable(productDetail.getSize()).ifPresent(size -> {
-                response.setSizeName(size.getName());
-            });
-        });
+        response.setTotalMerchandise(billDetail.getBill().getTotalMerchandise());
+        response.setTotalAmount(billDetail.getBill().getTotalAmount());
 
         return response;
     }

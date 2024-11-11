@@ -28,6 +28,12 @@ public class BillHistoryService {
     @Autowired
     private AccountRepository accountRepository;
 
+    public List<BillHistoryResponse> getBillHistoryByBillCode(String codeBill) {
+        List<BillHistory> billHistories = billHistoryRepository.findBillHistoryByBillCode(codeBill);
+        return billHistories.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+
     // Create a new BillHistory entry
     public BillHistoryResponse createBillHistory(BillHistoryRequest billHistoryRequest) {
         BillHistory billHistory = new BillHistory();
@@ -67,11 +73,13 @@ public class BillHistoryService {
         return BillHistoryResponse.builder()
                 .id(billHistory.getId())
                 .note(billHistory.getNote())
-                .idBill(billHistory.getBill().getId())// Assuming Bill has a field 'codeBill'
-                .idAccount(billHistory.getAccount().getId())
-                .status(billHistory.getBill().getStatus()) // Assuming Bill has a field 'status'
+                .idBill(billHistory.getBill() != null ? billHistory.getBill().getId() : null)
+                .idAccount(billHistory.getAccount() != null ? billHistory.getAccount().getId() : null)
+                .status(billHistory.getBill() != null ? billHistory.getBill().getStatus() : null)
+                .createdAt(billHistory.getCreatedAt()) // Fixed typo from 'getCreateAt' to 'getCreatedAt'
                 .build();
     }
+
 
     // Delete BillHistory by ID
     public void deleteBillHistory(Long id) {
