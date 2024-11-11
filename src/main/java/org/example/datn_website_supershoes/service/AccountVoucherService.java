@@ -29,13 +29,11 @@ public class AccountVoucherService {
         AccountVoucher accountVoucher = accountVoucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("AccountVoucher not found"));
 
-        accountVoucher.setDateOfUse(accountVoucherRequest.getDateOfUse());
         return accountVoucherRepository.save(accountVoucher);
     }
 
     private AccountVoucher convertAccountVoucherRequestDTO(AccountVoucherRequest accountVoucherRequest) {
         return AccountVoucher.builder()
-                .dateOfUse(accountVoucherRequest.getDateOfUse())
                 .build();
     }
 }

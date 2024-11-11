@@ -17,7 +17,7 @@ public interface AccountVoucherRepository extends JpaRepository<AccountVoucher, 
 
     @Query("""
             SELECT new org.example.datn_website_supershoes.dto.response.AccountVoucherResponse(
-            av.id, av.dateOfUse, a.id, a.name, v.id, v.name, av.status)
+            av.id, a.id, a.name, v.id, v.name, av.status)
             FROM AccountVoucher av 
             JOIN av.account a 
             JOIN av.voucher v

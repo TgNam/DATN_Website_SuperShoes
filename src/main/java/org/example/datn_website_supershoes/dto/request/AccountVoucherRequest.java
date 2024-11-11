@@ -18,8 +18,6 @@ public class AccountVoucherRequest {
 
     private Long id;
 
-    private Date dateOfUse;
-
     private List<Long> accountIds;
 
     private String status;

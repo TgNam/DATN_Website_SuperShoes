@@ -17,8 +17,6 @@ public class AccountVoucherResponse {
 
     private Long id;
 
-    private Date dateOfUse;
-
     private Long idAccount;
 
     private String nameAccount;
