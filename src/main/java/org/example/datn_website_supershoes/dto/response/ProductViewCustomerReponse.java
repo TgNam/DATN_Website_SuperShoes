@@ -18,8 +18,6 @@ public class ProductViewCustomerReponse {
 
     private String nameProduct;
 
-    private BigDecimal originalPrice;
-
     private BigDecimal minPrice;
 
     private BigDecimal maxPrice;
