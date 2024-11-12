@@ -162,40 +162,7 @@ public ProductResponse createProduct(Product product) {
             response.setIdShoeSole(product.getShoeSole().getId());
             response.setNameShoeSole(product.getShoeSole().getName());
         }
-        if (product.getProductDetails() != null) {
-            List<Long> productDetailIds = product.getProductDetails().stream()
-                    .map(ProductDetail::getId)
-                    .collect(Collectors.toList());
-            response.setIdProductDetail(productDetailIds);
 
-        }
-        if (product.getProductDetails() != null && !product.getProductDetails().isEmpty()) {
-            ProductDetail firstProductDetail = product.getProductDetails().get(0); // Lấy ProductDetail đầu tiên
-
-            // Thiết lập quantity, price, description từ ProductDetail đầu tiên
-            response.setQuantity(firstProductDetail.getQuantity() != null ? firstProductDetail.getQuantity() : 0);
-            response.setPrice(firstProductDetail.getPrice() != null ? firstProductDetail.getPrice() : BigDecimal.ZERO);
-            response.setDescription(firstProductDetail.getDescription());
-
-            // Chuyển đổi danh sách ProductImage sang imageBytes nếu có
-            if (firstProductDetail.getProductImage() != null) {
-                response.setImageBytes(firstProductDetail.getProductImage().stream()
-                        .map(ProductImage::getImageByte)
-                        .collect(Collectors.toList()));
-            }
-
-            // Chuyển đổi thông tin Color nếu có
-            if (firstProductDetail.getColor() != null) {
-                response.setIdColor(firstProductDetail.getColor().getId());
-                response.setNameColor(firstProductDetail.getColor().getName());
-            }
-
-            // Chuyển đổi thông tin Size nếu có
-            if (firstProductDetail.getSize() != null) {
-                response.setIdSize(firstProductDetail.getSize().getId());
-                response.setNameSize(firstProductDetail.getSize().getName());
-            }
-        }
 
 
         return response;
@@ -227,7 +194,7 @@ public ProductResponse createProduct(Product product) {
     }
 
 
-//    public List<ProductResponse> findProductRequests(){
-//    return productRepository.findProductRequests();
-//    }
+    public List<ProductResponse> findProductRequests(){
+    return productRepository.findProductRequests();
+    }
 }

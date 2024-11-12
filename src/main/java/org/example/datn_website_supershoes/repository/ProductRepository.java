@@ -35,12 +35,11 @@ public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpeci
 //        @Param("id") Long id,
 //        @Param("name") String name);
 
+
 Page<Product> findAll(Specification<Product> spec, Pageable pageable);
-
-
-//@Query("select new org.example.datn_website_supershoes.dto.response.ProductResponse(p.id, p.name, p.productCode, p.imageByte, p.gender, b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status)" +
-//        "from Product p " +
-//        "join p.brand b join p.category c join p.material m join p.shoeSole s")
-//List<ProductResponse> findProductRequests();
+@Query("select new org.example.datn_website_supershoes.dto.response.ProductResponse(p.id, p.name, p.productCode, p.imageByte, p.gender, b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status)" +
+        "from Product p " +
+        "join p.brand b join p.category c join p.material m join p.shoeSole s")
+List<ProductResponse> findProductRequests();
 
 }
