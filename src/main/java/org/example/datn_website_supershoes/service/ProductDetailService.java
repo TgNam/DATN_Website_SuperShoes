@@ -189,6 +189,10 @@ public class ProductDetailService {
         return productDetailRepository.findById(idProductDetail).get();
     }
     public List<ProductViewCustomerReponse> getProductPriceRangeWithPromotion() {
-        return productDetailRepository.findProductPriceRangeWithPromotion();
+        List<ProductViewCustomerReponse> productViewCustomerReponses = productDetailRepository.findProductPriceRangeWithPromotion();
+        for(ProductViewCustomerReponse reponse :productViewCustomerReponses){
+            System.out.println("IdProduct: "+ reponse.getIdProduct()+", NameProduct: "+reponse.getNameProduct()+", MinPrice: "+reponse.getMinPrice()+", MaxPrice"+reponse.getMaxPrice()+", MinPriceAfterDiscount: "+reponse.getMinPriceAfterDiscount()+", MaxPriceAfterDiscount"+reponse.getMaxPriceAfterDiscount());
+        }
+        return productViewCustomerReponses;
     }
 }

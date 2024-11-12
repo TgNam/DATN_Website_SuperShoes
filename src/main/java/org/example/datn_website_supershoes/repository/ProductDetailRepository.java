@@ -59,19 +59,20 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse(" +
             "p.id, " +
             "p.name, " +
-            "pd.price," +
             "MIN(pd.price), " +
             "MAX(pd.price), " +
-            "MIN(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END), " +
-            "MAX(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END)) " +
+            "MIN(CAST(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal)), " +
+            "MAX(CAST(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal))" +
+            ") " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
             "LEFT JOIN pd.promotionDetail prod ON prod.productDetail.id = pd.id " +
             "LEFT JOIN prod.promotion pro " +
             "WHERE p.status = 'ACTIVE' " +
             "AND pd.status = 'ACTIVE' " +
-            "GROUP BY p.id, p.name, pd.price "+
+            "GROUP BY p.id, p.name " +
             "ORDER BY p.name")
     List<ProductViewCustomerReponse> findProductPriceRangeWithPromotion();
+
 
 }
