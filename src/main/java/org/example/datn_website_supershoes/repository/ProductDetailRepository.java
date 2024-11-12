@@ -19,7 +19,7 @@ import java.util.Optional;
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Long>, JpaSpecificationExecutor<ProductDetail> {
 
     Page<ProductDetail> findAll(Specification<ProductDetail> spec, Pageable pageable);
-
+    List<ProductDetail> findByProductId(Long productId);
 
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam(" +
             "pd.id, pd.quantity, pd.price, p.id, p.name, s.id, s.name, c.id, c.name, c.codeColor, pd.status) " +
