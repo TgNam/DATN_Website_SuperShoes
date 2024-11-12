@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.BillRequest;
 import org.example.datn_website_supershoes.dto.response.BillResponse;
+import org.example.datn_website_supershoes.dto.response.BillStatisticalPieResponse;
 import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.service.BillService;
@@ -32,6 +33,12 @@ public class BillController {
 
     @Autowired
     private BillService billService;
+
+    @GetMapping("/statistics/completed")
+    public ResponseEntity<List<BillStatisticalPieResponse>> getCompletedBillStatistics() {
+        List<BillStatisticalPieResponse> statistics = billService.getCompletedBillStatistics();
+        return ResponseEntity.ok(statistics);
+    }
 
     @PutMapping("/update-status-note/{codeBill}")
     public ResponseEntity<?> updateBillStatusAndNote(

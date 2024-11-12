@@ -3,6 +3,7 @@ package org.example.datn_website_supershoes.service;
 import jakarta.persistence.EntityNotFoundException;
 import org.example.datn_website_supershoes.dto.request.BillRequest;
 import org.example.datn_website_supershoes.dto.response.BillResponse;
+import org.example.datn_website_supershoes.dto.response.BillStatisticalPieResponse;
 import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.repository.BillRepository;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +25,22 @@ public class BillService {
 
     @Autowired
     private BillRepository billRepository;
+
+    public List<BillStatisticalPieResponse> getCompletedBillStatistics() {
+        List<Object[]> results = billRepository.findCompletedBillStatisticsByYear();
+        List<BillStatisticalPieResponse> statistics = new ArrayList<>();
+
+        for (Object[] result : results) {
+            BillStatisticalPieResponse response = new BillStatisticalPieResponse(
+                    (Date) result[0], // Assumes the first column is a Date
+                    ((Number) result[1]).intValue(), // Assumes the second column is a number of bills
+                    (BigDecimal) result[2] // Assumes the third column is the price
+            );
+            statistics.add(response);
+        }
+        return statistics;
+    }
+
 
     public void updateBillStatusAndNoteByCode(String codeBill, String status, String note) {
         Bill bill = billRepository.findByCodeBill(codeBill)
@@ -138,7 +158,6 @@ public class BillService {
     }
 
 
-
     public void deleteBill(Long id) {
         billRepository.deleteById(id);
     }
@@ -208,6 +227,7 @@ public class BillService {
                 bill.getNote()
         );
     }
+
     public BillSummaryResponse updateBillByCode(String codeBill, BillRequest billRequest) {
 
         Bill bill = billRepository.findByCodeBill(codeBill)
@@ -225,6 +245,7 @@ public class BillService {
 
         return new BillSummaryResponse(bill);
     }
+
     public Bill findBillByCode(String codeBill) {
         return billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new EntityNotFoundException("Bill not found with code: " + codeBill));

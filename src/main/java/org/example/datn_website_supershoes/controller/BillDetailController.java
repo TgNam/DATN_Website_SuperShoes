@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
+import org.example.datn_website_supershoes.dto.response.BillDetailStatisticalProductRespone;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,14 @@ public class BillDetailController {
 
     @Autowired
     private BillDetailService billDetailService;
+
+    @GetMapping("/statisticsProduct")
+    public ResponseEntity<List<BillDetailStatisticalProductRespone>> getBillStatistics() {
+            List<BillDetailStatisticalProductRespone> statistics = billDetailService.getBillStatistics();
+            return ResponseEntity.ok(statistics);
+
+    }
+
 
     @GetMapping("/list-bill-details")
     public Page<BillDetailResponse> getAllBillDetails(
