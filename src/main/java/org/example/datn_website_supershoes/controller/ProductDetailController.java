@@ -18,6 +18,7 @@ import org.example.datn_website_supershoes.repository.ProductRepository;
 import org.example.datn_website_supershoes.repository.SizeRepository;
 import org.example.datn_website_supershoes.service.ProductDetailService;
 import org.example.datn_website_supershoes.service.ProductImageService;
+import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -66,6 +67,9 @@ public class ProductDetailController {
 
     @Autowired
     private ColorRepository colorRepository;
+
+    @Autowired
+    private ProductService productService;
 
     @GetMapping("/list-productDetail")
     public ResponseEntity<Map<String, Object>> getAllProductDetail(
@@ -212,6 +216,9 @@ public class ProductDetailController {
         if (productDetail.getDescription() != null) {
             existingProduct.setDescription(productDetail.getDescription());
         }
+        if (productDetail.getProductImage() != null) {
+            existingProduct.setProductImage(productDetail.getProductImage());
+        }
 
         // Gọi phương thức updateProductDetail với ID và đối tượng ProductDetail
         ProductDetail updatedProductDetail = productDetailService.updateProductDetail(id, existingProduct);
@@ -248,6 +255,79 @@ public class ProductDetailController {
         response.put("DT", updateProductDetail);
         response.put("EC", 0);
         response.put("EM", "ProductDetail updated successfully");
+
+        return ResponseEntity.ok(response);
+    }
+
+//    @PutMapping("/updateProductStatus/{id}")
+//    public ResponseEntity<Map<String, Object>> updateStatus(@PathVariable Long id, @RequestBody ProductDetail productDetail) {
+//        // Tìm ProductDetail hiện tại bằng ID
+//        Optional<ProductDetail> existingProductDetailOpt = productDetailService.getProductByIdDetail(id);
+//
+//        if (!existingProductDetailOpt.isPresent()) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        // Lấy ProductDetail hiện tại
+//        ProductDetail existingProductDetail = existingProductDetailOpt.get();
+//
+//        // Cập nhật trạng thái của ProductDetail
+//        existingProductDetail.setStatus(productDetail.getStatus());
+//
+//        // Lấy Product liên kết với ProductDetail và cập nhật trạng thái
+//        Product product = existingProductDetail.getProduct();
+//        if (product != null) {
+//            product.setStatus(productDetail.getStatus());
+//            productService.createProduct1(product); // Lưu Product sau khi cập nhật
+//        }
+//
+//        // Lưu ProductDetail sau khi cập nhật
+//        ProductDetail updatedProductDetail = productDetailService.createProductDetail(existingProductDetail);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("DT", updatedProductDetail);
+//        response.put("EC", 0);
+//        response.put("EM", "Status of Product and ProductDetail updated successfully");
+//
+//        return ResponseEntity.ok(response);
+//    }
+
+    @PutMapping("/updateProductStatus/{id}")
+    public ResponseEntity<Map<String, Object>> updateStatus(@PathVariable Long id, @RequestBody ProductDetail productDetail) {
+        // Tìm ProductDetail hiện tại bằng ID
+        Optional<ProductDetail> existingProductDetailOpt = productDetailService.getProductByIdDetail(id);
+
+        if (!existingProductDetailOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Lấy ProductDetail hiện tại
+        ProductDetail existingProductDetail = existingProductDetailOpt.get();
+
+        // Cập nhật trạng thái của ProductDetail
+        existingProductDetail.setStatus(productDetail.getStatus());
+
+        // Lấy Product liên kết với ProductDetail và cập nhật trạng thái
+        Product product = existingProductDetail.getProduct();
+        if (product != null) {
+            product.setStatus(productDetail.getStatus());
+            productService.createProduct1(product); // Lưu Product sau khi cập nhật
+
+            // Lấy tất cả ProductDetail liên kết với Product và cập nhật trạng thái
+            List<ProductDetail> productDetails = productDetailService.getProductDetailsByProductId(product.getId());
+            for (ProductDetail detail : productDetails) {
+                detail.setStatus(productDetail.getStatus());
+                productDetailService.createProductDetail(detail); // Lưu từng ProductDetail sau khi cập nhật
+            }
+        }
+
+        // Lưu ProductDetail sau khi cập nhật
+        ProductDetail updatedProductDetail = productDetailService.createProductDetail(existingProductDetail);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", updatedProductDetail);
+        response.put("EC", 0);
+        response.put("EM", "Status of Product and associated ProductDetails updated successfully");
 
         return ResponseEntity.ok(response);
     }

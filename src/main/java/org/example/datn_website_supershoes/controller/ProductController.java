@@ -14,6 +14,7 @@ import org.example.datn_website_supershoes.repository.CategoryRepository;
 import org.example.datn_website_supershoes.repository.MaterialRepository;
 import org.example.datn_website_supershoes.repository.ProductRepository;
 import org.example.datn_website_supershoes.repository.ShoeSoleRepository;
+import org.example.datn_website_supershoes.service.ProductDetailService;
 import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -61,7 +62,8 @@ public class ProductController {
 
     @Autowired
     private BrandRepository brandRepository;
-
+    @Autowired
+    ProductDetailService productDetailService;
 
 
     @GetMapping("/list-product")
@@ -72,6 +74,8 @@ public class ProductController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "productDetailId", required = false) Long productDetailId,
+            @RequestParam(value = "productCode", required = false) String productCode,
             @RequestParam(value = "size", defaultValue = "20") int size
     ) {
         // Tạo Specification cho các tiêu chí tìm kiếm
@@ -93,6 +97,10 @@ public class ProductController {
             }
             if (brandId != null) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("brand").get("id"), brandId));
+            }
+            if (productDetailId != null) {
+                Join<ProductDetail, Product> detailProductJoin = root.join("product");
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(detailProductJoin.get("id"), productDetailId));
             }
 
             return p;
@@ -119,6 +127,37 @@ public class ProductController {
         Optional<Product> product = productService.getProductById(id);
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    @PutMapping("/updateProductStatus/{id}")
+    public ResponseEntity<Map<String, Object>> updateStatusByProduct(@PathVariable Long idProduct, @RequestBody Product productRequest) {
+        // Tìm Product hiện tại bằng ID
+        Optional<Product> existingProductOpt = productService.getProductById(idProduct);
+
+        if (!existingProductOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Lấy Product hiện tại
+        Product existingProduct = existingProductOpt.get();
+
+        // Cập nhật trạng thái của Product
+        existingProduct.setStatus(productRequest.getStatus());
+        productService.createProduct1(existingProduct); // Lưu Product sau khi cập nhật
+
+        // Lấy tất cả ProductDetail liên kết với Product và cập nhật trạng thái
+        List<ProductDetail> productDetails = productDetailService.getProductDetailsByProductId(idProduct);
+        for (ProductDetail productDetail : productDetails) {
+            productDetail.setStatus(productRequest.getStatus());
+            productDetailService.createProductDetail(productDetail); // Lưu ProductDetail sau khi cập nhật
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("DT", existingProduct);
+        response.put("EC", 0);
+        response.put("EM", "Status of Product and associated ProductDetails updated successfully");
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> createProduct(@RequestBody Product product) {
@@ -257,15 +296,15 @@ public class ProductController {
     }
 
     // dùng cho sale sản phẩm
-    @GetMapping("/listProduct")
-    public List<ProductResponse> getAllAccount() {
-        List<ProductResponse> productResponse = productService.findProductRequests();
-        return productResponse;
-    }
-    @GetMapping("/listProductSearch")
-    private List<ProductResponse> findSearch(@RequestParam("search") String search){
-        return productService.findProductRequests().stream()
-                .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-                .collect(Collectors.toList());
-    }
+//    @GetMapping("/listProduct")
+//    public List<ProductResponse> getAllAccount() {
+//        List<ProductResponse> productResponse = productService.findProductRequests();
+//        return productResponse;
+//    }
+//    @GetMapping("/listProductSearch")
+//    private List<ProductResponse> findSearch(@RequestParam("search") String search){
+//        return productService.findProductRequests().stream()
+//                .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+//                .collect(Collectors.toList());
+//    }
 }

@@ -37,7 +37,9 @@ public class ProductDetailService {
 //
         return productDetailRepository.findAll(spec, pageable).map(this::convertToProductDetailResponse);
     }
-
+    public List<ProductDetail> getProductDetailsByProductId(Long productId) {
+        return productDetailRepository.findByProductId(productId);
+    }
     private ProductDetailResponse convertToProductDetailResponse(ProductDetail productDetail) {
         ProductDetailResponse response = new ProductDetailResponse();
 

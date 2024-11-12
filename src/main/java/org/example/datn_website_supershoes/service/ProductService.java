@@ -9,6 +9,8 @@ import org.example.datn_website_supershoes.model.Brand;
 import org.example.datn_website_supershoes.model.Category;
 import org.example.datn_website_supershoes.model.Material;
 import org.example.datn_website_supershoes.model.Product;
+import org.example.datn_website_supershoes.model.ProductDetail;
+import org.example.datn_website_supershoes.model.ProductImage;
 import org.example.datn_website_supershoes.model.ShoeSole;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.BrandRepository;
@@ -24,8 +26,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -47,7 +51,13 @@ public class ProductService {
     @Autowired
     private ShoeSoleRepository shoeSoleRepository;
 
+    public Product createProduct1(Product product) {
+        // Lưu đối tượng Product vào cơ sở dữ liệu
+        Product savedProduct = productRepository.save(product);
+        return  productRepository.save(product);
+        // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
 
+    }
 
 
 public ProductResponse createProduct(Product product) {
@@ -57,6 +67,7 @@ public ProductResponse createProduct(Product product) {
     // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
     return convertToProductResponse(savedProduct);
 }
+
 
     @Transactional
     public Product updateProduct(Long id, ProductRequest productRequest) {
@@ -117,35 +128,79 @@ public ProductResponse createProduct(Product product) {
         return productRepository.findAll(spec, pageable).map(this::convertToProductResponse);
     }
 
-private ProductResponse convertToProductResponse(Product product) {
-    ProductResponse response = new ProductResponse();
-    // Chép các thuộc tính đơn giản
-    response.setId(product.getId());
-    response.setName(product.getName());
-    response.setProductCode(product.getProductCode());
-    response.setImageByte(product.getImageByte());
-    // Chép các thuộc tính từ các đối tượng liên quan
-    if (product.getBrand() != null) {
-        response.setIdBrand(product.getBrand().getId());
-        response.setNameBrand(product.getBrand().getName());
-    }
-    if (product.getCategory() != null) {
-        response.setIdCategory(product.getCategory().getId());
-        response.setNameCategory(product.getCategory().getName());
-    }
-    if (product.getMaterial() != null) {
-        response.setIdMaterial(product.getMaterial().getId());
-        response.setNameMaterial(product.getMaterial().getName());
-    }
-    if (product.getShoeSole() != null) {
-        response.setIdShoeSole(product.getShoeSole().getId());
-        response.setNameShoeSole(product.getShoeSole().getName());
-    }
-    response.setStatus(product.getStatus());
+    private ProductResponse convertToProductResponse(Product product) {
+        ProductResponse response = new ProductResponse();
 
-    return response;
+        // Chép các thuộc tính đơn giản
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setProductCode(product.getProductCode());
+        response.setImageByte(product.getImageByte());
+        response.setGender(product.isGender()); // Thêm trường giới tính nếu có
+        response.setStatus(product.getStatus());
 
-}
+        // Chép các thuộc tính từ Brand nếu có
+        if (product.getBrand() != null) {
+            response.setIdBrand(product.getBrand().getId());
+            response.setNameBrand(product.getBrand().getName());
+        }
+
+        // Chép các thuộc tính từ Category nếu có
+        if (product.getCategory() != null) {
+            response.setIdCategory(product.getCategory().getId());
+            response.setNameCategory(product.getCategory().getName());
+        }
+
+        // Chép các thuộc tính từ Material nếu có
+        if (product.getMaterial() != null) {
+            response.setIdMaterial(product.getMaterial().getId());
+            response.setNameMaterial(product.getMaterial().getName());
+        }
+
+        // Chép các thuộc tính từ ShoeSole nếu có
+        if (product.getShoeSole() != null) {
+            response.setIdShoeSole(product.getShoeSole().getId());
+            response.setNameShoeSole(product.getShoeSole().getName());
+        }
+        if (product.getProductDetails() != null) {
+            List<Long> productDetailIds = product.getProductDetails().stream()
+                    .map(ProductDetail::getId)
+                    .collect(Collectors.toList());
+            response.setIdProductDetail(productDetailIds);
+
+        }
+        if (product.getProductDetails() != null && !product.getProductDetails().isEmpty()) {
+            ProductDetail firstProductDetail = product.getProductDetails().get(0); // Lấy ProductDetail đầu tiên
+
+            // Thiết lập quantity, price, description từ ProductDetail đầu tiên
+            response.setQuantity(firstProductDetail.getQuantity() != null ? firstProductDetail.getQuantity() : 0);
+            response.setPrice(firstProductDetail.getPrice() != null ? firstProductDetail.getPrice() : BigDecimal.ZERO);
+            response.setDescription(firstProductDetail.getDescription());
+
+            // Chuyển đổi danh sách ProductImage sang imageBytes nếu có
+            if (firstProductDetail.getProductImage() != null) {
+                response.setImageBytes(firstProductDetail.getProductImage().stream()
+                        .map(ProductImage::getImageByte)
+                        .collect(Collectors.toList()));
+            }
+
+            // Chuyển đổi thông tin Color nếu có
+            if (firstProductDetail.getColor() != null) {
+                response.setIdColor(firstProductDetail.getColor().getId());
+                response.setNameColor(firstProductDetail.getColor().getName());
+            }
+
+            // Chuyển đổi thông tin Size nếu có
+            if (firstProductDetail.getSize() != null) {
+                response.setIdSize(firstProductDetail.getSize().getId());
+                response.setNameSize(firstProductDetail.getSize().getName());
+            }
+        }
+
+
+        return response;
+    }
+
     public Optional<Product> getProductById(Long id){
         return productRepository.findById(id);
     }
@@ -172,7 +227,7 @@ private ProductResponse convertToProductResponse(Product product) {
     }
 
 
-    public List<ProductResponse> findProductRequests(){
-    return productRepository.findProductRequests();
-    }
+//    public List<ProductResponse> findProductRequests(){
+//    return productRepository.findProductRequests();
+//    }
 }
