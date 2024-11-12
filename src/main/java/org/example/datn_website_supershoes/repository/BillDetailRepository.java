@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.repository;
 
 
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
+import org.example.datn_website_supershoes.dto.response.BillDetailStatisticalProductRespone;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,4 +59,12 @@ public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
 
     @Query("SELECT bd FROM BillDetail bd WHERE bd.bill.id = :idBill")
     List<BillDetail> findByIdBill(@Param("idBill") Long idBill);
+
+    @Query("SELECT p.imageByte, p.name, bd.quantity, bd.priceDiscount " +
+            "FROM BillDetail bd " +
+            "JOIN bd.bill b " +
+            "JOIN bd.productDetail pd " +
+            "JOIN pd.product p")
+    List<Object[]> findProductDetailsForBillDetails();
+
 }

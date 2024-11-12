@@ -5,6 +5,8 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
+import org.example.datn_website_supershoes.dto.response.BillDetailStatisticalProductRespone;
+import org.example.datn_website_supershoes.dto.response.BillStatisticalPieResponse;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.BillDetail;
@@ -21,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BillDetailService {
@@ -434,4 +437,19 @@ public class BillDetailService {
             System.out.println(e.getMessage());
         }
     }
+    public List<BillDetailStatisticalProductRespone> getBillStatistics() {
+        // Fetch raw data from the repository
+        List<Object[]> rawData = billDetailRepository.findProductDetailsForBillDetails();
+
+        // Map raw data to BillDetailStatisticalProductRespone objects
+        return rawData.stream()
+                .map(data -> new BillDetailStatisticalProductRespone(
+                        (byte[]) data[0],        // Assuming first element is image (byte[])
+                        (String) data[1],       // Assuming second element is product name
+                        (Integer) data[2],      // Assuming third element is quantity
+                        (BigDecimal) data[3]    // Assuming fourth element is priceDiscount
+                ))
+                .collect(Collectors.toList());
+    }
+
 }

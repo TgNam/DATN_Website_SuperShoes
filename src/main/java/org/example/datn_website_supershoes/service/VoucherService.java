@@ -22,8 +22,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -56,12 +60,14 @@ public class VoucherService {
         for (Voucher voucher : vouchers) {
             String oldStatus = voucher.getStatus();
 
-            if (voucher.getStartAt().after(now)) {
-                voucher.setStatus(Status.UPCOMING.toString());
-            } else if (voucher.getStartAt().before(now) && voucher.getEndAt().after(now)) {
-                voucher.setStatus(Status.ONGOING.toString());
-            } else if (voucher.getEndAt().before(now)) {
-                voucher.setStatus(Status.EXPIRED.toString());
+            if (!oldStatus.equals(Status.EXPIRED.toString()) && !oldStatus.equals(Status.ENDED_EARLY.toString())) {
+                if (voucher.getStartAt().after(now)) {
+                    voucher.setStatus(Status.UPCOMING.toString());
+                } else if (voucher.getStartAt().before(now) && voucher.getEndAt().after(now)) {
+                    voucher.setStatus(Status.ONGOING.toString());
+                } else if (voucher.getEndAt().before(now)) {
+                    voucher.setStatus(Status.EXPIRED.toString());
+                }
             }
 
             if (!oldStatus.equals(voucher.getStatus())) {
@@ -83,7 +89,10 @@ public class VoucherService {
 
         Voucher voucher = convertVoucherRequestDTO(voucherRequest);
         voucher.setCodeVoucher(generateVoucherCode());
-        Date currentDate = new Date();
+        Date currentDate = Date.from(Instant.now());
+
+        voucher.setStartAt(convertToUTC(voucherRequest.getStartAt()));
+        voucher.setEndAt(convertToUTC(voucherRequest.getEndAt()));
 
         Account creator = accountRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -94,16 +103,17 @@ public class VoucherService {
 
         if (voucher.getIsPrivate()) {
             List<AccountVoucher> accountVouchers = voucherRequest.getAccountIds().stream()
+                    .filter(Objects::nonNull)
                     .map(accountId -> {
                         Account account = accountRepository.findById(accountId)
-                                .orElseThrow(() -> new RuntimeException("Account not found for ID: " + accountId));
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với ID: " + accountId));
 
                         AccountVoucher accountVoucher = new AccountVoucher();
                         accountVoucher.setVoucher(savedVoucher);
                         accountVoucher.setAccount(account);
                         accountVoucher.setCreatedBy(creator.getName());
                         accountVoucher.setStatus("ACTIVE");
-                        accountVoucher.setCreatedAt(currentDate);
+                        accountVoucher.setCreatedAt(new Date());
                         return accountVoucher;
                     })
                     .collect(Collectors.toList());
@@ -124,13 +134,23 @@ public class VoucherService {
         Account updater = accountRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        voucher.setStartAt(voucherRequest.getStartAt());
-        voucher.setEndAt(voucherRequest.getEndAt());
+        voucher.setStartAt(convertToUTC(voucherRequest.getStartAt()));
+        voucher.setEndAt(convertToUTC(voucherRequest.getEndAt()));
         voucher.setQuantity(voucherRequest.getQuantity());
         voucher.setUpdatedBy(updater.getName());
 
+        Date currentDate = Date.from(Instant.now());
+        updateVoucherStatus(voucher, currentDate);
+
         Voucher updatedVoucher = voucherRepository.save(voucher);
         return updatedVoucher;
+    }
+
+    private Date convertToUTC(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return Date.from(ZonedDateTime.ofInstant(date.toInstant(), ZoneOffset.UTC).toInstant());
     }
 
     public VoucherResponse getVoucherById(Long id) {
@@ -190,19 +210,6 @@ public class VoucherService {
         return voucherRepository.save(voucher);
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void checkAndExpireVouchers() {
-        List<Voucher> vouchers = voucherRepository.findAll();
-        Date currentDate = new Date();
-
-        vouchers.forEach(voucher -> {
-            if (voucher.getEndAt().before(currentDate) && !Status.EXPIRED.toString().equals(voucher.getStatus())) {
-                voucher.setStatus(Status.EXPIRED.toString());
-                voucherRepository.save(voucher);
-            }
-        });
-    }
-
     private void updateVoucherStatus(Voucher voucher, Date currentDate) {
         if (voucher.getStartAt().after(currentDate)) {
             voucher.setStatus(Status.UPCOMING.toString());
@@ -236,7 +243,8 @@ public class VoucherService {
     }
 
     public Page<VoucherResponse> getVouchers(Specification<Voucher> spec, Pageable pageable) {
-        return voucherRepository.findAll(spec, pageable).map(this::convertToVoucherResponse);
+        Page<Voucher> voucherPage = voucherRepository.findAll(spec, pageable);
+        return voucherPage.map(this::convertToVoucherResponse);
     }
 
     public List<VoucherBillResponse> findListVoucherByStatusAndIsPublic() {
