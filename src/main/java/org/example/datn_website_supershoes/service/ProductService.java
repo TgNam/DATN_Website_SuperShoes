@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ProductRequest;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
+import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
 import org.example.datn_website_supershoes.model.Brand;
 import org.example.datn_website_supershoes.model.Category;
@@ -11,11 +12,7 @@ import org.example.datn_website_supershoes.model.Material;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ShoeSole;
 import org.example.datn_website_supershoes.model.Voucher;
-import org.example.datn_website_supershoes.repository.BrandRepository;
-import org.example.datn_website_supershoes.repository.CategoryRepository;
-import org.example.datn_website_supershoes.repository.MaterialRepository;
-import org.example.datn_website_supershoes.repository.ProductRepository;
-import org.example.datn_website_supershoes.repository.ShoeSoleRepository;
+import org.example.datn_website_supershoes.repository.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,7 +30,8 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
 
     @Autowired
     private BrandRepository brandRepository;
@@ -174,5 +172,13 @@ private ProductResponse convertToProductResponse(Product product) {
 
     public List<ProductResponse> findProductRequests(){
     return productRepository.findProductRequests();
+    }
+
+    public ProductViewCustomerReponse getFindProductPriceRangeWithPromotionByIdProduct(Long idProduct){
+        Optional<ProductViewCustomerReponse> productViewCustomerReponse = productDetailRepository.findProductPriceRangeWithPromotionByIdProduct(idProduct);
+        if (productViewCustomerReponse.isEmpty()){
+            throw new RuntimeException("Sản phẩm có Id là: " +idProduct+" không tồn tại");
+        }
+        return productViewCustomerReponse.get();
     }
 }

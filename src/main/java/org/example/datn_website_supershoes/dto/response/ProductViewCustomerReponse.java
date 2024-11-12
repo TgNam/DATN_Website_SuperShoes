@@ -18,6 +18,24 @@ public class ProductViewCustomerReponse {
 
     private String nameProduct;
 
+    private byte[] imageByte;
+
+    private Long idBrand;
+
+    private String nameBrand;
+
+    private Long idCategory;
+
+    private String nameCategory;
+
+    private Long idMaterial;
+
+    private String nameMaterial;
+
+    private Long idShoeSole;
+
+    private String nameShoeSole;
+
     private BigDecimal minPrice;
 
     private BigDecimal maxPrice;
