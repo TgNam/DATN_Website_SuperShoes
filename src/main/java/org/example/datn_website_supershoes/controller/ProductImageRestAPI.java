@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.dto.request.ProductImageRequest;
 import org.example.datn_website_supershoes.dto.response.ProductImageResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+@CrossOrigin(origins = "http://localhost:3000") // Hoặc nguồn gốc của frontend
 @RestController
 @RequestMapping("/api/image")
 public class ProductImageRestAPI {
@@ -83,7 +84,7 @@ public class ProductImageRestAPI {
 //                    .body("Error updating image: " + e.getMessage());
 //        }
 //    }
-
+@Transactional
     @PostMapping("/updateImages2")
     public ResponseEntity<?> createOrUpdateImages(@RequestBody ProductImageRequest productImageRequest) {
         try {
@@ -112,6 +113,29 @@ public class ProductImageRestAPI {
             return ResponseEntity.ok(responses);
 
         } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating images: " + e.getMessage());
+        }
+    }
+    @PostMapping("/updateImages3")
+    public ResponseEntity<?> createOrUpdateImages1(@RequestBody ProductImageRequest productImageRequest) {
+        System.out.println("Received request: " + productImageRequest);
+        try {
+            // Kiểm tra các điều kiện cần thiết
+            if (productImageRequest.getIdProductDetail() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("idProductDetail is required for updating the images.");
+            }
+            // Xử lý logic cập nhật...
+            System.out.println("Updating images...");
+            List<ProductImage> updatedImages = productImageService.updateProductImageByProductDetailId(
+                    productImageRequest.getIdProductDetail(), productImageRequest
+            );
+            System.out.println("Images updated successfully");
+            // Trả về phản hồi
+            return ResponseEntity.ok(updatedImages);
+        } catch (RuntimeException e) {
+            System.out.println("Error while updating images: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error updating images: " + e.getMessage());
         }
