@@ -296,15 +296,15 @@ public class ProductController {
     }
 
     // dùng cho sale sản phẩm
-//    @GetMapping("/listProduct")
-//    public List<ProductResponse> getAllAccount() {
-//        List<ProductResponse> productResponse = productService.findProductRequests();
-//        return productResponse;
-//    }
-//    @GetMapping("/listProductSearch")
-//    private List<ProductResponse> findSearch(@RequestParam("search") String search){
-//        return productService.findProductRequests().stream()
-//                .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-//                .collect(Collectors.toList());
-//    }
+    @GetMapping("/listProduct")
+    public List<ProductResponse> getAllAccount() {
+        List<ProductResponse> productResponse = productService.findProductRequests();
+        return productResponse;
+    }
+    @GetMapping("/listProductSearch")
+    private List<ProductResponse> findSearch(@RequestParam("search") String search){
+        return productService.findProductRequests().stream()
+                .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                .collect(Collectors.toList());
+    }
 }
