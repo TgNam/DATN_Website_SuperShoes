@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.controller.REST;
 
 import org.example.datn_website_supershoes.dto.request.LoginRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -31,6 +32,20 @@ public class AuthenticationRestAPI {
         }
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Account account){
+        try {
+            return ResponseEntity.ok(authenticationService.register(account));
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(e.getMessage());
+        }catch (Exception e){
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Param("email") String email) {
         try {
