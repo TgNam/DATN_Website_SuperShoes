@@ -195,7 +195,12 @@ public class ProductDetailService {
         return productViewCustomerReponses;
     }
 
-    public ProductPromotionResponse findProductPromotionByIdProcuctAndIdColorAndIdSize(Long idProduct,Long idColor,Long idSize){
-        return productDetailRepository.findProductPromotionByIdProcuctAndIdColorAndIdSize(idProduct,idColor,idSize).get();
+    public ProductPromotionResponse findProductPromotionByIdProcuctAndIdColorAndIdSize(Long idProduct, Long idColor, Long idSize) {
+        Optional<ProductPromotionResponse> productPromotionResponse = productDetailRepository.findProductPromotionByIdProcuctAndIdColorAndIdSize(idProduct, idColor, idSize);
+        if (productPromotionResponse.isEmpty()) {
+            throw new RuntimeException("Sản phẩm đã hết hàng");
+        }
+        return productPromotionResponse.get();
     }
+
 }

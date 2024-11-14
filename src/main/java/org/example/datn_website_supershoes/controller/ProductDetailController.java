@@ -406,8 +406,8 @@ public class ProductDetailController {
             @RequestParam(value = "idProduct", required = false) Long idProduct,
             @RequestParam(value = "idColor", required = false) Long idColor,
             @RequestParam(value = "idSize", required = false) Long idSize
-    ){
-        try{
+    ) {
+        try {
             if (idProduct == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -428,13 +428,15 @@ public class ProductDetailController {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
                                 .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: ID kích cỡ  không được để trống!")
+                                .mess("Lỗi: ID kích cỡ không được để trống!")
                                 .build()
                 );
             }
-            ProductPromotionResponse productPromotionResponse = productDetailService.findProductPromotionByIdProcuctAndIdColorAndIdSize(idProduct,idColor,idSize);
+
+            ProductPromotionResponse productPromotionResponse = productDetailService.findProductPromotionByIdProcuctAndIdColorAndIdSize(idProduct, idColor, idSize);
             return ResponseEntity.ok(productPromotionResponse);
-        }catch (RuntimeException e){
+
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -444,6 +446,8 @@ public class ProductDetailController {
                     );
         }
     }
+
+
 }
 
 
