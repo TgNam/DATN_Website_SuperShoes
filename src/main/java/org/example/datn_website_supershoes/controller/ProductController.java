@@ -3,6 +3,8 @@ package org.example.datn_website_supershoes.controller;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
+import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
+import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Brand;
 import org.example.datn_website_supershoes.model.Category;
 import org.example.datn_website_supershoes.model.Material;
@@ -307,4 +309,28 @@ public class ProductController {
                 .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
+    @GetMapping("/findProductPriceRangePromotion")
+    public ResponseEntity<?> findProductPriceRangePromotion(@RequestParam(value = "idProduct", required = false) Long idProduct){
+        try{
+            if (idProduct == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            ProductViewCustomerReponse productViewCustomerReponse = productService.getFindProductPriceRangeWithPromotionByIdProduct(idProduct);
+            return ResponseEntity.ok(productViewCustomerReponse);
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
 }

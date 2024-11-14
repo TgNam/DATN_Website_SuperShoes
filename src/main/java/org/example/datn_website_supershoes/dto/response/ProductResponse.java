@@ -45,23 +45,4 @@ public class ProductResponse {
 
     private String status;
 
-    private List<Long> idProductDetail;
-
-    private int quantity;
-
-    private BigDecimal price;
-
-    private String description;
-
-    private Long idSize;
-
-    private String nameSize;
-
-    private Long idColor;
-
-    private String nameColor;
-
-    private List<byte[]> imageBytes;
-
-
 }

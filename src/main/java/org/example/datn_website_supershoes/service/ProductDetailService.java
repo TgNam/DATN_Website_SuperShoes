@@ -192,9 +192,15 @@ public class ProductDetailService {
     }
     public List<ProductViewCustomerReponse> getProductPriceRangeWithPromotion() {
         List<ProductViewCustomerReponse> productViewCustomerReponses = productDetailRepository.findProductPriceRangeWithPromotion();
-        for(ProductViewCustomerReponse reponse :productViewCustomerReponses){
-            System.out.println("IdProduct: "+ reponse.getIdProduct()+", NameProduct: "+reponse.getNameProduct()+", MinPrice: "+reponse.getMinPrice()+", MaxPrice"+reponse.getMaxPrice()+", MinPriceAfterDiscount: "+reponse.getMinPriceAfterDiscount()+", MaxPriceAfterDiscount"+reponse.getMaxPriceAfterDiscount());
-        }
         return productViewCustomerReponses;
     }
+
+    public ProductPromotionResponse findProductPromotionByIdProcuctAndIdColorAndIdSize(Long idProduct, Long idColor, Long idSize) {
+        Optional<ProductPromotionResponse> productPromotionResponse = productDetailRepository.findProductPromotionByIdProcuctAndIdColorAndIdSize(idProduct, idColor, idSize);
+        if (productPromotionResponse.isEmpty()) {
+            throw new RuntimeException("Sản phẩm đã hết hàng");
+        }
+        return productPromotionResponse.get();
+    }
+
 }
