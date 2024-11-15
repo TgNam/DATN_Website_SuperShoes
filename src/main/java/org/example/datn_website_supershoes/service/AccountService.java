@@ -14,6 +14,8 @@ import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -227,5 +229,11 @@ public class AccountService {
         return accountRepository.findEmailsByCustomerIds(customerIds);
     }
 
+    public Account getUseLogin(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println( authentication.getName());
+        Account user = accountRepository.findByEmail(authentication.getName()).get();
+        return  user;
+    }
 }
 

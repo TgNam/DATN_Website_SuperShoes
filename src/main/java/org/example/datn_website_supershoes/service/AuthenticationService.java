@@ -9,7 +9,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.util.Optional;
 
 
 @Service
@@ -44,6 +47,15 @@ public class AuthenticationService {
                 .resfreshToken("1234")
                 .build();
 
+    }
+    @Transactional
+    public  Account register(Account account){
+        Optional<Account> checkAccount = accountRepository.findByEmail(account.getEmail());
+        if(checkAccount.isPresent()){
+            throw  new RuntimeException("Email đã được đăng ký!");
+        }
+        account.setPassword(passwordEncoderService.encodedPassword(account.getPassword()));
+        return  accountRepository.save(account);
     }
 
 

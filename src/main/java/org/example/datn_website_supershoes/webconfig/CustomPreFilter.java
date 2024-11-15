@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.datn_website_supershoes.service.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,16 +50,17 @@ public class CustomPreFilter extends OncePerRequestFilter {
         if (StringUtils.isNotEmpty(email) || SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
             if (jwtService.isValid(token, userDetails)) {
-                SecurityContext contextHolder = SecurityContextHolder.createEmptyContext();
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities()
                 );
-                contextHolder.setAuthentication(authenticationToken);
-                SecurityContextHolder.setContext(contextHolder);
+
+                // Cập nhật SecurityContext với authentication token
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }

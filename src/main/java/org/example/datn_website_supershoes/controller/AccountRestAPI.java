@@ -243,4 +243,9 @@ public class AccountRestAPI {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/get-account-login")
+    public Account getAccountLogin(){
+        return accountService.getUseLogin();
+    }
+
 }
