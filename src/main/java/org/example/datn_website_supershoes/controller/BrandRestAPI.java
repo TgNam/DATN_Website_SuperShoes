@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/brand")
+@RequestMapping("api/v1/brand")
 public class BrandRestAPI {
     @Autowired
     private BrandService brandService;

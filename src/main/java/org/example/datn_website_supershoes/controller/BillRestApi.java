@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/billByEmployee")
+@RequestMapping("/api/v1/billByEmployee")
 public class BillRestApi {
     @Autowired
     private BillByEmployeeService billByEmployeeService;

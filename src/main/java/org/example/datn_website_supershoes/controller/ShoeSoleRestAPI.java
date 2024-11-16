@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/shoeSole")
+@RequestMapping("/api/v1/shoeSole")
 public class ShoeSoleRestAPI {
 
     @Autowired

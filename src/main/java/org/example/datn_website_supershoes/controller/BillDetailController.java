@@ -21,7 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 @RestController
-@RequestMapping("/bill-detail")
+@RequestMapping("/api/v1/bill-detail")
 public class BillDetailController {
 
     @Autowired

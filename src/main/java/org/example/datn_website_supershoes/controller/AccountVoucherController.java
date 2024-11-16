@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 
 @RestController
-@RequestMapping("/account-voucher")
+@RequestMapping("/api/v1/account-voucher")
 public class AccountVoucherController {
 
     @Autowired

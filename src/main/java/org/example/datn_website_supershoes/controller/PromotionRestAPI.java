@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/promotion")
+@RequestMapping("api/v1/promotion")
 public class PromotionRestAPI {
 
     @Autowired

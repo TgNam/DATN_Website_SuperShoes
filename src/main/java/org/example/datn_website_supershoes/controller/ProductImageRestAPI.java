@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:3000") // Hoặc nguồn gốc của frontend
 @RestController
-@RequestMapping("/api/image")
+@RequestMapping("/api/v1/image")
 public class ProductImageRestAPI {
     @Autowired
     private ProductImageService productImageService;

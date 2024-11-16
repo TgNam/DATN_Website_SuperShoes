@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api/size")
+@RequestMapping("api/v1/size")
 public class SizeRestAPI {
 
     @Autowired

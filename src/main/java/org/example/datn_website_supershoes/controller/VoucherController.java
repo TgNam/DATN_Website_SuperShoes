@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/voucher")
+@RequestMapping("/api/v1/voucher")
 public class VoucherController {
 
     @Autowired
