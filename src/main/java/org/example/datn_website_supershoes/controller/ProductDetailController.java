@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/productDetail")
+@RequestMapping("api/v1/productDetail")
 public class ProductDetailController {
 
     @Autowired

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/color")
+@RequestMapping("/api/v1/color")
 public class ColorRestAPI {
     @Autowired
     private ColorService colorService;

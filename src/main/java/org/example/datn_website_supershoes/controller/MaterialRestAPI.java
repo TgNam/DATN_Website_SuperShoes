@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/material")
+@RequestMapping("/api/v1/material")
 public class MaterialRestAPI {
     @Autowired
     private MaterialService materialService;

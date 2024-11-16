@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/billDetailByEmployee")
+@RequestMapping("/api/v1/billDetailByEmployee")
 public class BillDetailRestAPI {
     @Autowired
     private BillDetailService billDetailService;

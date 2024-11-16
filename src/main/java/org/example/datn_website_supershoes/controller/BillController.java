@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/bill")
+@RequestMapping("/api/v1/bill")
 public class BillController {
 
     @Autowired
