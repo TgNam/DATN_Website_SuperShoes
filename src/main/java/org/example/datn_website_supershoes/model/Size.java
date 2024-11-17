@@ -23,7 +23,6 @@ public class Size extends BaseEntity {
     private String name;
 
     @JsonIgnore
-    @JsonManagedReference(value = "sizeProductDetailReference")
     @OneToMany(mappedBy = "size")
     private List<ProductDetail> productDetail;
 

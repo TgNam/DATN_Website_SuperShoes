@@ -29,7 +29,6 @@ public class PromotionDetail extends BaseEntity {
     @JoinColumn(name = "id_productDetail", referencedColumnName = "id")
     private ProductDetail productDetail;
 
-    @JsonBackReference(value = "promotionPromotionDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_promotion", referencedColumnName = "id")
     private Promotion promotion;

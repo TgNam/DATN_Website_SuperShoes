@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -125,5 +122,16 @@ public class PromotionDetailService {
             promotionDetails.add(promotionDetail);
         }
         return promotionDetails;
+    }
+    public Map<Long, PromotionDetail> findPromotionDetailByIdProductDetail (List<Long> ids){
+        Map<Long, PromotionDetail> promotionDetailMap = new HashMap<>();
+
+        for (Long id: ids) {
+            PromotionDetail promotionDetail = promotionDetailRepository
+                    .findPromotionDetailByIdProductDetailAndStatuses(id, List.of(Status.ONGOING.toString()))
+                            .orElse(null);
+            promotionDetailMap.put(id, promotionDetail);
+        }
+        return promotionDetailMap;
     }
 }

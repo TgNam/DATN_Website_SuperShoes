@@ -1,13 +1,11 @@
 package org.example.datn_website_supershoes.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponse;
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
-import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
-import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
+import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
+import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -106,6 +104,12 @@ public class ProductDetailService {
         return productDetailRepository.findById(id);
     }
 
+    public ProductDetail getById(Long id) {
+
+        return productDetailRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product Details not found!"));
+    }
+
 
     public ProductDetail updateProductDetail(Long id, ProductDetail productDetail) {
         ProductDetail existingProductDetail = productDetailRepository.findById(id)
@@ -202,5 +206,7 @@ public class ProductDetailService {
         }
         return productPromotionResponse.get();
     }
+
+
 
 }

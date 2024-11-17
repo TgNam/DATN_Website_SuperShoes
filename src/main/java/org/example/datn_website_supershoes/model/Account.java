@@ -62,8 +62,8 @@ public class Account extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> address;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @OneToOne(mappedBy = "account")
+    @JsonIgnore
     private Cart cart;
 
     @JsonIgnore

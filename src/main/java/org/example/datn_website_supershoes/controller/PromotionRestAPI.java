@@ -1,12 +1,15 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionUpdatesRequest;
 import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Promotion;
+import org.example.datn_website_supershoes.model.PromotionDetail;
+import org.example.datn_website_supershoes.service.PromotionDetailService;
 import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,8 @@ public class PromotionRestAPI {
 
     @Autowired
     private PromotionService promotionService;
+    @Autowired
+    private PromotionDetailService promotionDetailService;
     @GetMapping("/listPromotion")
     public List<PromotionResponse> getAllPromotion(){
         return promotionService.getAllPromotion();
@@ -159,4 +164,30 @@ public class PromotionRestAPI {
                     );
         }
     }
+
+    @PostMapping("/get-by-product-details")
+    private ResponseEntity<?> findPromotionDetailByIdProductDetailAndStatus (@RequestBody List<Long> ids){
+        try{
+            if (ids == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok(promotionDetailService
+                    .findPromotionDetailByIdProductDetail(ids));
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+
 }

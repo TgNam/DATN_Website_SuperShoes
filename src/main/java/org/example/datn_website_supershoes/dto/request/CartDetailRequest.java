@@ -20,6 +20,6 @@ public class CartDetailRequest {
 
     private Long idCart;
 
-    private ProductDetail idProductDetail;
+    private long idProductDetail;
 
 }

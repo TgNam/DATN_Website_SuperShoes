@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -55,6 +57,15 @@ public class ProductService {
         return  productRepository.save(product);
         // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
 
+    }
+
+    public Map<Long, String> getProductNameById(List<Long> listId){
+        Map<Long, String> mapName = new HashMap<>();
+        for (Long id: listId) {
+            ProductDetail pd  = productDetailRepository.findById(id).get();
+            mapName.put(id,pd.getProduct().getName());
+        }
+        return mapName;
     }
 
 

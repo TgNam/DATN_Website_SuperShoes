@@ -20,5 +20,8 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     Optional<CartResponse> CartResponse(@Param("id") Long id);
 
 
+    Optional<Cart> findByAccount_Id(long accountId);
+
+
 
 }

@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.service;
 
+import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.LoginRequest;
 import org.example.datn_website_supershoes.dto.token.TokenResponse;
 import org.example.datn_website_supershoes.model.Account;
@@ -54,6 +55,8 @@ public class AuthenticationService {
         if(checkAccount.isPresent()){
             throw  new RuntimeException("Email đã được đăng ký!");
         }
+        account.setRole("USER");
+        account.setStatus(Status.ACTIVE.toString());
         account.setPassword(passwordEncoderService.encodedPassword(account.getPassword()));
         return  accountRepository.save(account);
     }
