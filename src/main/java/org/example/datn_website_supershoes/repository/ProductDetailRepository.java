@@ -112,4 +112,15 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE' AND p.id=:idProduct AND c.id=:idColor AND s.id=:idSize")
     Optional<ProductPromotionResponse> findProductPromotionByIdProcuctAndIdColorAndIdSize(@Param("idProduct") Long idProduct, @Param("idColor") Long idColor, @Param("idSize") Long idSize);
 
+    @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
+            "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
+            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity) " +
+            "FROM ProductDetail pd " +
+            "INNER JOIN pd.product p " +
+            "INNER JOIN pd.color c " +
+            "INNER JOIN pd.size s " +
+            "JOIN pd.promotionDetail prod ON prod.status = 'ONGOING' " +
+            "JOIN prod.promotion pro " +
+            "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE' AND pd.id IN (:idProductDetail)")
+    List<ProductPromotionResponse> findProductPromotionByLitsIdProductDetail(@Param("idProductDetail") List<Long> idProductDetail);
 }
