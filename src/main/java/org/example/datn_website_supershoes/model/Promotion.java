@@ -50,7 +50,6 @@ public class Promotion extends BaseEntity {
     private Date endAt;
 
     @JsonIgnore
-    @JsonManagedReference(value = "promotionPromotionDetailReference")
     @OneToMany(mappedBy = "promotion")
     private List<PromotionDetail> promotionDetail;
 

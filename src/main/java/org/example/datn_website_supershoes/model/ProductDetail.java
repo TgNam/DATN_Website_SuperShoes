@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,14 +41,13 @@ public class ProductDetail extends BaseEntity {
     @JsonBackReference(value = "productProductDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_product", referencedColumnName = "id")
+    @JsonIgnore
     private Product product;
 
-    @JsonBackReference(value = "sizeProductDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_size", referencedColumnName = "id")
     private Size size;
 
-    @JsonBackReference(value = "colorProductDetailReference")
     @ManyToOne
     @JoinColumn(name = "id_color", referencedColumnName = "id")
     private Color color;
@@ -58,13 +58,16 @@ public class ProductDetail extends BaseEntity {
 
     @JsonManagedReference(value = "productDetailPromotionDetailReference")
     @OneToMany(mappedBy = "productDetail")
+    @JsonIgnore
     private List<PromotionDetail> promotionDetail;
 
     @JsonManagedReference(value = "productDetailCartDetailReference")
     @OneToMany(mappedBy = "productDetail")
+    @JsonIgnore
     private List<CartDetail> cartDetails;
 
     @JsonManagedReference(value = "productDetailBillDetailReference")
     @OneToMany(mappedBy = "productDetail")
+    @JsonIgnore
     private List<BillDetail> billDetails;
 }

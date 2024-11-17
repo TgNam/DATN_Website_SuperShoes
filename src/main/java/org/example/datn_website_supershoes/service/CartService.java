@@ -34,6 +34,15 @@ public class CartService {
             return cartResponse.get();
         }
     }
+    public Cart getCartByAccountId (long accountId){
+        Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
+        if(cartOptional.isPresent()) return cartOptional.get();
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found!"));
+        return cartRepository.save(Cart.builder()
+                        .account(account)
+                        .build());
+    }
 
     public void deleteCartById(Long id) {
         if (cartRepository.existsById(id)) {

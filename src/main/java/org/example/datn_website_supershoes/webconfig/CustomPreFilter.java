@@ -44,21 +44,26 @@ public class CustomPreFilter extends OncePerRequestFilter {
         String token = author.substring("Bearer ".length());
         log.info("token {}", token);
 
-        String email = jwtService.extract(token);
-        log.info("email {}", email);
-
-        if (StringUtils.isNotEmpty(email) || SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-            if (jwtService.isValid(token, userDetails)) {
-                Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-
-                // Cập nhật SecurityContext với authentication token
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        try {
+            String email = jwtService.extract(token);
+            log.info("email {}", email);
+            if(StringUtils.isNotEmpty(email) || SecurityContextHolder.getContext().getAuthentication() == null){
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+                if(jwtService.isValid(token,userDetails)){
+                    SecurityContext contextHolder =  SecurityContextHolder.createEmptyContext();
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    contextHolder.setAuthentication(authenticationToken);
+                    SecurityContextHolder.setContext(contextHolder);
+                }
             }
+
+        }catch (Exception e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
         filterChain.doFilter(request, response);
