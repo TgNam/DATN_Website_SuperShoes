@@ -7,6 +7,7 @@ import org.example.datn_website_supershoes.dto.response.SizeResponse;
 import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.repository.SizeRepository;
 
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,8 @@ public class SizeService {
 
     @Autowired
     SizeRepository sizeRepository;
+    @Autowired
+    private NotificationController notificationController;
     public List<SizeResponse> findAllSize(){
         return sizeRepository.findAllSize();
     }
@@ -39,6 +42,7 @@ public class SizeService {
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
             sizeOt.get().setStatus(newStatus);
             Size size = sizeRepository.save(sizeOt.get());
+        notificationController.sendNotification("UPDATE_SIZE");
             return size;
 
     }
