@@ -9,7 +9,11 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CartRequest {
+
+
     @NotNull
     private Long idAccount;
+
+
 
 }

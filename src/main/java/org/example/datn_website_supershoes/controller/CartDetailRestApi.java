@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cart-detail")
+@RequestMapping("/api/v1/cart-detail")
 public class CartDetailRestApi {
 
     @Autowired
@@ -66,11 +66,11 @@ public class CartDetailRestApi {
         }
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createCartDetail(@RequestBody CartDetailRequest cartDetailRequest) {
+    @PostMapping("/add-product-to-cart/{idUser}")
+    public ResponseEntity<?> createCartDetail(@RequestBody CartDetailRequest cartDetailRequest,
+                                              @PathVariable("idUser") long id) {
         try {
-            cartDetailService.createCartDetail(cartDetailRequest);
-            return ResponseEntity.ok("Thêm sản phẩm thành công!");
+            return ResponseEntity.ok(cartDetailService.addToCart(cartDetailRequest, id));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

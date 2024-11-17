@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -21,14 +22,14 @@ public class CartDetail extends BaseEntity {
     private String codeCart;
 
     @Column
-    private Integer quantity;
+    private int quantity;
 
-    @JsonBackReference(value = "cartDetailReference")
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_cart", referencedColumnName = "id")
     private Cart cart;
 
-    @JsonBackReference(value = "productDetailCartDetailReference")
+
     @ManyToOne
     @JoinColumn(name = "product_detail_id")
     private ProductDetail productDetail;
