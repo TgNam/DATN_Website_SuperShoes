@@ -38,7 +38,7 @@ public class ProductDetail extends BaseEntity {
     @Column(name = "description")
     private String description;
 
-    @JsonBackReference(value = "productProductDetailReference")
+
     @ManyToOne
     @JoinColumn(name = "id_product", referencedColumnName = "id")
     @JsonIgnore

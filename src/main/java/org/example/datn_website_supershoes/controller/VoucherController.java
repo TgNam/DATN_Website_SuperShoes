@@ -278,4 +278,27 @@ public class VoucherController {
                     );
         }
     }
+
+    @GetMapping("/findVoucherByCodeVoucher")
+    public ResponseEntity<?> getVoucherBycodeVoucher (@RequestParam(value = "codeVoucher", required = false) String codeVoucher){
+        try {
+            if (codeVoucher == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: mã giảm giá của phiếu giảm giá không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(voucherService.getVoucherBycodeVoucher(codeVoucher));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 }

@@ -8,6 +8,7 @@ import org.example.datn_website_supershoes.model.*;
 import org.example.datn_website_supershoes.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,6 +34,14 @@ public class BillByEmployeeService {
     private PayBillRepository payBillRepository;
     @Autowired
     private PayBillService PayBillService;
+    @Autowired
+    private CartService cartService;
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
+    @Autowired
+    private CartDetailRepository cartDetailRepository;
     //Lấy tối đa 5 phần tử
     private static final int MAX_DISPLAY_BILLS = 5;
 
@@ -414,5 +423,79 @@ public class BillByEmployeeService {
             throw new RuntimeException(e);
         }
     }
+    @Transactional
+    public void payBillOnline(
+            String codeVoucher,
+            Long idAccount,
+            String name,
+            String phoneNumber,
+            String address,
+            String note
+    ) {
+        UUID uuid = UUID.randomUUID();
+        String generatedCode = this.generateRandomCode() + "-" + uuid;
+
+        Account account = accountRepository.findById(idAccount)
+                .orElseThrow(() -> new RuntimeException("Account not found!"));
+
+        Cart cart = cartService.getCartByAccountId(idAccount);
+        List<CartDetail> cartDetails = cart.getCartDetails();
+
+        Voucher voucher = voucherRepository.findByCodeVoucher(codeVoucher)
+                .orElse(null);
+
+        Bill bill = Bill.builder()
+                .customer(account)
+                .codeBill(generatedCode)
+                .nameCustomer(name)
+                .phoneNumber(phoneNumber)
+                .address(address)
+                .note(note)
+                .type(1)
+                .build();
+
+        bill.setCreatedBy(account.getName());
+        bill.setUpdatedBy(account.getName());
+        bill.setStatus(Status.PENDING.toString());
+
+        if (voucher != null && voucher.getIsPrivate()) {
+            bill.setVoucher(voucher);
+        }
+
+        // Lưu Bill trước
+        billRepository.save(bill);
+
+        try {
+            for (CartDetail detail : cartDetails) {
+                Optional<ProductDetail> productDetailOptional = productDetailRepository
+                        .findByIdAndAndStatus(detail.getProductDetail().getId(), Status.ACTIVE.toString());
+
+                if (productDetailOptional.isEmpty()) {
+                    throw new RuntimeException("Id " + detail.getProductDetail().getId() + " không tồn tại hoặc trạng thái không hợp lệ.");
+                }
+
+                ProductDetail productDetail = productDetailOptional.get();
+
+                BillDetail billDetail = new BillDetail();
+                billDetail.setProductDetail(productDetail);
+                billDetail.setBill(bill);
+                billDetail.setQuantity(detail.getQuantity());
+                billDetail.setStatus(Status.PENDING.toString());
+                billDetail.setPriceDiscount(productDetail.getPrice());
+
+                // Lưu từng BillDetail
+                billDetailRepository.save(billDetail);
+            }
+
+            // Xóa tất cả CartDetail liên quan sau khi xử lý thành công
+            cartRepository.delete(cart);
+
+
+        } catch (RuntimeException e) {
+            // Rollback transaction nếu có lỗi
+            throw e;
+        }
+    }
+
 
 }

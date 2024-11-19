@@ -124,4 +124,27 @@ public class BillRestApi {
                     );
         }
     }
+    @PostMapping("/payBillOnline")
+    private ResponseEntity<?> payBillOnline (
+            @RequestParam(value = "codeVoucher", required = false) String codeVoucher,//Mã phiếu giảm giá
+            @RequestParam(value = "idAccount", required = false) Long idAccount,//id tài khoản mua hàng
+            @RequestParam(value = "name", required = false) String name,//Tên người nhận hàng
+            @RequestParam(value = "phoneNumber", required = false) String phoneNumber,//Số điện thoại người nhận hàng
+            @RequestParam(value = "address", required = false) String address,
+            @RequestParam(value = "note", required = false) String note//Thông tin cần lưu ý
+
+    ){
+        try {
+            billByEmployeeService.payBillOnline(codeVoucher,idAccount,name,phoneNumber,address,note);
+            return ResponseEntity.ok("Thanh toán thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 }

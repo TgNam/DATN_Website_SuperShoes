@@ -137,8 +137,8 @@ public class ProductDetailController {
             throw new RuntimeException("Quantity trong ProductDetail là null");
         }
     }
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createProductDetail(@RequestBody ProductDetail productDetail) {
+    @PostMapping("/add/{productId}")
+    public ResponseEntity<Map<String, Object>> createProductDetail(@RequestBody ProductDetail productDetail,@PathVariable Long productId) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -151,7 +151,7 @@ public class ProductDetailController {
             }
 
             // Tìm kiếm và thiết lập các đối tượng
-            Product product = productRepository.findById(productDetail.getProduct().getId())
+            Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product not found"));
             Size size = sizeRepository.findById(productDetail.getSize().getId())
                     .orElseThrow(() -> new RuntimeException("Size not found"));
