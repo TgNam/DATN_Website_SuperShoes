@@ -176,8 +176,7 @@ public class PromotionRestAPI {
                                 .build()
                 );
             }
-            return ResponseEntity.ok(promotionDetailService
-                    .findPromotionDetailByIdProductDetail(ids));
+            return ResponseEntity.ok(promotionService.findProductPromotionByLitsIdProductDetail(ids));
         }catch (RuntimeException e){
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

@@ -38,7 +38,7 @@ public class Product extends BaseEntity {
     @Column
     private boolean gender;
 
-    @JsonManagedReference(value = "productProductDetailReference")
+
     @OneToMany(mappedBy = "product")
     private List<ProductDetail> productDetails;
 

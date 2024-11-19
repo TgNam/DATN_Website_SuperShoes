@@ -10,7 +10,7 @@ public class DiscountScheduler {
 
     @Autowired
     PromotionService promotionService;
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 30000)
     public void checkAndUpdateExpiredDiscounts() {
         promotionService.updateUpcomingDiscounts();
         promotionService.updateFinishedDiscounts();

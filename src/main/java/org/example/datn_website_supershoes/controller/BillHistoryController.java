@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/bill-history")
+@RequestMapping("/api/v1/bill-history")
 public class BillHistoryController {
 
     @Autowired

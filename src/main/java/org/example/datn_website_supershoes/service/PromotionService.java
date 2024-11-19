@@ -8,10 +8,13 @@ import org.example.datn_website_supershoes.dto.request.PromotionUpdatesRequest;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
+import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
+import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,8 @@ public class PromotionService {
     private PromotionRepository promotionRepository;
     @Autowired
     private PromotionDetailService promotionDetailService;
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
     @Autowired
     private RandomPasswordGeneratorService randomCodePromotion;
     //chuyển trạng thái từ sắp diễn ra thành diễn ra
@@ -165,5 +170,9 @@ public class PromotionService {
         List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.filterListProductPromotion(promotion.get().getId(),search,nameSize,nameColor,priceRange);
         PromotionDetailResponse promotionDetailResponse = new PromotionDetailResponse(promotion.get(), productPromotionResponses);
         return promotionDetailResponse;
+    }
+
+    public  List<ProductPromotionResponse> findProductPromotionByLitsIdProductDetail( List<Long> idProductDetail){
+        return productDetailRepository.findProductPromotionByLitsIdProductDetail(idProductDetail);
     }
 }

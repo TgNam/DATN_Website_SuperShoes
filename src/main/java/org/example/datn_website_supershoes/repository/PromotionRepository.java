@@ -26,6 +26,7 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
             p.id, p.codePromotion, p.name, p.value, p.type, p.note,
             p.startAt, p.endAt, p.status)
             FROM Promotion p
+            ORDER BY p.createdAt DESC
             """)
     List<PromotionResponse> listPromotionResponse();
     @Query("SELECT d FROM Promotion d WHERE d.endAt < :currentTime AND d.status in(:status)")

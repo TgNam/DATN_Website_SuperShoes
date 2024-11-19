@@ -164,6 +164,13 @@ public class VoucherService {
         }
         return voucherResponse;
     }
+    public VoucherResponse getVoucherBycodeVoucher(String codeVoucher) {
+        Voucher voucher = voucherRepository.findByCodeVoucher(codeVoucher)
+                .orElseThrow(() -> new RuntimeException("Voucher not found"));
+
+        VoucherResponse voucherResponse = convertToVoucherResponse(voucher);
+        return voucherResponse;
+    }
 
     public Voucher deleteVoucher(Long id) {
         Voucher voucher = voucherRepository.findById(id)
