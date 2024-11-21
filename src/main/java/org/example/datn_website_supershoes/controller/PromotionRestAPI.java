@@ -5,6 +5,7 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionUpdatesRequest;
 import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
+import org.example.datn_website_supershoes.dto.response.PromotionDetailResponseByQuang;
 import org.example.datn_website_supershoes.dto.response.PromotionResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Promotion;
@@ -28,14 +29,16 @@ public class PromotionRestAPI {
     private PromotionService promotionService;
     @Autowired
     private PromotionDetailService promotionDetailService;
+
     @GetMapping("/listPromotion")
-    public List<PromotionResponse> getAllPromotion(){
+    public List<PromotionResponse> getAllPromotion() {
         return promotionService.getAllPromotion();
     }
+
     @GetMapping("/getPromotionDetailResponse")
     public ResponseEntity<?> getPromotionDetailResponse(
-            @RequestParam(value ="idPromotion", required = false) Long idPromotion
-    ){
+            @RequestParam(value = "idPromotion", required = false) Long idPromotion
+    ) {
         try {
             if (idPromotion == null) {
                 return ResponseEntity.badRequest().body(
@@ -47,7 +50,7 @@ public class PromotionRestAPI {
             }
             PromotionDetailResponse promotionDetailResponse = promotionService.getPromotionDetailResponse(idPromotion);
             return ResponseEntity.ok(promotionDetailResponse);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -57,9 +60,36 @@ public class PromotionRestAPI {
                     );
         }
     }
+
+    @GetMapping("/getPromotionDetailResponseByQuang")
+    public ResponseEntity<?> getPromotionDetailResponseByQuang(
+            @RequestParam(value = "idPromotion", required = false) Long idPromotion
+    ) {
+        try {
+            if (idPromotion == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID đợt giảm giá không được để trống!")
+                                .build()
+                );
+            }
+            PromotionDetailResponseByQuang promotionDetailResponseByQuang = promotionService.getPromotionDetailResponseByQuang(idPromotion);
+            return ResponseEntity.ok(promotionDetailResponseByQuang);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
     @GetMapping("/getSearchPromotionDetailResponse")
     public ResponseEntity<?> getAllPromotionDetailResponseSearch(
-            @RequestParam(value ="idPromotion", required = false) Long idPromotion,
+            @RequestParam(value = "idPromotion", required = false) Long idPromotion,
             @RequestParam("search") String search,
             @RequestParam("nameSize") String nameSize,
             @RequestParam("nameColor") String nameColor,
@@ -72,9 +102,10 @@ public class PromotionRestAPI {
                             .build()
             );
         }
-        PromotionDetailResponse promotionDetailResponse = promotionService.getSearchPromotionDetailResponse(idPromotion,search,nameSize,nameColor,priceRange);
+        PromotionDetailResponse promotionDetailResponse = promotionService.getSearchPromotionDetailResponse(idPromotion, search, nameSize, nameColor, priceRange);
         return ResponseEntity.ok(promotionDetailResponse);
     }
+
     @GetMapping("/listSearchPromotion")
     public List<PromotionResponse> getAllPromotionSearch(
             @RequestParam("search") String search,
@@ -90,6 +121,7 @@ public class PromotionRestAPI {
                 .filter(promotion -> promotion.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
+
     @PostMapping("/createPromotion")
     public ResponseEntity<?> createPromotion(
             @RequestBody @Valid PromotionCreationRequest promotionCreationRequest,
@@ -104,7 +136,7 @@ public class PromotionRestAPI {
             }
             Promotion promotion = promotionService.createPromotion(promotionCreationRequest);
             return ResponseEntity.ok(promotion);
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -114,6 +146,7 @@ public class PromotionRestAPI {
                     );
         }
     }
+
     @PutMapping("/updatePromotion")
     public ResponseEntity<?> updatePromotion(
             @RequestBody @Valid PromotionUpdatesRequest promotionUpdatesRequest,
@@ -128,7 +161,7 @@ public class PromotionRestAPI {
             }
             Promotion promotion = promotionService.updatePromotion(promotionUpdatesRequest);
             return ResponseEntity.ok(promotion);
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -138,12 +171,13 @@ public class PromotionRestAPI {
                     );
         }
     }
+
     @PutMapping("/updateStatus")
     private ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
-    ){
-        try{
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean
+    ) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -152,9 +186,9 @@ public class PromotionRestAPI {
                                 .build()
                 );
             }
-            Promotion promotion = promotionService.updateStatus(id,aBoolean);
+            Promotion promotion = promotionService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(promotion);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -166,8 +200,8 @@ public class PromotionRestAPI {
     }
 
     @PostMapping("/get-by-product-details")
-    private ResponseEntity<?> findPromotionDetailByIdProductDetailAndStatus (@RequestBody List<Long> ids){
-        try{
+    private ResponseEntity<?> findPromotionDetailByIdProductDetailAndStatus(@RequestBody List<Long> ids) {
+        try {
             if (ids == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -177,7 +211,7 @@ public class PromotionRestAPI {
                 );
             }
             return ResponseEntity.ok(promotionService.findProductPromotionByLitsIdProductDetail(ids));
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()

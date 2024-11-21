@@ -5,9 +5,7 @@ import org.example.datn_website_supershoes.dto.request.PromotionCreationRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionUpdateRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionUpdatesRequest;
-import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
-import org.example.datn_website_supershoes.dto.response.PromotionDetailResponse;
-import org.example.datn_website_supershoes.dto.response.PromotionResponse;
+import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
@@ -162,6 +160,17 @@ public class PromotionService {
         PromotionDetailResponse promotionDetailResponse = new PromotionDetailResponse(promotion.get(), productPromotionResponses);
         return promotionDetailResponse;
     }
+    public PromotionDetailResponseByQuang getPromotionDetailResponseByQuang(Long idPromotion){
+        Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
+        if(!promotion.isPresent()){
+            throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
+        }
+        List<ProductPromotionResponseByQuang> productPromotionResponseByQuangs = promotionDetailService.findProductPromotionResponseByIdPromotionByQuang(promotion.get().getId());
+        PromotionDetailResponseByQuang promotionDetailResponseByQuang = new PromotionDetailResponseByQuang(promotion.get(), productPromotionResponseByQuangs);
+        return promotionDetailResponseByQuang;
+    }
+
+
     public PromotionDetailResponse getSearchPromotionDetailResponse(Long idPromotion,String search, String nameSize, String nameColor,String priceRange){
         Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
         if(!promotion.isPresent()){

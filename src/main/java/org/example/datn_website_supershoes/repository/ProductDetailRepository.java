@@ -1,8 +1,9 @@
 package org.example.datn_website_supershoes.repository;
 
-import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
 import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
+import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
+import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponseByQuang;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,12 +14,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+
 @Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Long>, JpaSpecificationExecutor<ProductDetail> {
 
     Page<ProductDetail> findAll(Specification<ProductDetail> spec, Pageable pageable);
+
     List<ProductDetail> findByProductId(Long productId);
 
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam(" +
@@ -29,9 +33,12 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "JOIN pd.size s " +
             "where p.id IN :idProducts")
     List<ProductDetailResponseByNam> findProductDetailRequests(@Param("idProducts") List<Long> idProducts);
+
+
     Optional<ProductDetail> findById(Long idProductDetail);
 
-    Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail,String Status);
+    Optional<ProductDetail> findByIdAndAndStatus(Long idProductDetail, String Status);
+
     @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.ProductPromotionResponse(" +
             "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
             "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity) " +
@@ -77,6 +84,52 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "GROUP BY p.id, p.name " +
             "ORDER BY p.name")
     List<ProductViewCustomerReponse> findProductPriceRangeWithPromotion();
+
+    @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponseByQuang(" +
+            "p.id, p.name, p.imageByte, " +
+            "b.id, b.name, " +
+            "c.id, c.name, " +
+            "m.id, m.name, " +
+            "ss.id, ss.name, " +
+            "MIN(pd.price), " +
+            "MAX(pd.price), " +
+            "MIN(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END), " +
+            "MAX(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END), " +
+            "si.id, si.name, " +
+            "cl.id, cl.name" +
+            ") " +
+            "FROM ProductDetail pd " +
+            "INNER JOIN pd.product p " +
+            "INNER JOIN p.brand b " +
+            "INNER JOIN p.category c " +
+            "INNER JOIN p.material m " +
+            "INNER JOIN p.shoeSole ss " +
+            "INNER JOIN pd.size si " +
+            "INNER JOIN pd.color cl " +
+            "LEFT JOIN pd.promotionDetail prod ON prod.productDetail.id = pd.id " +
+            "LEFT JOIN prod.promotion pro " +
+            "WHERE p.status = 'ACTIVE' " +
+            "AND pd.status = 'ACTIVE' " +
+            "AND (:nameProduct IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :nameProduct, '%'))) " +
+            "AND (:idColor IS NULL OR cl.id = :idColor) " +
+            "AND (:idSize IS NULL OR si.id = :idSize) " +
+            "AND (:idBrand IS NULL OR b.id = :idBrand) " +
+            "AND (:idCategory IS NULL OR c.id = :idCategory) " +
+            "AND (:minPrice IS NULL OR pd.price >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR pd.price <= :maxPrice) " +
+            "GROUP BY p.id, p.name, p.imageByte, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, si.id, si.name, cl.id, cl.name " +
+            "ORDER BY p.name")
+    List<ProductViewCustomerReponseByQuang> findProductPriceRangeWithPromotionByQuang(
+            @Param("nameProduct") String nameProduct,
+            @Param("idColor") Long idColor,
+            @Param("idSize") Long idSize,
+            @Param("idBrand") Long idBrand,
+            @Param("idCategory") Long idCategory,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice
+    );
+
+
 
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse(" +
             "p.id, p.name,p.imageByte, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, " +
