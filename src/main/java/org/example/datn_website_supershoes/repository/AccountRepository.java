@@ -17,6 +17,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findById(Long id);
 
+    Optional<Account> findByIdAndStatus(Long id,String status);
+
     List<Account> findAllByStatus(String status);
 
     @Query(value = """

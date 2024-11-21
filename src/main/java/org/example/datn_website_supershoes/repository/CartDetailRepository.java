@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.repository;
 
+import org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.CartDetailResponse;
 import org.example.datn_website_supershoes.model.CartDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,5 +33,44 @@ public interface CartDetailRepository extends JpaRepository<CartDetail, Long> {
     @Transactional
     @Query("UPDATE CartDetail set quantity = :quantity where cart.id = :id and codeCart = :codeCart")
     void updateById(@Param("quantity") Integer quantity,@Param("id") Long id,@Param("codeCart") String codeCart);
+
+    @Query("""
+            SELECT new org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse(
+                        cart.id, cd.id, ac.id, cd.quantity, p.id, p.name, c.id, c.name,
+                        s.id, s.name, pd.id, pd.quantity, pd.price, pro.id, pro.codePromotion,
+                        pro.value, pro.endAt, prod.id, prod.quantity)
+                        FROM CartDetail cd 
+                        INNER JOIN cd.cart cart
+                        INNER JOIN cart.account ac
+                        INNER JOIN cd.productDetail pd
+                        INNER JOIN pd.product p 
+                        INNER JOIN pd.color c 
+                        INNER JOIN pd.size s 
+                        LEFT JOIN pd.promotionDetail prod ON prod.status = 'ONGOING' 
+                        LEFT JOIN prod.promotion pro
+                        WHERE ac.id =:idAccount AND p.status = 'ACTIVE' AND pd.status = 'ACTIVE'
+            """)
+    List<CartDetailProductDetailResponse> findCartDetailByIdAccount(@Param("idAccount") Long idAccount);
+
+    @Query("""
+            SELECT new org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse(
+                        cart.id, cd.id, ac.id, cd.quantity, p.id, p.name, c.id, c.name,
+                        s.id, s.name, pd.id, pd.quantity, pd.price, pro.id, pro.codePromotion,
+                        pro.value, pro.endAt, prod.id, prod.quantity)
+                        FROM CartDetail cd 
+                        INNER JOIN cd.cart cart
+                        INNER JOIN cart.account ac
+                        INNER JOIN cd.productDetail pd
+                        INNER JOIN pd.product p 
+                        INNER JOIN pd.color c 
+                        INNER JOIN pd.size s 
+                        LEFT JOIN pd.promotionDetail prod ON prod.status = 'ONGOING' 
+                        LEFT JOIN prod.promotion pro
+                        WHERE ac.id =:idAccount 
+                        AND  cd.id IN (:idCartDetail)
+                        AND p.status = 'ACTIVE' 
+                        AND pd.status = 'ACTIVE'
+            """)
+    List<CartDetailProductDetailResponse> findCartDetailByIdAccountAndIdCartDetail(@Param("idAccount") Long idAccount,@Param("idCartDetail") List<Long> idCartDetail);
 
 }

@@ -1,8 +1,10 @@
 package org.example.datn_website_supershoes.controller;
 
 import org.example.datn_website_supershoes.dto.request.CartDetailRequest;
+import org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.CartDetailResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.model.Cart;
 import org.example.datn_website_supershoes.service.CartDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,6 +73,36 @@ public class CartDetailRestApi {
                                               @PathVariable("idUser") long id) {
         try {
             return ResponseEntity.ok(cartDetailService.addToCart(cartDetailRequest, id));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @GetMapping("/get-cartDetail-by-account/{accountId}")
+    public ResponseEntity<?> getCart(@PathVariable("accountId") long accountId){
+        try {
+            List<CartDetailProductDetailResponse> cartDetailByAccountId = cartDetailService.getCartDetailByAccountId(accountId);
+            return ResponseEntity.ok(cartDetailByAccountId);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @GetMapping("/get-cartDetail-by-accountAndListCartDetail")
+    public ResponseEntity<?> getCartDetailByAccountAndListIdCartDetail(@RequestParam("accountId") Long accountId,@RequestParam("idCartDetail") List<Long> idCartDetail){
+        try {
+            List<CartDetailProductDetailResponse> cartDetailByAccountId = cartDetailService.getCartDetailByAccountIdAndIdCartDetail(accountId,idCartDetail);
+            return ResponseEntity.ok(cartDetailByAccountId);
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

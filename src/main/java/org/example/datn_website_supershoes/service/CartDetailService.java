@@ -2,10 +2,13 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.CartDetailRequest;
+import org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.CartDetailResponse;
+import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Cart;
 import org.example.datn_website_supershoes.model.CartDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
+import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.CartDetailRepository;
 import org.example.datn_website_supershoes.repository.CartRepository;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class CartDetailService {
@@ -30,7 +34,11 @@ public class CartDetailService {
     ProductDetailService productDetailService;
 
     @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
     private ProductDetailRepository productDetailRepository;
+
     public List<String> listCodeCartByIdCart(Long id){
         if (id == null) {
             throw new IllegalArgumentException("ID không được để trống.");
@@ -84,5 +92,34 @@ public class CartDetailService {
                 .build();
         cartDetail.setStatus(Status.ACTIVE.toString());
         return cartDetail;
+    }
+
+    public List<CartDetailProductDetailResponse> getCartDetailByAccountId (long accountId){
+        Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
+        if(cartOptional.isPresent()) {
+            List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccount(accountId);
+            return cartDetailProductDetailResponse;
+        }
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found!"));
+        cartRepository.save(Cart.builder()
+                .account(account)
+                .build());
+        List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccount(accountId);
+        return cartDetailProductDetailResponse;
+    }
+    public List<CartDetailProductDetailResponse> getCartDetailByAccountIdAndIdCartDetail (long accountId, List<Long> idCartDetail){
+        Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
+        if(cartOptional.isPresent()) {
+            List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId,idCartDetail);
+            return cartDetailProductDetailResponse;
+        }
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found!"));
+        cartRepository.save(Cart.builder()
+                .account(account)
+                .build());
+        List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId,idCartDetail);;
+        return cartDetailProductDetailResponse;
     }
 }
