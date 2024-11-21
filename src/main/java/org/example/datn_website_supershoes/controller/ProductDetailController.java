@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.awt.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -341,6 +342,8 @@ public class ProductDetailController {
         return ResponseEntity.ok(productDetails);
     }
 
+
+
     @GetMapping("/filterListProductDetail")
     public List<ProductDetailResponseByNam> getAllProductDetailSearch(
             @RequestParam("idProducts") List<Long> idProducts,
@@ -400,6 +403,23 @@ public class ProductDetailController {
         List<ProductViewCustomerReponse> response = productDetailService.getProductPriceRangeWithPromotion();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/productPriceRangePromotionByQuang")
+    public ResponseEntity<List<ProductViewCustomerReponseByQuang>> getProductPriceRangeWithPromotionByQuang(
+            @RequestParam(value = "nameProduct", required = false) String nameProduct,
+            @RequestParam(value = "idColor", required = false) Long idColor,
+            @RequestParam(value = "idSize", required = false) Long idSize,
+            @RequestParam(value = "idBrand", required = false) Long idBrand,
+            @RequestParam(value = "idCategory", required = false) Long idCategory,
+            @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice
+    ) {
+        List<ProductViewCustomerReponseByQuang> response = productDetailService.getFilteredProducts(
+                nameProduct, idColor, idSize, idBrand, idCategory, minPrice, maxPrice
+        );
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/findProductPromotionByIdProcuctAndIdColorAndIdSize")
     public ResponseEntity<?> findProductPromotionByIdProcuctAndIdColorAndIdSize(

@@ -151,6 +151,8 @@ public class ProductDetailService {
     public List<ProductDetailResponseByNam> findProductDetailRequests(List<Long> idProducts) {
         return productDetailRepository.findProductDetailRequests(idProducts);
     }
+
+
     public List<ProductPromotionResponse> findProductPromotion() {
         return productDetailRepository.findProductPromotion();
     }
@@ -197,6 +199,11 @@ public class ProductDetailService {
     public List<ProductViewCustomerReponse> getProductPriceRangeWithPromotion() {
         List<ProductViewCustomerReponse> productViewCustomerReponses = productDetailRepository.findProductPriceRangeWithPromotion();
         return productViewCustomerReponses;
+    }
+    public List<ProductViewCustomerReponseByQuang> getFilteredProducts(
+            String nameProduct, Long idColor, Long idSize, Long idBrand, Long idCategory, BigDecimal minPrice, BigDecimal maxPrice) {
+        return productDetailRepository.findProductPriceRangeWithPromotionByQuang(
+                nameProduct, idColor, idSize, idBrand, idCategory, minPrice, maxPrice);
     }
 
     public ProductPromotionResponse findProductPromotionByIdProcuctAndIdColorAndIdSize(Long idProduct, Long idColor, Long idSize) {
