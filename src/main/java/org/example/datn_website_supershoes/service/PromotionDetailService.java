@@ -4,6 +4,7 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.request.PromotionDetailRequest;
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponseByQuang;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
@@ -28,6 +29,10 @@ public class PromotionDetailService {
     //cập nhật trạng thái từ sắp diễn ra thành diễn ra
     public List<ProductPromotionResponse> findProductPromotionResponseByIdPromotion(Long idPromotion){
         return promotionDetailRepository.findProductByIdPromotion(idPromotion);
+    }
+
+    public List<ProductPromotionResponseByQuang> findProductPromotionResponseByIdPromotionByQuang(Long idPromotion){
+        return promotionDetailRepository.findProductByIdPromotionByQuang(idPromotion);
     }
     public List<ProductPromotionResponse> filterListProductPromotion(Long idPromotion,String search, String nameSize, String nameColor,String priceRange) {
         return promotionDetailRepository.findProductByIdPromotion(idPromotion).stream()
