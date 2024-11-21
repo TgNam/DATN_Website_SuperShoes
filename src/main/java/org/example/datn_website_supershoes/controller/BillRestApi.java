@@ -126,6 +126,7 @@ public class BillRestApi {
     }
     @PostMapping("/payBillOnline")
     private ResponseEntity<?> payBillOnline (
+            @RequestParam(value = "IdCartDetail", required = false) List<Long> IdCartDetail,//Mã phiếu giảm giá
             @RequestParam(value = "codeVoucher", required = false) String codeVoucher,//Mã phiếu giảm giá
             @RequestParam(value = "idAccount", required = false) Long idAccount,//id tài khoản mua hàng
             @RequestParam(value = "name", required = false) String name,//Tên người nhận hàng
@@ -135,7 +136,47 @@ public class BillRestApi {
 
     ){
         try {
-            billByEmployeeService.payBillOnline(codeVoucher,idAccount,name,phoneNumber,address,note);
+            if (IdCartDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi:Không có sản phẩm để thanh toán!")
+                                .build()
+                );
+            }
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Vui lòng đăng nhập lại giỏ hàng!")
+                                .build()
+                );
+            }
+            if (name == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Tên của người nhận hàng không được để trống!")
+                                .build()
+                );
+            }
+            if (phoneNumber == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Số điện thoại của người nhận hàng không được để trống!")
+                                .build()
+                );
+            }
+            if (address == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Địa chỉ của người nhận hàng không được để trống!")
+                                .build()
+                );
+            }
+            billByEmployeeService.payBillOnline(IdCartDetail,codeVoucher,idAccount,name,phoneNumber,address,note);
             return ResponseEntity.ok("Thanh toán thành công");
         } catch (RuntimeException e) {
             return ResponseEntity

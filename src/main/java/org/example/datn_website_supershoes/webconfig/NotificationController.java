@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.webconfig;
 
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.EmitterProcessor;
@@ -22,5 +23,10 @@ public class NotificationController {
     // Phương thức này sẽ được gọi khi có thay đổi trong database (cập nhật size chẳng hạn)
     public void sendNotification(String message) {
         emitterProcessor.onNext(message);  // Phát đi sự kiện
+    }
+    // Scheduler: Phát thông báo "UPDATE_SIZE" mỗi 20 giây
+    @Scheduled(fixedRate = 20000) // 20 giây
+    public void sendPeriodicNotification() {
+        sendNotification("UPDATE_SIZE");
     }
 }

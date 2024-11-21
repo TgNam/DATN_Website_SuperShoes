@@ -2,10 +2,14 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PayBillRequest;
+import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.response.BillResponse;
+import org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
+import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.*;
 import org.example.datn_website_supershoes.repository.*;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +46,10 @@ public class BillByEmployeeService {
     private ProductDetailRepository productDetailRepository;
     @Autowired
     private CartDetailRepository cartDetailRepository;
+    @Autowired
+    private PromotionDetailRepository promotionDetailRepository;
+    @Autowired
+    private NotificationController notificationController;
     //Lấy tối đa 5 phần tử
     private static final int MAX_DISPLAY_BILLS = 5;
 
@@ -323,7 +331,7 @@ public class BillByEmployeeService {
             }
 
             if (idAccount != null) {
-                Optional<Account> accountOptional = accountRepository.findById(idAccount);
+                Optional<Account> accountOptional = accountRepository.findByIdAndStatus(idAccount, Status.ACTIVE.toString());
                 if (accountOptional.isEmpty()) {
                     throw new RuntimeException("Tài khoản với id là " + idAccount + " không tồn tại");
                 }
@@ -423,8 +431,10 @@ public class BillByEmployeeService {
             throw new RuntimeException(e);
         }
     }
+
     @Transactional
     public void payBillOnline(
+            List<Long> IdCartDetail,
             String codeVoucher,
             Long idAccount,
             String name,
@@ -432,70 +442,221 @@ public class BillByEmployeeService {
             String address,
             String note
     ) {
-        UUID uuid = UUID.randomUUID();
-        String generatedCode = this.generateRandomCode() + "-" + uuid;
-
-        Account account = accountRepository.findById(idAccount)
-                .orElseThrow(() -> new RuntimeException("Account not found!"));
-
-        Cart cart = cartService.getCartByAccountId(idAccount);
-        List<CartDetail> cartDetails = cart.getCartDetails();
-
-        Voucher voucher = voucherRepository.findByCodeVoucher(codeVoucher)
-                .orElse(null);
-
-        Bill bill = Bill.builder()
-                .customer(account)
-                .codeBill(generatedCode)
-                .nameCustomer(name)
-                .phoneNumber(phoneNumber)
-                .address(address)
-                .note(note)
-                .type(1)
-                .build();
-
-        bill.setCreatedBy(account.getName());
-        bill.setUpdatedBy(account.getName());
-        bill.setStatus(Status.PENDING.toString());
-
-        if (voucher != null && voucher.getIsPrivate()) {
-            bill.setVoucher(voucher);
-        }
-
-        // Lưu Bill trước
-        billRepository.save(bill);
-
         try {
-            for (CartDetail detail : cartDetails) {
-                Optional<ProductDetail> productDetailOptional = productDetailRepository
-                        .findByIdAndAndStatus(detail.getProductDetail().getId(), Status.ACTIVE.toString());
+            //Tạo mã hóa đơn
+            UUID uuid = UUID.randomUUID();
+            String generatedCode = this.generateRandomCode() + "-" + uuid;
+            //Kiểm tra xem tài khoản có tồn tại hay không
+            Account account = accountRepository.findByIdAndStatus(idAccount, Status.ACTIVE.toString())
+                    .orElseThrow(() -> new RuntimeException("Account not found!"));
+            boolean checkVoucher = false;
+            boolean checkAccountVoucher = false;
+            Voucher voucher = null;
+            AccountVoucher accountVoucher = null;
 
-                if (productDetailOptional.isEmpty()) {
-                    throw new RuntimeException("Id " + detail.getProductDetail().getId() + " không tồn tại hoặc trạng thái không hợp lệ.");
-                }
+            List<CartDetailProductDetailResponse> cartDetails = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(idAccount, IdCartDetail);
+            BigDecimal totalMerchandise = calculateTotalCartPriceForSelected(cartDetails);
 
-                ProductDetail productDetail = productDetailOptional.get();
+            BigDecimal priceDiscount = BigDecimal.ZERO;
+            BigDecimal totalAmount = totalMerchandise;
 
-                BillDetail billDetail = new BillDetail();
-                billDetail.setProductDetail(productDetail);
-                billDetail.setBill(bill);
-                billDetail.setQuantity(detail.getQuantity());
-                billDetail.setStatus(Status.PENDING.toString());
-                billDetail.setPriceDiscount(productDetail.getPrice());
-
-                // Lưu từng BillDetail
-                billDetailRepository.save(billDetail);
+            if (cartDetails == null || cartDetails.isEmpty()) {
+                throw new RuntimeException("Chưa có sản phẩm nào trong giỏ hàng");
             }
 
-            // Xóa tất cả CartDetail liên quan sau khi xử lý thành công
-            cartRepository.delete(cart);
+            Bill bill = Bill.builder()
+                    .customer(account)
+                    .codeBill(generatedCode)
+                    .nameCustomer(name)
+                    .phoneNumber(phoneNumber)
+                    .address(address)
+                    .note(note)
+                    .type(1)
+                    .build();
+            bill.setCreatedBy(account.getName());
+            bill.setUpdatedBy(account.getName());
+            bill.setStatus(Status.PENDING.toString());
 
+            if (codeVoucher != null && !codeVoucher.isBlank()) {
+                Optional<Voucher> voucherOptional = voucherRepository.findByCodeVoucher(codeVoucher);
+                if (voucherOptional.isPresent()) {
+                    voucher = voucherOptional.get();
 
-        } catch (RuntimeException e) {
-            // Rollback transaction nếu có lỗi
-            throw e;
+                    if (voucher.getQuantity() <= 0) {
+                        throw new RuntimeException("Đã hết phiếu giảm giá");
+                    }
+                    if (totalMerchandise.compareTo(voucher.getMinBillValue()) < 0) {
+                        throw new RuntimeException("Hóa đơn không đủ điều kiện sử dụng phiếu giảm giá");
+                    }
+                    BigDecimal priceSale = totalMerchandise.multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
+                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
+
+                    priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
+                    totalAmount = totalMerchandise.subtract(priceDiscount);
+                    if (voucher.getIsPrivate()) {
+                        if (idAccount == null) {
+                            throw new RuntimeException("Bạn không đủ điều kiện sử dụng voucher: " + voucher.getCodeVoucher());
+                        }
+                        Optional<AccountVoucher> accountVoucherOptional = accountVoucherRepository
+                                .findAccountVoucherByIdAccountAndidVoucher(idAccount, voucher.getId());
+                        if (accountVoucherOptional.isEmpty()) {
+                            throw new RuntimeException("Bạn không đủ điều kiện sử dụng voucher: " + voucher.getCodeVoucher());
+                        }
+                        accountVoucher = accountVoucherOptional.get();
+                        accountVoucher.setStatus(Status.INACTIVE.toString());
+                        checkAccountVoucher = true;
+                    }
+
+                    voucher.setQuantity(voucher.getQuantity() - 1);
+                    if (voucher.getQuantity() == 0) {
+                        voucher.setStatus(Status.FINISHED.toString());
+                    }
+                    checkVoucher = true;
+                    bill.setVoucher(voucher);
+                }
+            }
+            bill.setTotalMerchandise(totalMerchandise.setScale(2, RoundingMode.HALF_UP));
+            bill.setPriceDiscount(priceDiscount);
+            bill.setTotalAmount(totalAmount.setScale(2, RoundingMode.HALF_UP));
+            // Lưu Bill trước
+            Bill saveBill = billRepository.save(bill);
+
+            // Thực hiện thêm hóa đơn chi tiết
+            for (CartDetailProductDetailResponse request : cartDetails) {
+                // Tìm kiếm sản phẩm chi tiết theo id và trạng thái
+                Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(request.getIdProductDetail(), Status.ACTIVE.toString());
+
+                // Kiểm tra sản phẩm có tồn tại không
+                if (!productDetailOptional.isPresent()) {
+                    throw new RuntimeException("Id " + request.getIdProductDetail() + " của sản phẩm không tồn tại trong hệ thống.");
+                }
+
+                //Số lượng sản phẩm của sản phẩm chi tiết
+                int quantityProductDetail = productDetailOptional.get().getQuantity();
+
+                // Kiểm tra số lượng sản phẩm số lượng mua so với sản phẩm còn lại trong kho
+                if (request.getQuantityCartDetail() > quantityProductDetail || quantityProductDetail <= 0) {
+                    throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " đang hết hàng.");
+                }
+
+                //Giá tiền sản phẩm
+                BigDecimal priceProduct = productDetailOptional.get().getPrice();
+
+                //Tìm kiếm sản phẩm có đang  sale hay không
+                Optional<ProductPromotionResponse> productPromotionResponse = productDetailRepository.findProductPromotionByIdProductDetail(request.getIdProductDetail());
+
+                //Kiểm tra xem nếu sản phẩm đang sale
+                if (productPromotionResponse.isPresent()) {
+                    //Tìm kiếm đợt giảm giá chi tiết
+                    Optional<PromotionDetail> promotionDetail = promotionDetailRepository.findByIdAndAndStatus(productPromotionResponse.get().getIdPromotionDetail(), Status.ONGOING.toString());
+                    //Số lượng sản phẩm sale
+                    int quantityProductPromotion = productPromotionResponse.get().getQuantityPromotionDetail();
+                    //Giá sản phẩm sau khi sale
+                    BigDecimal promotionPrice = productPromotionResponse.get().getProductDetailPrice()
+                            .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
+                            .setScale(2, RoundingMode.HALF_UP); // Làm tròn đến 2 chữ số thập phân
+                    //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
+                    if (request.getQuantityCartDetail() <= quantityProductPromotion) {
+                        // Tạo hóa đơn chi tiết mới
+                        BillDetail billDetail = new BillDetail();
+                        billDetail.setProductDetail(productDetailOptional.get());
+                        billDetail.setBill(saveBill);
+                        billDetail.setQuantity(request.getQuantityCartDetail());
+                        billDetail.setStatus(Status.PENDING.toString());
+                        //Áp dụng giá sale
+                        billDetail.setPriceDiscount(promotionPrice);
+                        billDetailRepository.save(billDetail);
+
+                        //Số lượng còn lại của sản phẩm sale
+                        Integer newPromotionQuantity = quantityProductPromotion - request.getQuantityCartDetail();
+
+                        //Cập nhật số lượng cho sản phẩm sale
+                        promotionDetail.get().setQuantity(newPromotionQuantity);
+
+                        //Cập nhận lại số lượng giảm giá
+                        if (newPromotionQuantity <= 0) {
+                            promotionDetail.get().setStatus(Status.FINISHED.toString());
+                        }
+                        //Cập nhật lại sản phản phẩm sale
+                        promotionDetailRepository.save(promotionDetail.get());
+                    } else {
+                        // Số lượng bán lẻ khách hàng sẽ mua ngoài số lượng sale
+                        int retailQuantity = request.getQuantityCartDetail() - quantityProductPromotion;
+                        BillDetail billDetail = new BillDetail();
+                        billDetail.setProductDetail(productDetailOptional.get());
+                        billDetail.setBill(saveBill);
+                        billDetail.setQuantity(quantityProductPromotion);
+                        billDetail.setStatus(Status.PENDING.toString());
+                        billDetail.setPriceDiscount(promotionPrice);
+                        billDetailRepository.save(billDetail);
+                        if (retailQuantity > 0) {
+                            billDetail.setProductDetail(productDetailOptional.get());
+                            billDetail.setBill(saveBill);
+                            billDetail.setQuantity(retailQuantity);
+                            billDetail.setStatus(Status.PENDING.toString());
+                            billDetail.setPriceDiscount(priceProduct);
+                            billDetailRepository.save(billDetail);
+                        }
+
+                        // Cập nhật lại thông tin sản phẩm sale trong PromotionDetail
+                        promotionDetail.get().setQuantity(0);
+                        promotionDetail.get().setStatus(Status.FINISHED.toString());
+                        promotionDetailRepository.save(promotionDetail.get());
+                    }
+                }
+                //Trường hợp sản phẩm không sale
+                else {
+                    // Tạo hóa đơn chi tiết mới
+                    BillDetail billDetail = new BillDetail();
+                    billDetail.setProductDetail(productDetailOptional.get());
+                    billDetail.setBill(saveBill);
+                    billDetail.setQuantity(request.getQuantityCartDetail());
+                    billDetail.setStatus(Status.PENDING.toString());
+                    //Áp dụng giá gốc của sản phẩm
+                    billDetail.setPriceDiscount(productDetailOptional.get().getPrice());
+                    billDetailRepository.save(billDetail);
+                }
+                //Số lượng còn lại của sản phẩm
+                Integer newProductQuantity = quantityProductDetail - request.getQuantityCartDetail();
+                //Cập nhật số lượng cho sản phẩm
+                productDetailOptional.get().setQuantity(newProductQuantity);
+                //Nếu số lượng <= 0 thì chuyển productDetail sang trạng thái INACTIVE
+                if (newProductQuantity <= 0) {
+                    productDetailOptional.get().setStatus(Status.INACTIVE.toString());
+                }
+                //Cập nhật lại sản phẩm chi tiết
+                productDetailRepository.save(productDetailOptional.get());
+
+                cartDetailRepository.deleteById(request.getIdCartDetail());
+            }
+
+            PayBillRequest payBillRequest = PayBillRequest.builder()
+                    .amount(totalAmount)
+                    .codeBill(saveBill.getCodeBill())
+                    .type(1)
+                    .build();
+            PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
+            if (checkVoucher) {
+                voucherRepository.save(voucher);
+            }
+            if (checkAccountVoucher) {
+                accountVoucherRepository.save(accountVoucher);
+            }
+            notificationController.sendNotification("UPDATE_CART");
+        }catch (Exception e){
+            throw new RuntimeException(e);
         }
     }
 
+    public BigDecimal calculateTotalCartPriceForSelected(List<CartDetailProductDetailResponse> cartDetails) {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (CartDetailProductDetailResponse detail : cartDetails) {
+            total = total.add(detail.calculatePricePerProductDetail());
+        }
+
+        return total;
+    }
 
 }

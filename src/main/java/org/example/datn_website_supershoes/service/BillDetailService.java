@@ -38,8 +38,6 @@ public class BillDetailService {
     private ProductDetailRepository productDetailRepository;
     @Autowired
     private PromotionDetailRepository promotionDetailRepository;
-    @Autowired
-    private BillDetailByEmployeeRepository billDetailByEmployeeRepository;
 
     // Method to create a new BillDetail using BillDetailRequest
     @Transactional
@@ -297,7 +295,6 @@ public class BillDetailService {
 
                 //Kiểm tra xem nếu sản phẩm đang sale
                 if (productPromotionResponse.isPresent()) {
-                    System.out.println("//Kiểm tra xem nếu sản phẩm đang sale");
                     //Tìm kiếm đợt giảm giá chi tiết
                     Optional<PromotionDetail> promotionDetail = promotionDetailRepository.findByIdAndAndStatus(productPromotionResponse.get().getIdPromotionDetail(), Status.ONGOING.toString());
                     //Số lượng sản phẩm sale
