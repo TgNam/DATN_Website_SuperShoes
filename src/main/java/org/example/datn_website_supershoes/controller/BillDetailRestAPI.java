@@ -55,6 +55,39 @@ public class BillDetailRestAPI {
                     );
         }
     }
+    @PostMapping("/updateBillAndCreateBillDetailByIdBill")
+    private ResponseEntity<?> updateBillAndCreateBillDetailByIdBill(
+            @RequestParam(value ="codeBill", required = false) String codeBill,
+            @RequestBody @Valid List<ProductDetailPromoRequest> productDetail, BindingResult result
+    ){
+        try {
+            if (codeBill == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn không được để trống!")
+                                .build()
+                );
+            }
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            billDetailService.updateBillAndCreateBillDetailByIdBill(codeBill,productDetail);
+            return ResponseEntity
+                    .ok("Thêm sản phẩm vào giỏ hàng thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
     @GetMapping("/detail")
     public ResponseEntity<?> getBillByCodeBill(@RequestParam(value ="codeBill", required = false) String codeBill) {
         if (codeBill==null){

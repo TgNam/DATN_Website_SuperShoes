@@ -17,8 +17,11 @@ public class BrandService {
     @Autowired
     private BrandRepository brandRepository;
 
+    public List<BrandResponse> findAllBrand(){
+        return brandRepository.findAllBrand();
+    }
     public List<BrandResponse> findByStatus(){
-        return brandRepository.findByStatus();
+        return brandRepository.findByStatus(Status.ACTIVE.toString());
     }
     public Brand createBrand(BrandRequest brandRequest){
         Optional<Brand> brand = brandRepository.findByName(brandRequest.getName());

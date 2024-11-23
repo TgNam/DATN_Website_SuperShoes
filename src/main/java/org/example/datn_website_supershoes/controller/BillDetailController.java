@@ -151,9 +151,6 @@ public class BillDetailController {
         }
     }
 
-
-
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteBillDetail(@PathVariable Long id) {
         try {
