@@ -21,12 +21,16 @@ public class BrandRestAPI {
     @Autowired
     private BrandService brandService;
     @GetMapping("/list-brand")
+    private List<BrandResponse> findAllBrand(){
+        return brandService.findAllBrand();
+    }
+    @GetMapping("/list-brandActive")
     private List<BrandResponse> findByStatusActive(){
         return brandService.findByStatus();
     }
     @GetMapping("/list-brand-search")
     private List<BrandResponse> findByStatusSearch(@RequestParam("search") String search){
-        return brandService.findByStatus().stream()
+        return brandService.findAllBrand().stream()
                 .filter(brandResponse -> brandResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
