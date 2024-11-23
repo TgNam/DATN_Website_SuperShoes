@@ -248,7 +248,7 @@ public class BillDetailService {
         response.setId(billDetail.getId());
         response.setQuantity(billDetail.getQuantity());
         response.setStatus(billDetail.getStatus());
-        response.setPriceDiscount(billDetail.getPriceDiscount());
+        response.setPriceDiscount(billDetail.getBill().getPriceDiscount());
         response.setTotalMerchandise(billDetail.getBill().getTotalMerchandise());
         response.setTotalAmount(billDetail.getBill().getTotalAmount());
 
