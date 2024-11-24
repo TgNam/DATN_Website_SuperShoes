@@ -17,4 +17,6 @@ public interface BrandRepository extends JpaRepository<Brand,Long> {
     List<BrandResponse> findByStatus(@Param("status") String status);
 
     Optional<Brand> findByName(String name);
+
+    Optional<Brand> findByIdAndStatus(Long id, String status);
 }

@@ -1,18 +1,21 @@
 package org.example.datn_website_supershoes.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.ProductDetailRequest;
 import org.example.datn_website_supershoes.dto.response.*;
-import org.example.datn_website_supershoes.model.Product;
-import org.example.datn_website_supershoes.model.ProductDetail;
+import org.example.datn_website_supershoes.model.*;
+import org.example.datn_website_supershoes.repository.ColorRepository;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
+import org.example.datn_website_supershoes.repository.SizeRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.example.datn_website_supershoes.model.ProductImage;
 
 
 import java.math.BigDecimal;
@@ -26,6 +29,45 @@ import java.util.stream.Collectors;
 public class ProductDetailService {
     @Autowired
     private ProductDetailRepository productDetailRepository;
+    @Autowired
+    private SizeRepository sizeRepository;
+    @Autowired
+    private ColorRepository colorRepository;
+    @Autowired
+    private ProductImageService productImageService;
+
+    @Transactional
+    public boolean createProductDetail(Product product, List<ProductDetailRequest> productDetailRequest){
+        try {
+            for (ProductDetailRequest request: productDetailRequest){
+                Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
+                Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
+                if (optionalSize.isEmpty()){
+                    throw new RuntimeException("Id kích cỡ: "+request.getIdSize()+" không tồn tại trong hệ thống");
+                }
+                if (optionalColor.isEmpty()){
+                    throw new RuntimeException("Id màu sắc: "+request.getIdColor()+" không tồn tại trong hệ thống");
+                }
+                ProductDetail productDetail = ProductDetail.builder()
+                        .quantity(request.getQuantity())
+                        .price(request.getPrice())
+                        .product(product)
+                        .color(optionalColor.get())
+                        .size(optionalSize.get())
+                        .build();
+                productDetail.setStatus(Status.ACTIVE.toString());
+                ProductDetail saveProductDetail = productDetailRepository.save(productDetail);
+                boolean checkProductDetail = productImageService.createProductImage(saveProductDetail,request.getListImage());
+                if (!checkProductDetail){
+                    throw new RuntimeException("Xảy ra lỗi khi thêm ảnh cho sản phẩm chi tiết");
+                }
+            }
+            return true;
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
 
     public ProductDetail createProductDetail(ProductDetail productDetail) {
 

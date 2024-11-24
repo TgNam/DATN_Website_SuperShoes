@@ -1,4 +1,4 @@
-package org.example.datn_website_supershoes.dto;
+package org.example.datn_website_supershoes.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,12 +16,9 @@ public class ProductDetailRequest {
 
     private Integer quantity;
     private BigDecimal price;
-    private String description;
 
-    private Long productId;  // Chỉ gửi ID của Product
-    private Long sizeId;     // Chỉ gửi ID của Size
-    private Long colorId;    // Chỉ gửi ID của Color
+    private Long idColor;
+    private Long idSize;
 
-    private Long imageId;    // Chỉ gửi ID của Color
-    private byte[] imageByte;  // Danh sách hình ảnh Base64
+    private List<byte[]> listImage;
 }

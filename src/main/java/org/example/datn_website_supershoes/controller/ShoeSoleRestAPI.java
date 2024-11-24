@@ -22,6 +22,10 @@ public class ShoeSoleRestAPI {
     @Autowired
     private ShoeSoleService shoeSoleService;
     @GetMapping("/list-shoeSole")
+    private List<ShoeSoleResponse> findAllShoeSole(){
+        return shoeSoleService.findAllShoeSole();
+    }
+    @GetMapping("/list-shoeSoleActive")
     private List<ShoeSoleResponse> findByStatusActive(){
         return shoeSoleService.findByStatus();
     }
