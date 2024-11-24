@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
 public class MaterialRestAPI {
     @Autowired
     private MaterialService materialService;
+    @GetMapping("/list-materialActive")
+    private List<MaterialResponse> findAllMaterial(){
+        return materialService.findAllMaterial();
+    }
     @GetMapping("/list-material")
     private List<MaterialResponse> findByStatusActive(){
         return materialService.findByStatus();

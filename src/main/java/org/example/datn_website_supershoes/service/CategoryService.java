@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.CategoryRequest;
+import org.example.datn_website_supershoes.dto.response.BrandResponse;
 import org.example.datn_website_supershoes.dto.response.CategoryResponse;
 import org.example.datn_website_supershoes.model.Category;
 import org.example.datn_website_supershoes.repository.CategoryRepository;
@@ -16,8 +17,11 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    public List<CategoryResponse> findAllCategory(){
+        return categoryRepository.findAllCategory();
+    }
     public List<CategoryResponse> findByStatus() {
-        return categoryRepository.findByStatus();
+        return categoryRepository.findByStatus(Status.ACTIVE.toString());
     }
 
     public Category createCategory(CategoryRequest categoryRequest) {

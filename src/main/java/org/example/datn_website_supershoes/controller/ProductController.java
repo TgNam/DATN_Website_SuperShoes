@@ -2,6 +2,8 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import org.example.datn_website_supershoes.dto.request.ProductRequest;
+import org.example.datn_website_supershoes.dto.response.ProductImageResponse;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
 import org.example.datn_website_supershoes.dto.response.Response;
@@ -27,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.UUID;
 
 import java.util.Collections;
@@ -42,19 +45,6 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private MaterialRepository materialRepository;
-
-    @Autowired
-    private ShoeSoleRepository shoeSoleRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private BrandRepository brandRepository;
     @Autowired
     ProductDetailService productDetailService;
 
@@ -120,173 +110,32 @@ public class ProductController {
         Optional<Product> product = productService.getProductById(id);
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
-    @PutMapping("/updateProductStatus/{id}")
-    public ResponseEntity<Map<String, Object>> updateStatusByProduct(@PathVariable Long idProduct, @RequestBody Product productRequest) {
-        // Tìm Product hiện tại bằng ID
-        Optional<Product> existingProductOpt = productService.getProductById(idProduct);
-
-        if (!existingProductOpt.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Lấy Product hiện tại
-        Product existingProduct = existingProductOpt.get();
-
-        // Cập nhật trạng thái của Product
-        existingProduct.setStatus(productRequest.getStatus());
-        productService.createProduct1(existingProduct); // Lưu Product sau khi cập nhật
-
-        // Lấy tất cả ProductDetail liên kết với Product và cập nhật trạng thái
-        List<ProductDetail> productDetails = productDetailService.getProductDetailsByProductId(idProduct);
-        for (ProductDetail productDetail : productDetails) {
-            productDetail.setStatus(productRequest.getStatus());
-            productDetailService.createProductDetail(productDetail); // Lưu ProductDetail sau khi cập nhật
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", existingProduct);
-        response.put("EC", 0);
-        response.put("EM", "Status of Product and associated ProductDetails updated successfully");
-
-        return ResponseEntity.ok(response);
-    }
 
 
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createProduct(@RequestBody Product product) {
-        // Tìm các đối tượng theo ID
-
-        Map<String, Object> response = new HashMap<>();
+    @PostMapping("/addProduct")
+    public ResponseEntity<?> createProduct(@RequestBody ProductRequest productRequest) {
         try {
-
-            if (product.getName() == null) {
-                response.put("EC", 1);
-                response.put("EM", "name is missing in Product");
-                return ResponseEntity.badRequest().body(response);
-            }
-            if (product.getImageByte() == null) {
-                response.put("EC", 1);
-                response.put("EM", "ImageByte is missing in Product");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            Brand brand = brandRepository.findById(product.getBrand().getId())
-                    .orElseThrow(() -> new RuntimeException("Brand not found"));
-            Category category = categoryRepository.findById(product.getCategory().getId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            Material material = materialRepository.findById(product.getMaterial().getId())
-                    .orElseThrow(() -> new RuntimeException("Material not found"));
-            ShoeSole shoeSole = shoeSoleRepository.findById(product.getShoeSole().getId())
-                    .orElseThrow(() ->   new RuntimeException("ShoeSole trong Product là null"));
-            // Lưu URL của ảnh thay vì file
-            if (product.getImageByte() != null) {
-                System.out.println("URL ảnh sản phẩm: " + product.getImageByte());
-            }
-
-            // Thiết lập các đối tượng vào product
-            product.setBrand(brand);
-            product.setCategory(category);
-            product.setMaterial(material);
-            product.setShoeSole(shoeSole);
-            product.setImageByte(product.getImageByte());
-            // Lưu sản phẩm
-            String generatedCode = generateProductCode(); // Hàm sinh mã
-            product.setProductCode(generatedCode);
-            ProductResponse createdProduct = productService.createProduct(product);
-            System.out.println("Created product response: " + createdProduct);
-
-
-            response.put("DT", createdProduct);
-            response.put("EC", 0);
-            response.put("EM", "Product added successfully");
-
-            return ResponseEntity.ok(response);
-        }catch (RuntimeException e) {
-            // Xử lý lỗi và phản hồi
-            response.put("EC", 1);
-            response.put("EM", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            productService.addProduct(productRequest);
+            return ResponseEntity.ok("Thêm thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
         }
     }
-    private String generateProductCode() {
-        // Sử dụng UUID để tạo một mã duy nhất
-        return UUID.randomUUID().toString();
+
+    @GetMapping("/productImage")
+    public ProductImageResponse findImageByIdProduct(@RequestParam(value = "idProduct", required = false) Long id) {
+        if (id==null){
+            id = 0L;
+        }
+        return productService.findImageByIdProduct(id);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        // Tìm sản phẩm hiện có trong cơ sở dữ liệu
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // Cập nhật thông tin thương hiệu nếu có trong yêu cầu
-        if (product.getBrand() != null && product.getBrand().getId() != null) {
-            Brand brand = brandRepository.findById(product.getBrand().getId())
-                    .orElseThrow(() -> new RuntimeException("Brand not found"));
-            existingProduct.setBrand(brand);
-        }
-
-        // Cập nhật thông tin danh mục nếu có trong yêu cầu
-        if (product.getCategory() != null && product.getCategory().getId() != null) {
-            Category category = categoryRepository.findById(product.getCategory().getId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            existingProduct.setCategory(category);
-        }
-
-        // Cập nhật thông tin chất liệu nếu có trong yêu cầu
-        if (product.getMaterial() != null && product.getMaterial().getId() != null) {
-            Material material = materialRepository.findById(product.getMaterial().getId())
-                    .orElseThrow(() -> new RuntimeException("Material not found"));
-            existingProduct.setMaterial(material);
-        }
-
-        // Cập nhật thông tin đế giày nếu có trong yêu cầu
-        if (product.getShoeSole() != null && product.getShoeSole().getId() != null) {
-            ShoeSole shoeSole = shoeSoleRepository.findById(product.getShoeSole().getId())
-                    .orElseThrow(() -> new RuntimeException("ShoeSole not found"));
-            existingProduct.setShoeSole(shoeSole);
-        }
-
-        // Xử lý ảnh nếu có thay đổi
-        if (product.getImageByte() != null && product.getImageByte().length > 0) {
-            existingProduct.setImageByte(product.getImageByte());
-        }
-
-        // Cập nhật các trường thông tin sản phẩm, giữ nguyên giá trị cũ nếu không có thay đổi
-        if (product.getName() != null) {
-            existingProduct.setName(product.getName());
-        }
-        if (product.getProductCode() != null) {
-            existingProduct.setProductCode(product.getProductCode());
-        }
-        if (product.getStatus() != null) {
-            existingProduct.setStatus(product.getStatus());
-        }
-
-        // Lưu sản phẩm đã cập nhật
-        Product updatedProduct = productRepository.save(existingProduct);
-
-        // Tạo phản hồi JSON
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedProduct);
-        response.put("EC", 0);
-        response.put("EM", "Product updated successfully");
-
-        return ResponseEntity.ok(response);
-    }
-
-
-
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
-        try {
-            productService.deleteProduct(id);
-            return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting product");
-        }
-    }
 
     // dùng cho sale sản phẩm
     @GetMapping("/listProduct")
@@ -294,15 +143,17 @@ public class ProductController {
         List<ProductResponse> productResponse = productService.findProductRequests();
         return productResponse;
     }
+
     @GetMapping("/listProductSearch")
-    private List<ProductResponse> findSearch(@RequestParam("search") String search){
+    private List<ProductResponse> findSearch(@RequestParam("search") String search) {
         return productService.findProductRequests().stream()
                 .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
+
     @GetMapping("/findProductPriceRangePromotion")
-    public ResponseEntity<?> findProductPriceRangePromotion(@RequestParam(value = "idProduct", required = false) Long idProduct){
-        try{
+    public ResponseEntity<?> findProductPriceRangePromotion(@RequestParam(value = "idProduct", required = false) Long idProduct) {
+        try {
             if (idProduct == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -313,7 +164,7 @@ public class ProductController {
             }
             ProductViewCustomerReponse productViewCustomerReponse = productService.getFindProductPriceRangeWithPromotionByIdProduct(idProduct);
             return ResponseEntity.ok(productViewCustomerReponse);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -325,10 +176,10 @@ public class ProductController {
     }
 
     @PostMapping("/get-name-product-by-id")
-    public ResponseEntity<?> getNameById(@RequestBody List<Long> ids){
+    public ResponseEntity<?> getNameById(@RequestBody List<Long> ids) {
         try {
             return ResponseEntity.ok(productService.getProductNameById(ids));
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()

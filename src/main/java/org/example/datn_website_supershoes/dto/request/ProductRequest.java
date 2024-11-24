@@ -5,19 +5,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductRequest {
 
-    private Long id;
-
     private String name;
 
-    private String productCode;
-
-    private byte[] imageByte;
+    private byte[] image;
 
     private boolean gender;
 
@@ -28,5 +26,7 @@ public class ProductRequest {
     private Long idMaterial;
 
     private Long idShoeSole;
+
+    private List<ProductDetailRequest> productDetailRequest;
 
 }

@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.SizeResponse;
+import org.example.datn_website_supershoes.model.Brand;
 import org.example.datn_website_supershoes.model.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,6 @@ public interface SizeRepository extends JpaRepository<Size, Long> {
     List<SizeResponse> findSizeByStatus(@Param("status") String status);
 
     Optional<Size> findByName(String name);
+
+    Optional<Size> findByIdAndStatus(Long id, String status);
 }

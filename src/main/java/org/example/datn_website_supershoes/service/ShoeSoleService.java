@@ -16,8 +16,11 @@ public class ShoeSoleService {
     @Autowired
     private ShoeSoleRepository shoeSoleRepository;
 
+    public List<ShoeSoleResponse> findAllShoeSole(){
+        return shoeSoleRepository.findAllShoeSole();
+    }
     public List<ShoeSoleResponse> findByStatus(){
-        return shoeSoleRepository.findByStatus();
+        return shoeSoleRepository.findByStatus(Status.ACTIVE.toString());
     }
     public ShoeSole createShoeSole(ShoeSoleRequest shoeSoleRequest){
         Optional<ShoeSole> shoeSole = shoeSoleRepository.findByName(shoeSoleRequest.getName());

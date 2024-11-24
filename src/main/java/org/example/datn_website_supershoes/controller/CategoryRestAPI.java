@@ -22,6 +22,10 @@ public class CategoryRestAPI {
     @Autowired
     private CategoryService categoryService;
     @GetMapping("/list-category")
+    private List<CategoryResponse> findAllCategory(){
+        return categoryService.findAllCategory();
+    }
+    @GetMapping("/list-categoryActive")
     private List<CategoryResponse> findByStatusActive(){
         return categoryService.findByStatus();
     }

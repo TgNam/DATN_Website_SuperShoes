@@ -15,9 +15,11 @@ import java.util.Optional;
 public class MaterialService {
     @Autowired
     private MaterialRepository materialRepository;
-
+    public List<MaterialResponse> findAllMaterial(){
+        return materialRepository.findAllMaterial();
+    }
     public List<MaterialResponse> findByStatus(){
-        return materialRepository.findByStatus();
+        return materialRepository.findByStatus(Status.ACTIVE.toString());
     }
     public Material createMaterial(MaterialRequest materialRequest){
         Optional<Material> material = materialRepository.findByName(materialRequest.getName());
