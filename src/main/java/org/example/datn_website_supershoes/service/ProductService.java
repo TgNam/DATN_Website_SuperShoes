@@ -3,6 +3,7 @@ package org.example.datn_website_supershoes.service;
 import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ProductRequest;
+import org.example.datn_website_supershoes.dto.response.ProductImageResponse;
 import org.example.datn_website_supershoes.dto.response.ProductResponse;
 import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
@@ -38,6 +39,8 @@ public class ProductService {
 
     @Autowired
     private ProductDetailRepository productDetailRepository;
+    @Autowired
+    private ProductDetailService productDetailService;
 
     @Autowired
     private BrandRepository brandRepository;
@@ -50,87 +53,75 @@ public class ProductService {
 
     @Autowired
     private ShoeSoleRepository shoeSoleRepository;
+    @Autowired
+    private RandomPasswordGeneratorService randomCodePromotion;
 
-    public Product createProduct1(Product product) {
-        // Lưu đối tượng Product vào cơ sở dữ liệu
-        Product savedProduct = productRepository.save(product);
-        return  productRepository.save(product);
-        // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
+    private String generatePromotionCode() {
+        return "SS" + randomCodePromotion.getCodePromotion();
+    }
+    @Transactional
+    public void addProduct(ProductRequest productRequest){
+        try {
+            Optional<Brand> optionalBrand = brandRepository.findByIdAndStatus(productRequest.getIdBrand(),Status.ACTIVE.toString());
+            Optional<Category> optionalCategory = categoryRepository.findByIdAndStatus(productRequest.getIdCategory(),Status.ACTIVE.toString());
+            Optional<Material> optionalMaterial = materialRepository.findByIdAndStatus(productRequest.getIdMaterial(),Status.ACTIVE.toString());
+            Optional<ShoeSole> optionalShoeSole = shoeSoleRepository.findByIdAndStatus(productRequest.getIdShoeSole(),Status.ACTIVE.toString());
+            if (optionalBrand.isEmpty()){
+                throw new RuntimeException("IdBrand: "+productRequest.getIdBrand()+" không tồn tại trong hệ thống");
+            }
+            if (optionalCategory.isEmpty()){
+                throw new RuntimeException("IdCategory: "+productRequest.getIdCategory()+" không tồn tại trong hệ thống");
+            }
+            if (optionalMaterial.isEmpty()){
+                throw new RuntimeException("IdMaterial: "+productRequest.getIdMaterial()+" không tồn tại trong hệ thống");
+            }
+            if (optionalShoeSole.isEmpty()){
+                throw new RuntimeException("IdShoeSole: "+productRequest.getIdShoeSole()+" không tồn tại trong hệ thống");
+            }
+            Product product = Product.builder()
+                    .productCode(generatePromotionCode())
+                    .name(productRequest.getName())
+                    .brand(optionalBrand.get())
+                    .category(optionalCategory.get())
+                    .material(optionalMaterial.get())
+                    .shoeSole(optionalShoeSole.get())
+                    .gender(productRequest.isGender())
+                    .imageByte(productRequest.getImage())
+                    .build();
+            product.setStatus(Status.ACTIVE.toString());
+            Product saveProduct = productRepository.save(product);
+            boolean checkProductDetail = productDetailService.createProductDetail(saveProduct,productRequest.getProductDetailRequest());
+            if (!checkProductDetail){
+                throw new RuntimeException("Xảy ra lỗi khi thêm sản phẩm chi tiết");
+            }
 
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
-    public Map<Long, String> getProductNameById(List<Long> listId){
+    public ProductImageResponse findImageByIdProduct(Long id){
+        return productRepository.findImageByIdProduct(id);
+    }
+
+    public Map<Long, String> getProductNameById(List<Long> listId) {
         Map<Long, String> mapName = new HashMap<>();
-        for (Long id: listId) {
-            ProductDetail pd  = productDetailRepository.findById(id).get();
-            mapName.put(id,pd.getProduct().getName());
+        for (Long id : listId) {
+            ProductDetail pd = productDetailRepository.findById(id).get();
+            mapName.put(id, pd.getProduct().getName());
         }
         return mapName;
     }
 
 
-public ProductResponse createProduct(Product product) {
-    // Lưu đối tượng Product vào cơ sở dữ liệu
-    Product savedProduct = productRepository.save(product);
+    public ProductResponse createProduct(Product product) {
+        // Lưu đối tượng Product vào cơ sở dữ liệu
+        Product savedProduct = productRepository.save(product);
 
-    // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
-    return convertToProductResponse(savedProduct);
-}
-
-
-    @Transactional
-    public Product updateProduct(Long id, ProductRequest productRequest) {
-        // Tìm sản phẩm theo ID
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // Cập nhật thông tin thương hiệu nếu có trong ProductRequest
-        if (productRequest.getIdBrand() != null) {
-            Brand brand = brandRepository.findById(productRequest.getIdBrand())
-                    .orElseThrow(() -> new RuntimeException("Brand not found"));
-            existingProduct.setBrand(brand);
-        }
-
-        // Cập nhật thông tin danh mục nếu có trong ProductRequest
-        if (productRequest.getIdCategory() != null) {
-            Category category = categoryRepository.findById(productRequest.getIdCategory())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            existingProduct.setCategory(category);
-        }
-
-        // Cập nhật thông tin chất liệu nếu có trong ProductRequest
-        if (productRequest.getIdMaterial() != null) {
-            Material material = materialRepository.findById(productRequest.getIdMaterial())
-                    .orElseThrow(() -> new RuntimeException("Material not found"));
-            existingProduct.setMaterial(material);
-        }
-
-        // Cập nhật thông tin đế giày nếu có trong ProductRequest
-        if (productRequest.getIdShoeSole() != null) {
-            ShoeSole shoeSole = shoeSoleRepository.findById(productRequest.getIdShoeSole())
-                    .orElseThrow(() -> new RuntimeException("ShoeSole not found"));
-            existingProduct.setShoeSole(shoeSole);
-        }
-
-        // Cập nhật các trường dữ liệu sản phẩm nếu có giá trị mới
-        if (productRequest.getName() != null) {
-            existingProduct.setName(productRequest.getName());
-        }
-        if (productRequest.getProductCode() != null) {
-            existingProduct.setProductCode(productRequest.getProductCode());
-        }
-//        if (productRequest.getImageByte() != null) {
-//            existingProduct.setImageByte(productRequest.getImageByte());
-//        }
-
-        existingProduct.setGender(productRequest.isGender());
-        // Cập nhật danh sách chi tiết sản phẩm (ProductDetails) nếu có
-
-
-        // Lưu sản phẩm đã cập nhật
-        return productRepository.save(existingProduct);
+        // Chuyển đổi đối tượng đã lưu thành ProductResponse để trả về
+        return convertToProductResponse(savedProduct);
     }
-
 
 
     public Page<ProductResponse> getAllProduct(Specification<Product> spec, Pageable pageable) {
@@ -173,44 +164,22 @@ public ProductResponse createProduct(Product product) {
         }
 
 
-
         return response;
     }
 
-    public Optional<Product> getProductById(Long id){
+    public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
     }
 
-    public Product updateProduct(Long id, Product product) {
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(product, existingProduct, ignoredProperties);
-
-        if (product.getProductFavorites() != null) {
-            existingProduct.setProductFavorites(product.getProductFavorites());
-        }
-        if (product.getProductDetails() != null) {
-            existingProduct.setProductDetails(product.getProductDetails());
-        }
-
-        return productRepository.save(product);
+    public List<ProductResponse> findProductRequests() {
+        return productRepository.findProductRequests();
     }
 
-    public void deleteProduct(Long id){
-        productRepository.deleteById(id);
-    }
-
-
-    public List<ProductResponse> findProductRequests(){
-    return productRepository.findProductRequests();
-    }
-
-    public ProductViewCustomerReponse getFindProductPriceRangeWithPromotionByIdProduct(Long idProduct){
+    public ProductViewCustomerReponse getFindProductPriceRangeWithPromotionByIdProduct(Long idProduct) {
         Optional<ProductViewCustomerReponse> productViewCustomerReponse = productDetailRepository.findProductPriceRangeWithPromotionByIdProduct(idProduct);
-        if (productViewCustomerReponse.isEmpty()){
-            throw new RuntimeException("Sản phẩm có Id là: " +idProduct+" không tồn tại");
+        if (productViewCustomerReponse.isEmpty()) {
+            throw new RuntimeException("Sản phẩm có Id là: " + idProduct + " không tồn tại");
         }
         return productViewCustomerReponse.get();
     }

@@ -9,7 +9,4 @@ import lombok.*;
 @Builder
 public class ProductImageResponse {
     private byte[] imageByte;
-
-
-    
 }

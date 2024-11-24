@@ -24,142 +24,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-@CrossOrigin(origins = "http://localhost:3000") // Hoặc nguồn gốc của frontend
 @RestController
 @RequestMapping("/api/v1/image")
 public class ProductImageRestAPI {
     @Autowired
     private ProductImageService productImageService;
 
-
-    @GetMapping("/listProductImage")
+    @GetMapping("/listAllProductImage")
     public List<ProductImageResponse> getAllProductImage() {
         List<ProductImageResponse> productImage = productImageService.findAll();
         return productImage;
-//
     }
-
-//
-//    @PostMapping("/uploadImage")
-//    public ResponseEntity<?> uploadImage(@RequestBody ProductImageRequest productImageRequest) {
-//        try {
-//            // Gọi service để lưu hình ảnh và nhận về thông tin về hình ảnh đã lưu
-//
-//            ProductImage imageUrl = productImageService.createProductImage(productImageRequest); // Giả sử hàm này trả về URL hoặc ID của hình ảnh
-//
-//            return ResponseEntity.ok(imageUrl); // Trả về URL hoặc ID hình ảnh
-//        } catch (RuntimeException e) {
-//            return ResponseEntity
-//                    .status(HttpStatus.NOT_FOUND)
-//                    .body(
-//                            Response.builder()
-//                                    .status(HttpStatus.NOT_FOUND.toString())
-//                                    .mess(e.getMessage())
-//                                    .build()
-//                    );
-//        }
-//    }
-
-//    @PutMapping("/updateImages")
-//    public ResponseEntity<?> updateImage(@RequestBody ProductImageRequest productImageRequest) {
-//        try {
-//            // Check if idProductDetail is provided
-//            if (productImageRequest.getIdProductDetail() == null) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                        .body("idProductDetail is required for updating the image.");
-//            }
-//
-//            // Update the image using idProductDetail only
-//            ProductImage updatedImage = productImageService.updateProductImageByProductDetailId(
-//                    productImageRequest.getIdProductDetail(), productImageRequest
-//            );
-//
-//            // Create a response with the updated image data
-//            ProductImageResponse response = new ProductImageResponse(updatedImage.getImageByte());
-//
-//            return ResponseEntity.ok(response);
-//
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Error updating image: " + e.getMessage());
-//        }
-//    }
-@Transactional
-    @PostMapping("/updateImages2")
-    public ResponseEntity<?> createOrUpdateImages(@RequestBody ProductImageRequest productImageRequest) {
-        try {
-            // Check if idProductDetail is provided
-            if (productImageRequest.getIdProductDetail() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("idProductDetail is required for updating the images.");
-            }
-
-            // Check if imageBytes list is provided
-            if (productImageRequest.getImageBytes() == null || productImageRequest.getImageBytes().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("imageBytes are required for updating the images.");
-            }
-
-            // Call the service method to create or update images
-            List<ProductImage> updatedImages = productImageService.updateProductImageByProductDetailId(
-                    productImageRequest.getIdProductDetail(), productImageRequest
-            );
-
-            // Convert each ProductImage to a ProductImageResponse
-            List<ProductImageResponse> responses = updatedImages.stream()
-                    .map(image -> new ProductImageResponse(image.getImageByte()))
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(responses);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating images: " + e.getMessage());
+    @GetMapping("/listProductImage")
+    public List<ProductImageResponse> findListImageByIdProductDetail(@RequestParam(value = "idProductDetail", required = false) Long id) {
+        if (id==null){
+            id = 0L;
         }
+        return productImageService.findListImageByIdProductDetail(id);
     }
-    @PostMapping("/updateImages3")
-    public ResponseEntity<?> createOrUpdateImages1(@RequestBody ProductImageRequest productImageRequest) {
-        System.out.println("Received request: " + productImageRequest);
-        try {
-            // Kiểm tra các điều kiện cần thiết
-            if (productImageRequest.getIdProductDetail() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("idProductDetail is required for updating the images.");
-            }
-            // Xử lý logic cập nhật...
-            System.out.println("Updating images...");
-            List<ProductImage> updatedImages = productImageService.updateProductImageByProductDetailId(
-                    productImageRequest.getIdProductDetail(), productImageRequest
-            );
-            System.out.println("Images updated successfully");
-            // Trả về phản hồi
-            return ResponseEntity.ok(updatedImages);
-        } catch (RuntimeException e) {
-            System.out.println("Error while updating images: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating images: " + e.getMessage());
-        }
-    }
-
-
-    @PostMapping("/uploadListImage")
-    public ResponseEntity<?> uploadListImage(@RequestBody List<ProductImageRequest> productImageRequests) {
-        try {
-            for (ProductImageRequest productImageRequest : productImageRequests) {
-                // Gọi service để lưu từng ảnh
-                productImageService.createProductImage(productImageRequest);
-            }
-            return new ResponseEntity<>("Images uploaded successfully", HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(
-                            Response.builder()
-                                    .status(HttpStatus.NOT_FOUND.toString())
-                                    .mess(e.getMessage())
-                                    .build()
-                    );
-        }
-    }
-
 }

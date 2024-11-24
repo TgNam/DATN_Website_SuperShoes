@@ -19,4 +19,6 @@ public interface ColorRepository extends JpaRepository<Color,Long> {
     List<ColorResponse> findColorByStatus(@Param("status") String status);
     Optional<Color> findByName(String name);
     Optional<Color> findByCodeColor(String codeColor);
+
+    Optional<Color> findByIdAndStatus(Long id, String status);
 }
