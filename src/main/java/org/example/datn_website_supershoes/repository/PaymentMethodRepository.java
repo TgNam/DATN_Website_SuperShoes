@@ -18,7 +18,10 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
                 PaymentMethod pm WHERE pm.status = :status
 
             """)
+
     List<PaymentMethodResponse> listPaymentMethodResponseByStatus(@Param("status") String status);
     Optional<PaymentMethod> findByMethodNameAndType(String methodName,Integer type);
     Optional<PaymentMethod> findByType(Integer type);
+
+
 }

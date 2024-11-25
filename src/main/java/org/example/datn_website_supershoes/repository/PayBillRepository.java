@@ -40,4 +40,7 @@ public interface PayBillRepository extends JpaRepository<PayBill, Long> {
             """)
     List<PayBillOrderResponse> findByCodeBill(@Param("codeBill") String codeBill);
 
+    List<PayBill> findByBillCodeBill(@Param("codeBill") String codeBill);
+
+
 }

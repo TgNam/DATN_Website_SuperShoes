@@ -60,11 +60,13 @@ public interface BillDetailRepository extends JpaRepository<BillDetail, Long> {
     @Query("SELECT bd FROM BillDetail bd WHERE bd.bill.id = :idBill")
     List<BillDetail> findByIdBill(@Param("idBill") Long idBill);
 
-    @Query("SELECT p.imageByte, p.name, bd.quantity, bd.priceDiscount " +
+    @Query("SELECT p.imageByte, p.id, p.name, bd.quantity, bd.priceDiscount,( bd.quantity* bd.priceDiscount) " +
             "FROM BillDetail bd " +
             "JOIN bd.bill b " +
             "JOIN bd.productDetail pd " +
-            "JOIN pd.product p")
+            "JOIN pd.product p " +
+            "WHERE b.status = 'COMPLETED'")
     List<Object[]> findProductDetailsForBillDetails();
+
 
 }

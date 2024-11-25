@@ -40,6 +40,7 @@ public class BillHistoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
     // Get all BillHistory entries for a specific Bill
     @GetMapping("/by-bill/{billId}")
     public ResponseEntity<Map<String, Object>> getBillHistoryByBillId(@PathVariable Long billId) {
