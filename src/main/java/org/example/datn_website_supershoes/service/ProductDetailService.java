@@ -4,12 +4,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ProductDetailRequest;
+import org.example.datn_website_supershoes.dto.request.updateProduct.UpdateProductDetailRequest;
 import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.*;
-import org.example.datn_website_supershoes.repository.ColorRepository;
-import org.example.datn_website_supershoes.repository.ProductDetailRepository;
-import org.example.datn_website_supershoes.repository.PromotionDetailRepository;
-import org.example.datn_website_supershoes.repository.SizeRepository;
+import org.example.datn_website_supershoes.repository.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +31,8 @@ public class ProductDetailService {
     private ColorRepository colorRepository;
     @Autowired
     private ProductImageService productImageService;
+    @Autowired
+    private ProductImageRepository productImageRepository;
 
     @Transactional
     public boolean createProductDetail(Product product, List<ProductDetailRequest> productDetailRequest) {
@@ -65,6 +65,52 @@ public class ProductDetailService {
             System.out.println(e.getMessage());
             return false;
         }
+    }
+    public void updateProduct(List<UpdateProductDetailRequest> productDetailRequests){
+        for (UpdateProductDetailRequest request : productDetailRequests) {
+            Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(request.getId());
+            Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
+            Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
+            if (optionalProductDetail.isEmpty()) {
+                throw new RuntimeException("Id sản phẩm chi tiết: " + request.getId() + " không tồn tại trong hệ thống");
+            }
+            if (optionalSize.isEmpty()) {
+                throw new RuntimeException("Id kích cỡ: " + request.getIdSize() + " không tồn tại trong hệ thống");
+            }
+            if (optionalColor.isEmpty()) {
+                throw new RuntimeException("Id màu sắc: " + request.getIdColor() + " không tồn tại trong hệ thống");
+            }
+            if (request.getQuantity()<=0){
+                throw new RuntimeException("Vui lòng cập nhật số lượng lớn hơn 0");
+            }
+            ProductDetail detail = optionalProductDetail.get();
+            detail.setStatus(Status.ACTIVE.toString());
+            detail.setQuantity(request.getQuantity());
+            detail.setPrice(request.getPrice());
+            detail.setColor(optionalColor.get());
+            detail.setSize(optionalSize.get());
+            ProductDetail updateProductDetail = productDetailRepository.save(detail);
+            if (!request.getListImage().isEmpty()){
+                productImageRepository.deleteByProductDetail(updateProductDetail);
+                boolean checkProductDetail = productImageService.createProductImage(updateProductDetail, request.getListImage());
+                if (!checkProductDetail) {
+                    throw new RuntimeException("Xảy ra lỗi khi thêm ảnh cho sản phẩm chi tiết");
+                }
+            }
+        }
+    }
+    @Transactional
+    public ProductDetail updateStatus(Long id, boolean aBoolean) {
+        Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(id);
+        if (!optionalProductDetail.isPresent()) {
+            throw new RuntimeException("Id: " + id + " của sản phẩm không tồn tại");
+        }
+        if (optionalProductDetail.get().getQuantity() <= 0) {
+            throw new RuntimeException("Vui lòng cập nhập số lượng của sản phẩm trước khi thay đổi trạng thái");
+        }
+        String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
+        optionalProductDetail.get().setStatus(newStatus);
+        return productDetailRepository.save(optionalProductDetail.get());
     }
 
     public ProductDetail getById(Long id) {

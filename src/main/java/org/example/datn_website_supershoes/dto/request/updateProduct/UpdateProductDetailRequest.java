@@ -1,4 +1,4 @@
-package org.example.datn_website_supershoes.dto.request;
+package org.example.datn_website_supershoes.dto.request.updateProduct;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,12 +7,13 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductDetailRequest {
+public class UpdateProductDetailRequest {
+
+    private Long id;
 
     private Integer quantity;
 
