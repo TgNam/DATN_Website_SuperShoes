@@ -80,7 +80,7 @@ public class BillDetailRestAPI {
             }
             billDetailService.updateBillAndCreateBillDetailByIdBill(codeBill,productDetail);
             return ResponseEntity
-                    .ok("Thêm sản phẩm vào giỏ hàng thành công!");
+                    .ok("Thêm sản phẩm thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
