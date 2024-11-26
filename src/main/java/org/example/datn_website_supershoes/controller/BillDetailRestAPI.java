@@ -55,6 +55,9 @@ public class BillDetailRestAPI {
                     );
         }
     }
+
+
+
     @PostMapping("/updateBillAndCreateBillDetailByIdBill")
     private ResponseEntity<?> updateBillAndCreateBillDetailByIdBill(
             @RequestParam(value ="codeBill", required = false) String codeBill,
@@ -88,6 +91,10 @@ public class BillDetailRestAPI {
                     );
         }
     }
+
+
+
+
     @GetMapping("/detail")
     public ResponseEntity<?> getBillByCodeBill(@RequestParam(value ="codeBill", required = false) String codeBill) {
         if (codeBill==null){

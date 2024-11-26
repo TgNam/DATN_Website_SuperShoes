@@ -15,9 +15,14 @@ public class BillDetailStatisticalProductRespone {
 
     private byte[] imageByte;
 
+    private Long idProduct;
+
     private String nameProduct;
 
     private Integer quantity;
 
     private BigDecimal priceDiscount;
+
+    private BigDecimal revenue;
+
 }

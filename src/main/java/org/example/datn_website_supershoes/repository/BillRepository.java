@@ -32,6 +32,13 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
     @Query("SELECT b FROM Bill b WHERE b.codeBill = :codeBill")
     Optional<Bill> findByCodeBill(@Param("codeBill") String codeBill);
 
+
+//    @Query("UPDATE bill b" +
+//            "JOIN pay_bill pb ON b.id = pb.id_bill" +
+//            "SET pb.status = 'COMPLETED'" +
+//            "WHERE b.code_Bill = :codeBill")
+//    Optional<Bill> updateBillPayment(@Param("codeBill") String codeBill);
+
     @Query("""
             SELECT new org.example.datn_website_supershoes.dto.response.BillResponse(
             b.id,b.codeBill,b.nameCustomer ,b.phoneNumber,b.address,
@@ -47,22 +54,26 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
     Optional<BillResponse> findBillResponseByCodeBill(@Param("codeBill") String codeBill);
 
 
-    @Query(value = """
-    SELECT 
-        DATE(b.created_at) AS createdAt, 
-        COUNT(b.id) AS numberBill, 
-        SUM(b.total_amount) AS price
-    FROM 
-        bill b 
-    WHERE 
-        b.status = 'COMPLETED'
-    GROUP BY 
-        DATE(b.created_at)
-    ORDER BY 
-        DATE(b.created_at) DESC
-""", nativeQuery = true)
-    List<Object[]> findCompletedBillStatisticsByYear();
 
+
+
+
+    @Query(value = """
+                SELECT 
+                    DATE(b.created_at) AS createdAt, 
+                    COUNT(b.id) AS numberBill, 
+                    SUM(b.total_amount) AS price,
+                    b.status AS status
+                FROM 
+                    bill b
+                WHERE    b.status = 'COMPLETED' OR b.status = 'CANCELLED'
+                GROUP BY 
+                    DATE(b.created_at), 
+                    b.status
+                ORDER BY 
+                    DATE(b.created_at) DESC
+            """, nativeQuery = true)
+    List<Object[]> findCompletedBillStatisticsByYear();
 
 
 }

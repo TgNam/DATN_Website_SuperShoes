@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Date;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -16,6 +18,8 @@ import lombok.ToString;
 public class BillHistoryRequest {
 
     private String note;
+
+    private Date createdAt;
 
     private Long billId;
 

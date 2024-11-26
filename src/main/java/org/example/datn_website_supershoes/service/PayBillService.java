@@ -1,6 +1,6 @@
 package org.example.datn_website_supershoes.service;
 
-import org.example.datn_website_supershoes.Enum.Status;
+import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.dto.request.PayBillRequest;
 import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -80,6 +81,42 @@ public class PayBillService {
         return payBillRepository.save(existingPayBill);
     }
 
+    public void updatePaymentBill(String codeBill, String status) {
+        // Fetch all PayBills associated with the given codeBill
+        List<PayBill> payBills = payBillRepository.findByBillCodeBill(codeBill);
+
+        if (payBills.isEmpty()) {
+            throw new RuntimeException("Bill not found with code: " + codeBill);
+        }
+
+        // Update the status for each PayBill
+        payBills.forEach(payBill -> {
+            payBill.setStatus(status);
+            payBillRepository.save(payBill);
+        });
+    }
+
+
+    @Transactional
+    @Scheduled(cron = "0 * * * * *")
+    public void updatePaymentBillAuto() {
+        // Fetch the list of PayBill objects from the repository
+        List<PayBill> payBills = payBillRepository.findAll(); // Ensure this method fetches all PayBill records
+
+        // Loop through the payBills list
+        payBills.forEach(payBill -> {
+            Bill bill = payBill.getBill();
+            if (bill != null && "COMPLETED".equals(bill.getStatus())) {
+                payBill.setStatus("COMPLETED");
+                payBillRepository.save(payBill);
+            } else {
+
+            }
+        });
+
+    }
+
+
     // Delete a PayBill by ID and return whether it was successful
     public boolean deletePayBill(Long id) {
         if (payBillRepository.existsById(id)) {
@@ -119,16 +156,14 @@ public class PayBillService {
     }
 
 
-
-
     //by Nam
-    public PayBill createPayBill(PayBillRequest payBillRequest,Integer type,String status){
+    public PayBill createPayBill(PayBillRequest payBillRequest, Integer type, String status) {
         Optional<Bill> billOptional = billRepository.findByCodeBill(payBillRequest.getCodeBill());
-        if (billOptional.isEmpty()){
+        if (billOptional.isEmpty()) {
             throw new RuntimeException("Hóa đơn không tồn tại");
         }
         Optional<PaymentMethod> optionalPaymentMethod = paymentMethodRepository.findByType(payBillRequest.getType());
-        if(optionalPaymentMethod.isEmpty()){
+        if (optionalPaymentMethod.isEmpty()) {
             throw new RuntimeException("Phương thức thanh toán không tồn tại");
         }
         UUID uuid = UUID.randomUUID();
@@ -137,19 +172,21 @@ public class PayBillService {
                 .bill(billOptional.get())
                 .paymentMethod(optionalPaymentMethod.get())
                 .type(type)
-                .tradingCode("PD-"+uuid)
+                .tradingCode("PD-" + uuid)
                 .build();
         payBill.setStatus(status);
         return payBillRepository.save(payBill);
     }
-    public void deletePayBillById(Long id){
+
+    public void deletePayBillById(Long id) {
         Optional<PayBill> optionalPayBill = payBillRepository.findById(id);
-        if (optionalPayBill.isEmpty()){
+        if (optionalPayBill.isEmpty()) {
             throw new RuntimeException("Phương thức thanh toán không tồn tại");
         }
         payBillRepository.delete(optionalPayBill.get());
     }
-    public List<PayBillOrderResponse> findPayBillOrderByCodeBill(String codeBill){
+
+    public List<PayBillOrderResponse> findPayBillOrderByCodeBill(String codeBill) {
         return payBillRepository.findByCodeBill(codeBill);
     }
 }
