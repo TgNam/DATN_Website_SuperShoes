@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.controller;
 ;
 import org.example.datn_website_supershoes.dto.request.ProductRequest;
+import org.example.datn_website_supershoes.dto.request.updateProduct.UpdateProductRequest;
 import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.Product;
 import org.example.datn_website_supershoes.model.Size;
@@ -65,6 +66,21 @@ public class ProductController {
         try {
             productService.addProduct(productRequest);
             return ResponseEntity.ok("Thêm thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PutMapping("/updateProduct")
+    public ResponseEntity<?> updateProduct(@RequestBody UpdateProductRequest updateProductRequest) {
+        try {
+            productService.updateProduct(updateProductRequest);
+            return ResponseEntity.ok("Cập nhật thành công");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

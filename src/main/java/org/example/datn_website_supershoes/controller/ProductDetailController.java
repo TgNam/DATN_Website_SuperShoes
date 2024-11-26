@@ -57,6 +57,32 @@ public class ProductDetailController {
         List<ProductDetailResponseByNam> productDetails = productDetailService.findProductDetailRequests(idProducts);
         return ResponseEntity.ok(productDetails);
     }
+    @PutMapping("/update-status")
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
+    ){
+        try{
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            ProductDetail product  = productDetailService.updateStatus(id,aBoolean);
+            return ResponseEntity.ok(product);
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
     @GetMapping("/filterListProductDetail")
     public List<ProductDetailResponseByNam> getAllProductDetailSearch(
             @RequestParam("idProducts") List<Long> idProducts,
