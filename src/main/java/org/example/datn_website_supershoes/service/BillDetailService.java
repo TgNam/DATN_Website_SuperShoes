@@ -248,7 +248,7 @@ public class BillDetailService {
         response.setId(billDetail.getId());
         response.setQuantity(billDetail.getQuantity());
         response.setStatus(billDetail.getStatus());
-        response.setPriceDiscount(billDetail.getPriceDiscount());
+        response.setPriceDiscount(billDetail.getBill().getPriceDiscount());
         response.setTotalMerchandise(billDetail.getBill().getTotalMerchandise());
         response.setTotalAmount(billDetail.getBill().getTotalAmount());
 
@@ -659,10 +659,11 @@ public class BillDetailService {
         // Map raw data to BillDetailStatisticalProductRespone objects
         return rawData.stream()
                 .map(data -> new BillDetailStatisticalProductRespone(
-                        (byte[]) data[0],        // Assuming first element is image (byte[])
-                        (String) data[1],       // Assuming second element is product name
-                        (Integer) data[2],      // Assuming third element is quantity
-                        (BigDecimal) data[3]    // Assuming fourth element is priceDiscount
+                        (byte[]) data[0],
+                        (Long) data[1],  // Assuming first element is image (byte[])
+                        (String) data[2],       // Assuming second element is product name
+                        (Integer) data[3],      // Assuming third element is quantity
+                        (BigDecimal) data[4]  , (BigDecimal) data[5]   // Assuming fourth element is priceDiscount
                 ))
                 .collect(Collectors.toList());
     }

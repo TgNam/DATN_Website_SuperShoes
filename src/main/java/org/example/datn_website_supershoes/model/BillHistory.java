@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "BillHistory")
 @Getter
@@ -23,7 +25,7 @@ public class BillHistory extends BaseEntity {
     private String note;
 
     @Column
-    private String createAt;
+    private Date createAt;
 
     @JsonBackReference(value = "billBillHistoryReference")
     @ManyToOne

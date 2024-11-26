@@ -20,4 +20,6 @@ public class BillStatisticalPieResponse {
 
     private BigDecimal price;
 
+    private String status;
+
 }

@@ -1,14 +1,12 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.Enum.Status;
-import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.PayBillRequest;
-import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
-import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.PayBill;
 import org.example.datn_website_supershoes.service.PayBillService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +32,34 @@ public class PayBillController {
 
     @Autowired
     private PayBillService payBillService;
+
+    @PutMapping("/update-statuses-payment")
+    public ResponseEntity<?> updatePaymentManually() {
+        try {
+            // Gọi logic cập nhật trạng thái thanh toán
+            payBillService.updatePaymentBillAuto();
+
+            // Trả về phản hồi thành công
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .status(HttpStatus.OK.toString())
+                            .mess("Statuses updated successfully.")
+                            .build()
+            );
+        } catch (RuntimeException e) {
+            // Ghi log lỗi
+
+
+            // Trả về phản hồi lỗi
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                            .mess("An error occurred: " + e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
 
     @GetMapping("/list-pay-bills")
     public Page<PayBillResponse> getAllPayBills(
@@ -102,6 +128,48 @@ public class PayBillController {
         }
     }
 
+    @PutMapping("/update-pay-bill/{codeBill}")
+    public ResponseEntity<?> updateBillStatusAndNote(
+            @PathVariable String codeBill,
+            @RequestParam String status
+    ) {
+        try {
+            // Validate the status parameter
+            if (status == null || status.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Status cannot be null or empty.");
+            }
+
+            // Call the service to update the status
+            payBillService.updatePaymentBill(codeBill, status);
+
+            // Return a success response
+            return ResponseEntity.ok(Map.of(
+                    "message", "Bill status updated successfully.",
+                    "codeBill", codeBill,
+                    "newStatus", status
+            ));
+        } catch (EntityNotFoundException e) {
+            // Handle case where the bill is not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "message", "Bill not found.",
+                    "codeBill", codeBill
+            ));
+        } catch (IllegalArgumentException e) {
+            // Handle invalid status or other argument-related issues
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "message", e.getMessage(),
+                    "codeBill", codeBill
+            ));
+        } catch (Exception e) {
+            // Handle unexpected exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "message", "An unexpected error occurred.",
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+
     @GetMapping("/detail/{id}")
     public ResponseEntity<PayBill> getPayBillById(@PathVariable Long id) {
         Optional<PayBill> payBill = payBillService.getPayBillById(id);
@@ -139,8 +207,9 @@ public class PayBillController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting PayBill");
         }
     }
+
     @GetMapping("/listPayBill")
-    public ResponseEntity<?> findPayBillOrderByCodeBill(@RequestParam(value = "codeBill", required = false) String codeBill){
+    public ResponseEntity<?> findPayBillOrderByCodeBill(@RequestParam(value = "codeBill", required = false) String codeBill) {
         try {
             if (codeBill == null) {
                 return ResponseEntity.badRequest().body(
@@ -161,8 +230,9 @@ public class PayBillController {
                     );
         }
     }
+
     @PostMapping("/createPayBill")
-    public ResponseEntity<?> createPayBill(@RequestBody @Valid PayBillRequest payBillRequest, BindingResult result){
+    public ResponseEntity<?> createPayBill(@RequestBody @Valid PayBillRequest payBillRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()
@@ -170,7 +240,7 @@ public class PayBillController {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            PayBill payBill = payBillService.createPayBill(payBillRequest,1, Status.ACTIVE.toString());
+            PayBill payBill = payBillService.createPayBill(payBillRequest, 1, Status.ACTIVE.toString());
             return ResponseEntity.ok(payBill);
         } catch (RuntimeException e) {
             return ResponseEntity
@@ -183,8 +253,9 @@ public class PayBillController {
         }
 
     }
+
     @DeleteMapping("/deletePayBill")
-    public ResponseEntity<?> deletePayBillById(@RequestParam(value = "id", required = false) Long id){
+    public ResponseEntity<?> deletePayBillById(@RequestParam(value = "id", required = false) Long id) {
         try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(

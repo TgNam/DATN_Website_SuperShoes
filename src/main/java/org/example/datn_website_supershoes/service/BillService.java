@@ -34,7 +34,8 @@ public class BillService {
             BillStatisticalPieResponse response = new BillStatisticalPieResponse(
                     (Date) result[0], // Assumes the first column is a Date
                     ((Number) result[1]).intValue(), // Assumes the second column is a number of bills
-                    (BigDecimal) result[2] // Assumes the third column is the price
+                    (BigDecimal) result[2] ,
+                    (String) result[3]// Assumes the third column is the price
             );
             statistics.add(response);
         }
@@ -43,6 +44,7 @@ public class BillService {
 
 
     public void updateBillStatusAndNoteByCode(String codeBill, String status, String note) {
+
         Bill bill = billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new RuntimeException("Bill not found with code: " + codeBill));
 
@@ -50,6 +52,7 @@ public class BillService {
         bill.setNote(note);
 
         billRepository.save(bill);
+
     }
 
     public void updateBillStatus(String codeBill) {

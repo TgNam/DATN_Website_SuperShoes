@@ -2,12 +2,12 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.dto.request.BillHistoryRequest;
 import org.example.datn_website_supershoes.dto.response.BillHistoryResponse;
-import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.Account;
+import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.BillHistory;
+import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.BillHistoryRepository;
 import org.example.datn_website_supershoes.repository.BillRepository;
-import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,6 +80,22 @@ public class BillHistoryService {
                 .build();
     }
 
+//    public BillHistoryRequest createBillHistoryRequest(BillHistory billHistory) {
+//        // Save the PayBill entity to the database
+//        BillHistory billHistory1 = billHistoryRepository.save(billHistory);
+//
+//        // Convert savedPayBill into a BillHistoryRequest object
+//        BillHistoryRequest billHistoryRequest = new BillHistoryRequest();
+//
+//        // Map fields from savedPayBill to billHistoryRequest
+//        billHistoryRequest.setBillId(billHistory1.getId());
+//        billHistoryRequest.setCreatedAt(billHistory1.getCreatedAt());
+//        billHistoryRequest.setStatus(billHistory1.getStatus());
+//        billHistoryRequest.setNote(billHistory1.getNote());
+//        billHistoryRequest.setAccountId(billHistory1.getAccount().getId());
+//
+//        return billHistoryRequest;
+//    }
 
     // Delete BillHistory by ID
     public void deleteBillHistory(Long id) {
