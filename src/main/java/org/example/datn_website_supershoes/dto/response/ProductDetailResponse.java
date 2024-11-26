@@ -20,15 +20,9 @@ public class ProductDetailResponse {
 
     private BigDecimal price;
 
-    private String description;
-
     private Long idProduct;
 
     private String nameProduct;
-
-    private String productCode;
-
-    private byte[] imageByte;
 
     private Long idSize;
 
@@ -38,26 +32,9 @@ public class ProductDetailResponse {
 
     private String nameColor;
 
-    private List<byte[]> imageBytes;
-
-    private boolean gender;
-
-    private Long idBrand;
-
-    private String nameBrand;
-
-    private Long idCategory;
-
-    private String nameCategory;
-
-    private Long idMaterial;
-
-    private String nameMaterial;
-
-    private Long idShoeSole;
-
-    private String nameShoeSole;
-
+    private String codeColor;
 
     private String status;
+
+    private List<byte[]> imageByte;
 }
