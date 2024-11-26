@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
@@ -25,11 +26,18 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             "join p.brand b join p.category c join p.material m join p.shoeSole s")
     List<ProductResponse> findProductRequests();
 
+    @Query("select new org.example.datn_website_supershoes.dto.response.ProductResponse(" +
+            "p.id, p.name, p.productCode, p.imageByte, p.gender, b.id, b.name, c.id, c.name, m.id, m.name, s.id, s.name, p.status" +
+            ")" +
+            "from Product p " +
+            "join p.brand b " +
+            "join p.category c " +
+            "join p.material m " +
+            "join p.shoeSole s where p.id=:id")
+    Optional<ProductResponse> findProductRequestsById(@Param("id") Long id);
+
     @Query("""
-        select new org.example.datn_website_supershoes.dto.response.ProductProductDetailResponse(
-        p.id, p.name, p.productCode, p.imageByte, p.gender, b.id, b.name,
-        c.id, c.name, m.id, m.name, ss.id, ss.name, sum(pd.quantity), p.status
-        )
+        select new org.example.datn_website_supershoes.dto.response.ProductProductDetailResponse(p.id, p.name, p.productCode, p.imageByte, p.gender, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, coalesce(sum(pd.quantity), 0), p.status)
         from Product p 
         inner join p.productDetails pd
         inner join p.brand b 

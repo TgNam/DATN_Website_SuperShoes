@@ -36,7 +36,7 @@ public interface PayBillRepository extends JpaRepository<PayBill, Long> {
             pm.status,b.id,b.codeBill,b.totalMerchandise,b.priceDiscount,b.totalAmount)
             FROM PayBill pb 
             INNER JOIN pb.bill b 
-            INNER JOIN pb.paymentMethod pm WHERE b.codeBill=:codeBill And pb.status = 'ACTIVE'
+            INNER JOIN pb.paymentMethod pm WHERE b.codeBill=:codeBill And pb.status = 'COMPLETED'
             """)
     List<PayBillOrderResponse> findByCodeBill(@Param("codeBill") String codeBill);
 

@@ -21,8 +21,6 @@ import java.util.Optional;
 @Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Long>, JpaSpecificationExecutor<ProductDetail> {
 
-    Page<ProductDetail> findAll(Specification<ProductDetail> spec, Pageable pageable);
-
     List<ProductDetail> findByProductId(Long productId);
 
     @Query("SELECT new org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam(" +
@@ -33,7 +31,6 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "JOIN pd.size s " +
             "where p.id IN :idProducts")
     List<ProductDetailResponseByNam> findProductDetailRequests(@Param("idProducts") List<Long> idProducts);
-
 
     Optional<ProductDetail> findById(Long idProductDetail);
 

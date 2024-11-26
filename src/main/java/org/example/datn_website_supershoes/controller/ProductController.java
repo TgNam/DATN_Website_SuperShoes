@@ -2,6 +2,8 @@ package org.example.datn_website_supershoes.controller;
 ;
 import org.example.datn_website_supershoes.dto.request.ProductRequest;
 import org.example.datn_website_supershoes.dto.response.*;
+import org.example.datn_website_supershoes.model.Product;
+import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.ProductDetailService;
 import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,28 @@ public class ProductController {
     @Autowired
     ProductDetailService productDetailService;
 
+    @GetMapping("/findProductResponseById")
+    public ResponseEntity<?> findProductResponseById(@RequestParam(value = "idProduct", required = false) Long id) {
+        try {
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok(productService.findProductById(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
     @GetMapping("/findProductProductDetailResponse")
     public List<ProductProductDetailResponse> findProductProductDetailResponse() {
         List<ProductProductDetailResponse> productResponse = productService.findProductProductDetailResponse();
@@ -59,7 +83,32 @@ public class ProductController {
         }
         return productService.findImageByIdProduct(id);
     }
-
+    @PutMapping("/update-status")
+    private ResponseEntity<?> updateStatus(
+            @RequestParam(value ="id", required = false) Long id,
+            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
+    ){
+        try{
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            Product product  = productService.updateStatus(id,aBoolean);
+            return ResponseEntity.ok(product);
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 
     // dùng cho sale sản phẩm
     @GetMapping("/listProduct")

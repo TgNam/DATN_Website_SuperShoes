@@ -289,7 +289,7 @@ public class BillByEmployeeService {
         bill.setStatus(Status.WAITING_FOR_PAYMENT.toString());
         return bill;
     }
-
+    @Transactional
     public void payBillByEmployee(
             String codeBill,
             boolean delivery,

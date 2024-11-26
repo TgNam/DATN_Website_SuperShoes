@@ -633,7 +633,6 @@ public class BillDetailService {
                 Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
                 if (voucherOptional.isPresent()) {
                     Voucher voucher = voucherOptional.get();
-
                     if (bill.getTotalMerchandise().compareTo(voucher.getMinBillValue()) >= 0) {
                         BigDecimal priceSale = bill.getTotalMerchandise().multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
                                 .setScale(2, RoundingMode.HALF_UP);

@@ -240,7 +240,7 @@ public class PayBillController {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            PayBill payBill = payBillService.createPayBill(payBillRequest, 1, Status.ACTIVE.toString());
+            PayBill payBill = payBillService.createPayBill(payBillRequest,1, Status.COMPLETED.toString());
             return ResponseEntity.ok(payBill);
         } catch (RuntimeException e) {
             return ResponseEntity

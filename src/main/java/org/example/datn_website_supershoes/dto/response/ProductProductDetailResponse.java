@@ -36,7 +36,7 @@ public class ProductProductDetailResponse {
 
     private String nameShoeSole;
 
-    private Long quantity; // Cập nhật kiểu dữ liệu từ Integer sang Long
+    private Long quantity;
 
     private String status;
 }

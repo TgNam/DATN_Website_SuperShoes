@@ -19,9 +19,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -37,16 +35,16 @@ public class ProductDetailService {
     private ProductImageService productImageService;
 
     @Transactional
-    public boolean createProductDetail(Product product, List<ProductDetailRequest> productDetailRequest){
+    public boolean createProductDetail(Product product, List<ProductDetailRequest> productDetailRequest) {
         try {
-            for (ProductDetailRequest request: productDetailRequest){
+            for (ProductDetailRequest request : productDetailRequest) {
                 Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
                 Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
-                if (optionalSize.isEmpty()){
-                    throw new RuntimeException("Id kích cỡ: "+request.getIdSize()+" không tồn tại trong hệ thống");
+                if (optionalSize.isEmpty()) {
+                    throw new RuntimeException("Id kích cỡ: " + request.getIdSize() + " không tồn tại trong hệ thống");
                 }
-                if (optionalColor.isEmpty()){
-                    throw new RuntimeException("Id màu sắc: "+request.getIdColor()+" không tồn tại trong hệ thống");
+                if (optionalColor.isEmpty()) {
+                    throw new RuntimeException("Id màu sắc: " + request.getIdColor() + " không tồn tại trong hệ thống");
                 }
                 ProductDetail productDetail = ProductDetail.builder()
                         .quantity(request.getQuantity())
@@ -57,147 +55,31 @@ public class ProductDetailService {
                         .build();
                 productDetail.setStatus(Status.ACTIVE.toString());
                 ProductDetail saveProductDetail = productDetailRepository.save(productDetail);
-                boolean checkProductDetail = productImageService.createProductImage(saveProductDetail,request.getListImage());
-                if (!checkProductDetail){
+                boolean checkProductDetail = productImageService.createProductImage(saveProductDetail, request.getListImage());
+                if (!checkProductDetail) {
                     throw new RuntimeException("Xảy ra lỗi khi thêm ảnh cho sản phẩm chi tiết");
                 }
             }
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             return false;
         }
     }
 
-    public ProductDetail createProductDetail(ProductDetail productDetail) {
-
-        return productDetailRepository.save(productDetail);
-    }
-
-    public Page<ProductDetailResponse> getAllProductDetail(Specification<ProductDetail> spec, Pageable pageable) {
-//
-        return productDetailRepository.findAll(spec, pageable).map(this::convertToProductDetailResponse);
-    }
-    public List<ProductDetail> getProductDetailsByProductId(Long productId) {
-        return productDetailRepository.findByProductId(productId);
-    }
-    private ProductDetailResponse convertToProductDetailResponse(ProductDetail productDetail) {
-        ProductDetailResponse response = new ProductDetailResponse();
-
-        // Chép các thuộc tính từ ProductDetail
-        response.setId(productDetail.getId());
-        response.setQuantity(productDetail.getQuantity() != null ? productDetail.getQuantity() : 0); // Cung cấp giá trị mặc định nếu null
-        response.setPrice(productDetail.getPrice() != null ? productDetail.getPrice() : BigDecimal.ZERO); // Cung cấp giá trị mặc định nếu null
-        response.setDescription(productDetail.getDescription());
-
-        if (productDetail.getProductImage() != null) {
-            response.setImageBytes(productDetail.getProductImage().stream()
-                    .map(ProductImage::getImageByte)
-                    .collect(Collectors.toList()));
-        }
-
-        // Kiểm tra nếu Product không bị null
-        if (productDetail.getProduct() != null) {
-            Product product = productDetail.getProduct();
-            response.setIdProduct(product.getId());
-            response.setNameProduct(product.getName());
-            response.setGender(product.isGender());
-            response.setProductCode(product.getProductCode());
-            response.setImageByte(product.getImageByte());
-            // Chuyển tiếp các giá trị từ các đối tượng liên quan
-            if (product.getBrand() != null) {
-                response.setIdBrand(product.getBrand().getId());
-                response.setNameBrand(product.getBrand().getName());
-            }
-            if (product.getCategory() != null) {
-                response.setIdCategory(product.getCategory().getId());
-                response.setNameCategory(product.getCategory().getName());
-            }
-            if (product.getMaterial() != null) {
-                response.setIdMaterial(product.getMaterial().getId());
-                response.setNameMaterial(product.getMaterial().getName());
-            }
-            if (product.getShoeSole() != null) {
-                response.setIdShoeSole(product.getShoeSole().getId());
-                response.setNameShoeSole(product.getShoeSole().getName());
-            }
-
-        }
-
-        // Gán các giá trị khác nếu có
-        if (productDetail.getColor() != null) {
-            response.setIdColor(productDetail.getColor().getId());
-            response.setNameColor(productDetail.getColor().getName());
-        }
-        if (productDetail.getSize() != null) {
-            response.setIdSize(productDetail.getSize().getId());
-            response.setNameSize(productDetail.getSize().getName());
-        }
-
-        response.setStatus(productDetail.getStatus());
-
-        return response;
-    }
-
-
-
-
-    public Optional<ProductDetail> getProductByIdDetail(Long id) {
-        return productDetailRepository.findById(id);
-    }
-
     public ProductDetail getById(Long id) {
-
         return productDetailRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product Details not found!"));
     }
-
-
-    public ProductDetail updateProductDetail(Long id, ProductDetail productDetail) {
-        ProductDetail existingProductDetail = productDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ProductDetail not found"));
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(productDetail, existingProductDetail, ignoredProperties);
-
-        if (productDetail.getProduct() != null) {
-            existingProductDetail.setProduct(productDetail.getProduct());
-        }
-        if (productDetail.getSize() != null) {
-            existingProductDetail.setSize(productDetail.getSize());
-        }
-        if (productDetail.getColor() != null) {
-            existingProductDetail.setColor(productDetail.getColor());
-        }
-        if (productDetail.getProductImage() != null) {
-            existingProductDetail.setProductImage(productDetail.getProductImage());
-        }
-        if (productDetail.getPromotionDetail() != null) {
-            existingProductDetail.setPromotionDetail(productDetail.getPromotionDetail());
-        }
-        if (productDetail.getCartDetails() != null) {
-            existingProductDetail.setCartDetails(productDetail.getCartDetails());
-        }
-        if (productDetail.getBillDetails() != null) {
-            existingProductDetail.setBillDetails(productDetail.getBillDetails());
-        }
-
-        return productDetailRepository.save(productDetail);
-    }
-
-    public void deleteProductDetail(Long id) {
-        productDetailRepository.deleteById(id);
-    }
-
 
     public List<ProductDetailResponseByNam> findProductDetailRequests(List<Long> idProducts) {
         return productDetailRepository.findProductDetailRequests(idProducts);
     }
 
-
     public List<ProductPromotionResponse> findProductPromotion() {
         return productDetailRepository.findProductPromotion();
     }
+
     public List<ProductDetailResponseByNam> filterListProductDetail(List<Long> idProducts, String search, String nameSize, String nameColor, String priceRange) {
         return productDetailRepository.findProductDetailRequests(idProducts).stream()
                 .filter(productDetailResponse -> productDetailResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
@@ -206,6 +88,7 @@ public class ProductDetailService {
                 .filter(productDetailResponse -> filterByPriceRange(productDetailResponse.getPrice(), priceRange))
                 .collect(Collectors.toList());
     }
+
     public List<ProductPromotionResponse> filterListProductPromotion(String search, String nameSize, String nameColor, String priceRange) {
         return productDetailRepository.findProductPromotion().stream()
                 .filter(ProductPromotionResponse -> ProductPromotionResponse.getNameProduct().toLowerCase().contains(search.trim().toLowerCase()))
@@ -238,10 +121,12 @@ public class ProductDetailService {
     public ProductDetail findProductDetailByIdProductDetail(Long idProductDetail) {
         return productDetailRepository.findById(idProductDetail).get();
     }
+
     public List<ProductViewCustomerReponse> getProductPriceRangeWithPromotion() {
         List<ProductViewCustomerReponse> productViewCustomerReponses = productDetailRepository.findProductPriceRangeWithPromotion();
         return productViewCustomerReponses;
     }
+
     public List<ProductViewCustomerReponseByQuang> getFilteredProducts(
             String nameProduct, Long idColor, Long idSize, Long idBrand, Long idCategory, BigDecimal minPrice, BigDecimal maxPrice) {
         return productDetailRepository.findProductPriceRangeWithPromotionByQuang(
@@ -255,7 +140,6 @@ public class ProductDetailService {
         }
         return productPromotionResponse.get();
     }
-
 
 
 }
