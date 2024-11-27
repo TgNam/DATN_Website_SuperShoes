@@ -629,7 +629,7 @@ public class BillDetailService {
 
             BigDecimal priceDiscount = BigDecimal.ZERO;
             BigDecimal totalAmount = bill.getTotalMerchandise();
-            if (bill.getVoucher().getIsPrivate()) {
+            if (bill.getVoucher()!=null) {
                 Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
                 if (voucherOptional.isPresent()) {
                     Voucher voucher = voucherOptional.get();
@@ -637,7 +637,6 @@ public class BillDetailService {
                         BigDecimal priceSale = bill.getTotalMerchandise().multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
                                 .setScale(2, RoundingMode.HALF_UP);
                         BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
-
                         priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
                         totalAmount = bill.getTotalMerchandise().subtract(priceDiscount);
                     }
