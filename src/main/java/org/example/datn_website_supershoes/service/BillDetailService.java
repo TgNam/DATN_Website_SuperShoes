@@ -37,6 +37,9 @@ public class BillDetailService {
     private PromotionDetailRepository promotionDetailRepository;
     @Autowired
     private VoucherRepository voucherRepository;
+    @Autowired
+    private PayBillRepository payBillRepository;
+
 
     // Method to create a new BillDetail using BillDetailRequest
     @Transactional
@@ -644,7 +647,12 @@ public class BillDetailService {
             }
             bill.setPriceDiscount(priceDiscount);
             bill.setTotalAmount(totalAmount);
-            billRepository.save(bill);
+            Bill updateBill = billRepository.save(bill);
+            Optional<PayBill> optionalPayBill = payBillRepository.findByBill(updateBill);
+            if (optionalPayBill.isPresent()){
+                optionalPayBill.get().setAmount(totalAmount);
+            }
+            payBillRepository.save(optionalPayBill.get());
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

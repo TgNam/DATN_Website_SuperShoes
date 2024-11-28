@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 ;
+import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.ProductRequest;
 import org.example.datn_website_supershoes.dto.request.updateProduct.UpdateProductRequest;
 import org.example.datn_website_supershoes.dto.response.*;
@@ -10,6 +11,7 @@ import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,8 +64,14 @@ public class ProductController {
     }
 
     @PostMapping("/addProduct")
-    public ResponseEntity<?> createProduct(@RequestBody ProductRequest productRequest) {
+    public ResponseEntity<?> createProduct(@RequestBody @Valid ProductRequest productRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
             productService.addProduct(productRequest);
             return ResponseEntity.ok("Thêm thành công");
         } catch (RuntimeException e) {
@@ -77,8 +85,14 @@ public class ProductController {
         }
     }
     @PutMapping("/updateProduct")
-    public ResponseEntity<?> updateProduct(@RequestBody UpdateProductRequest updateProductRequest) {
+    public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequest updateProductRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
             productService.updateProduct(updateProductRequest);
             return ResponseEntity.ok("Cập nhật thành công");
         } catch (RuntimeException e) {

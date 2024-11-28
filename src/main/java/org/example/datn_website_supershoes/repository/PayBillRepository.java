@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
+import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.PayBill;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PayBillRepository extends JpaRepository<PayBill, Long> {
@@ -42,5 +44,5 @@ public interface PayBillRepository extends JpaRepository<PayBill, Long> {
 
     List<PayBill> findByBillCodeBill(@Param("codeBill") String codeBill);
 
-
+    Optional<PayBill> findByBill(Bill bill);
 }

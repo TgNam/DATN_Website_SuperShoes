@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductProductDetailResponse {
+
     private Long id;
 
     private String name;
@@ -39,5 +40,6 @@ public class ProductProductDetailResponse {
     private Long quantity;
 
     private String status;
+
 }
 
