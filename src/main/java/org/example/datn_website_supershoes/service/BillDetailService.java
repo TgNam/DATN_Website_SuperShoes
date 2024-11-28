@@ -661,7 +661,8 @@ public class BillDetailService {
                         (Long) data[1],  // Assuming first element is image (byte[])
                         (String) data[2],       // Assuming second element is product name
                         (Integer) data[3],      // Assuming third element is quantity
-                        (BigDecimal) data[4]  , (BigDecimal) data[5]   // Assuming fourth element is priceDiscount
+                        (BigDecimal) data[4]  ,
+                        (BigDecimal) data[5]   // Assuming fourth element is priceDiscount
                 ))
                 .collect(Collectors.toList());
     }
