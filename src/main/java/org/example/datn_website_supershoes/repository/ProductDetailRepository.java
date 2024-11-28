@@ -4,6 +4,7 @@ import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByN
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
 import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponseByQuang;
+import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -173,4 +174,6 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "JOIN prod.promotion pro " +
             "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE' AND pd.id IN (:idProductDetail)")
     List<ProductPromotionResponse> findProductPromotionByLitsIdProductDetail(@Param("idProductDetail") List<Long> idProductDetail);
+
+    Optional<ProductDetail> findByIdAndAndStatusAndPrice(Long id, String status, BigDecimal price);
 }

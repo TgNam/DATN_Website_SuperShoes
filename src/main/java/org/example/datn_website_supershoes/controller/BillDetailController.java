@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.BillDetailRequest;
 import org.example.datn_website_supershoes.dto.response.BillDetailResponse;
 import org.example.datn_website_supershoes.dto.response.BillDetailStatisticalProductRespone;
+import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,6 @@ public class BillDetailController {
             return ResponseEntity.ok(statistics);
 
     }
-
-
     @GetMapping("/list-bill-details")
     public Page<BillDetailResponse> getAllBillDetails(
             @RequestParam(value = "status", required = false) String status,
@@ -178,6 +177,134 @@ public class BillDetailController {
         }
         return ResponseEntity.ok(response);
     }
-
-
+    @PostMapping("/plusBillDetail")
+    private ResponseEntity<?> plusBillDetail(
+            @RequestParam(value ="codeBill", required = false) String codeBill,
+            @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
+            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+    ){
+        try {
+            if (codeBill == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: mã hóa đơn không được để trống!")
+                                .build()
+                );
+            }
+            if (idBillDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity
+                    .ok(billDetailService.plusBillDetail(codeBill,idBillDetail,idProductDetail));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PostMapping("/subtractBillDetail")
+    private ResponseEntity<?> subtractBillDetail(
+            @RequestParam(value ="codeBill", required = false) String codeBill,
+            @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
+            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+    ){
+        try {
+            if (codeBill == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: mã hóa đơn không được để trống!")
+                                .build()
+                );
+            }
+            if (idBillDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity
+                    .ok(billDetailService.subtractBillDetail(codeBill,idBillDetail,idProductDetail));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @DeleteMapping("/deleteBillDetail")
+    private ResponseEntity<?> deleteBillDetail(
+            @RequestParam(value ="codeBill", required = false) String codeBill,
+            @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
+            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+    ){
+        try {
+            if (codeBill == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: mã hóa đơn không được để trống!")
+                                .build()
+                );
+            }
+            if (idBillDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            billDetailService.deleteBillDetail(codeBill,idBillDetail,idProductDetail);
+            return ResponseEntity
+                    .ok("Xóa thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 }

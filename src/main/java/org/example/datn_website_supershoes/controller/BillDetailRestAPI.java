@@ -92,9 +92,6 @@ public class BillDetailRestAPI {
         }
     }
 
-
-
-
     @GetMapping("/detail")
     public ResponseEntity<?> getBillByCodeBill(@RequestParam(value ="codeBill", required = false) String codeBill) {
         if (codeBill==null){
@@ -107,5 +104,108 @@ public class BillDetailRestAPI {
         }
         List<BillDetailOrderResponse> billDetailOrderResponses = billDetailByEmployeeService.getBillDetailsByCodeBill(codeBill);
         return ResponseEntity.ok(billDetailOrderResponses);
+    }
+    @PostMapping("/plusBillDetail")
+    private ResponseEntity<?> plusBillDetail(
+            @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
+            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+    ){
+        try {
+            if (idBillDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity
+                    .ok(billDetailByEmployeeService.plusBillDetail(idBillDetail,idProductDetail));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PostMapping("/subtractBillDetail")
+    private ResponseEntity<?> subtractBillDetail(
+            @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
+            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+    ){
+        try {
+            if (idBillDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity
+                    .ok(billDetailByEmployeeService.subtractBillDetail(idBillDetail,idProductDetail));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @DeleteMapping("/deleteBillDetail")
+    private ResponseEntity<?> deleteBillDetail(
+            @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
+            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+    ){
+        try {
+            if (idBillDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            billDetailByEmployeeService.deleteBillDetail(idBillDetail,idProductDetail);
+            return ResponseEntity
+                    .ok("Xóa thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
     }
 }
