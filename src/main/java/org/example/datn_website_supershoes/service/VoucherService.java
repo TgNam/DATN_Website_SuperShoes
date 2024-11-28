@@ -89,7 +89,7 @@ public class VoucherService {
 
         Voucher voucher = convertVoucherRequestDTO(voucherRequest);
         voucher.setCodeVoucher(generateVoucherCode());
-        Date currentDate = Date.from(Instant.now());
+        Date currentDate = new Date();
 
         voucher.setStartAt(convertToUTC(voucherRequest.getStartAt()));
         voucher.setEndAt(convertToUTC(voucherRequest.getEndAt()));
@@ -139,7 +139,7 @@ public class VoucherService {
         voucher.setQuantity(voucherRequest.getQuantity());
         voucher.setUpdatedBy(updater.getName());
 
-        Date currentDate = Date.from(Instant.now());
+        Date currentDate = new Date();
         updateVoucherStatus(voucher, currentDate);
 
         Voucher updatedVoucher = voucherRepository.save(voucher);

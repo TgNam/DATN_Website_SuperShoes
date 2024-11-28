@@ -63,8 +63,10 @@ public class BillService {
         if (bill.getStatus().equals("PENDING")) {
             bill.setStatus("CONFIRMED");
         } else if (bill.getStatus().equals("CONFIRMED")) {
-            bill.setStatus("SHIPPED");
-        } else if (bill.getStatus().equals("SHIPPED")) {
+            bill.setStatus("WAITTING_FOR_SHIPPED");
+        } else if (bill.getStatus().equals("WAITTING_FOR_SHIPPED")) {
+            bill.setStatus("SHIPPED");}
+        else if (bill.getStatus().equals("SHIPPED")) {
             bill.setStatus("COMPLETED");
         } else {
             throw new RuntimeException("Invalid bill status");
