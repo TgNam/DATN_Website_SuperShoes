@@ -411,7 +411,7 @@ public class BillByEmployeeService {
                         .codeBill(codeBill)
                         .type(1)
                         .build();
-                PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
+                PayBillService.createPayBill(payBillRequest, 1, Status.WAITING_FOR_PAYMENT.toString());
                 bill.setStatus(Status.SHIPPED.toString());
             } else if (totalPaid.compareTo(totalAmount) < 0) {
                 throw new RuntimeException("Vui lòng thanh toán đủ số tiền trước khi thanh toán hóa đơn");
@@ -636,7 +636,7 @@ public class BillByEmployeeService {
                     .codeBill(saveBill.getCodeBill())
                     .type(1)
                     .build();
-            PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
+            PayBillService.createPayBill(payBillRequest, 1, Status.WAITING_FOR_PAYMENT.toString());
             if (checkVoucher) {
                 voucherRepository.save(voucher);
             }
