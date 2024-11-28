@@ -88,12 +88,13 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "c.id, c.name, " +
             "m.id, m.name, " +
             "ss.id, ss.name, " +
-            "MIN(pd.price), " +
-            "MAX(pd.price), " +
-            "MIN(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END), " +
-            "MAX(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END), " +
+            "MIN(pd.price) AS minPrice, " +
+            "MAX(pd.price) AS maxPrice, " +
+            "MIN(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END) AS minPromoPrice, " +
+            "MAX(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END) AS maxPromoPrice, " +
             "si.id, si.name, " +
-            "cl.id, cl.name" +
+            "cl.id, cl.name, " +
+            "p.gender" +
             ") " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
@@ -114,7 +115,8 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "AND (:idCategory IS NULL OR c.id = :idCategory) " +
             "AND (:minPrice IS NULL OR pd.price >= :minPrice) " +
             "AND (:maxPrice IS NULL OR pd.price <= :maxPrice) " +
-            "GROUP BY p.id, p.name, p.imageByte, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, si.id, si.name, cl.id, cl.name " +
+            "AND (:gender IS NULL OR p.gender = :gender) " + // Added gender filtering
+            "GROUP BY p.id, p.name, p.imageByte, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, si.id, si.name, cl.id, cl.name, p.gender " +
             "ORDER BY p.name")
     List<ProductViewCustomerReponseByQuang> findProductPriceRangeWithPromotionByQuang(
             @Param("nameProduct") String nameProduct,
@@ -123,8 +125,10 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             @Param("idBrand") Long idBrand,
             @Param("idCategory") Long idCategory,
             @Param("minPrice") BigDecimal minPrice,
-            @Param("maxPrice") BigDecimal maxPrice
+            @Param("maxPrice") BigDecimal maxPrice,
+            @Param("gender") Boolean gender
     );
+
 
 
 
