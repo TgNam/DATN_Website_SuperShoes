@@ -436,6 +436,7 @@ public class BillDetailService {
             System.out.println(e.getMessage());
         }
     }
+
     @Transactional
     public void updateBillAndCreateBillDetailByIdBill(String codeBill, List<ProductDetailPromoRequest> listProductDetail) {
         try {
@@ -632,7 +633,7 @@ public class BillDetailService {
 
             BigDecimal priceDiscount = BigDecimal.ZERO;
             BigDecimal totalAmount = bill.getTotalMerchandise();
-            if (bill.getVoucher()!=null) {
+            if (bill.getVoucher() != null) {
                 Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
                 if (voucherOptional.isPresent()) {
                     Voucher voucher = voucherOptional.get();
@@ -649,7 +650,7 @@ public class BillDetailService {
             bill.setTotalAmount(totalAmount);
             Bill updateBill = billRepository.save(bill);
             Optional<PayBill> optionalPayBill = payBillRepository.findByBill(updateBill);
-            if (optionalPayBill.isPresent()){
+            if (optionalPayBill.isPresent()) {
                 optionalPayBill.get().setAmount(totalAmount);
             }
             payBillRepository.save(optionalPayBill.get());
@@ -669,10 +670,201 @@ public class BillDetailService {
                         (Long) data[1],  // Assuming first element is image (byte[])
                         (String) data[2],       // Assuming second element is product name
                         (Integer) data[3],      // Assuming third element is quantity
-                        (BigDecimal) data[4]  ,
+                        (BigDecimal) data[4],
                         (BigDecimal) data[5]   // Assuming fourth element is priceDiscount
                 ))
                 .collect(Collectors.toList());
     }
 
+    public BillDetail plusBillDetail(String codeBill, Long idBillDetail, Long idProductDetail) {
+        // Tìm kiếm hóa đơn theo mã hóa đơn
+        Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
+
+        // Kiểm tra hóa đơn theo mã hóa đơn có tồn tại hay không
+        if (!billOptional.isPresent()) {
+            throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
+        }
+
+        Bill bill = billOptional.get();
+
+        Optional<BillDetail> billDetailOptional = billDetailRepository.findById(idBillDetail);
+
+        if (billDetailOptional.isEmpty()) {
+            throw new RuntimeException("Hóa đơn không tồn tại!");
+        }
+
+        Optional<ProductDetail> optionalProductDetail = productDetailRepository.findByIdAndAndStatusAndPrice(idProductDetail, Status.ACTIVE.toString(), billDetailOptional.get().getPriceDiscount());
+
+        if (optionalProductDetail.isEmpty()) {
+            throw new RuntimeException("Sản phẩm đã hết hàng!");
+        }
+        if (optionalProductDetail.get().getQuantity() <= 0) {
+            throw new RuntimeException("Sản phẩm đã hết hàng");
+        }
+        Integer newQuantity = optionalProductDetail.get().getQuantity() - 1;
+        optionalProductDetail.get().setQuantity(newQuantity);
+        if (newQuantity <= 0) {
+            optionalProductDetail.get().setStatus(Status.INACTIVE.toString());
+        }
+        productDetailRepository.save(optionalProductDetail.get());
+        billDetailOptional.get().setQuantity(billDetailOptional.get().getQuantity() + 1);
+        bill.setTotalMerchandise(
+                bill.getTotalMerchandise().add(optionalProductDetail.get().getPrice())
+        );
+        BigDecimal priceDiscount = BigDecimal.ZERO;
+        BigDecimal totalAmount = bill.getTotalMerchandise();
+        if (bill.getVoucher() != null) {
+            Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
+            if (voucherOptional.isPresent()) {
+                Voucher voucher = voucherOptional.get();
+                if (bill.getTotalMerchandise().compareTo(voucher.getMinBillValue()) >= 0) {
+                    BigDecimal priceSale = bill.getTotalMerchandise().multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
+                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
+                    priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
+                    totalAmount = bill.getTotalMerchandise().subtract(priceDiscount);
+                }
+            }
+        }
+        bill.setPriceDiscount(priceDiscount);
+        bill.setTotalAmount(totalAmount);
+        Bill updateBill = billRepository.save(bill);
+        Optional<PayBill> optionalPayBill = payBillRepository.findByBill(updateBill);
+        if (optionalPayBill.isPresent()) {
+            optionalPayBill.get().setAmount(totalAmount);
+        }
+        payBillRepository.save(optionalPayBill.get());
+
+        return billDetailRepository.save(billDetailOptional.get());
+    }
+
+    public BillDetail subtractBillDetail(String codeBill, Long idBillDetail, Long idProductDetail) {
+        // Tìm kiếm hóa đơn theo mã hóa đơn
+        Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
+
+        // Kiểm tra hóa đơn theo mã hóa đơn có tồn tại hay không
+        if (!billOptional.isPresent()) {
+            throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
+        }
+
+        Bill bill = billOptional.get();
+
+        Optional<BillDetail> billDetailOptional = billDetailRepository.findById(idBillDetail);
+
+        if (billDetailOptional.isEmpty()) {
+            throw new RuntimeException("Hóa đơn không tồn tại!");
+        }
+
+        Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(idProductDetail);
+
+        if (optionalProductDetail.isEmpty()) {
+            throw new RuntimeException("Sản phẩm không tồn tại!");
+        }
+        Integer newQuantity = billDetailOptional.get().getQuantity() - 1;
+
+        if (newQuantity <= 0) {
+            throw new RuntimeException("Tối thiểu phải có 1 sản phẩm");
+        }
+        billDetailOptional.get().setQuantity(newQuantity);
+
+        optionalProductDetail.get().setQuantity(optionalProductDetail.get().getQuantity() + 1);
+
+        productDetailRepository.save(optionalProductDetail.get());
+
+        bill.setTotalMerchandise(
+                bill.getTotalMerchandise().subtract(optionalProductDetail.get().getPrice())
+        );
+
+        BigDecimal priceDiscount = BigDecimal.ZERO;
+        BigDecimal totalAmount = bill.getTotalMerchandise();
+
+        if (bill.getVoucher() != null) {
+            Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
+            if (voucherOptional.isPresent()) {
+                Voucher voucher = voucherOptional.get();
+                if (bill.getTotalMerchandise().compareTo(voucher.getMinBillValue()) >= 0) {
+                    BigDecimal priceSale = bill.getTotalMerchandise().multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
+                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
+                    priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
+                    totalAmount = bill.getTotalMerchandise().subtract(priceDiscount);
+                }
+            }
+        }
+        bill.setPriceDiscount(priceDiscount);
+        bill.setTotalAmount(totalAmount);
+        Bill updateBill = billRepository.save(bill);
+        Optional<PayBill> optionalPayBill = payBillRepository.findByBill(updateBill);
+        if (optionalPayBill.isPresent()) {
+            optionalPayBill.get().setAmount(totalAmount);
+        }
+        payBillRepository.save(optionalPayBill.get());
+
+        return billDetailRepository.save(billDetailOptional.get());
+    }
+
+    public void deleteBillDetail(String codeBill, Long idBillDetail, Long idProductDetail) {
+        // Tìm kiếm hóa đơn theo mã hóa đơn
+        Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
+
+        // Kiểm tra hóa đơn theo mã hóa đơn có tồn tại hay không
+        if (!billOptional.isPresent()) {
+            throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
+        }
+
+        Bill bill = billOptional.get();
+
+        List<BillDetail> billDetails = billDetailRepository.findByIdBill(bill.getId());
+
+        if (billDetails.size() <= 1) {
+            throw new RuntimeException("Cần tối thiểu 1 sản phẩm có trong giỏ hàng");
+        }
+        Optional<BillDetail> billDetailOptional = billDetailRepository.findById(idBillDetail);
+
+        if (billDetailOptional.isEmpty()) {
+            throw new RuntimeException("Hóa đơn không tồn tại!");
+        }
+
+        Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(idProductDetail);
+
+        if (optionalProductDetail.isEmpty()) {
+            throw new RuntimeException("Sản phẩm không tồn tại!");
+        }
+
+        Integer newQuantity = billDetailOptional.get().getQuantity() + optionalProductDetail.get().getQuantity();
+
+        optionalProductDetail.get().setQuantity(newQuantity);
+
+        productDetailRepository.save(optionalProductDetail.get());
+
+        bill.setTotalMerchandise(
+                bill.getTotalMerchandise().subtract(optionalProductDetail.get().getPrice().multiply(BigDecimal.valueOf(optionalProductDetail.get().getQuantity())))
+        );
+
+        BigDecimal priceDiscount = BigDecimal.ZERO;
+        BigDecimal totalAmount = bill.getTotalMerchandise();
+
+        if (bill.getVoucher() != null) {
+            Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
+            if (voucherOptional.isPresent()) {
+                Voucher voucher = voucherOptional.get();
+                if (bill.getTotalMerchandise().compareTo(voucher.getMinBillValue()) >= 0) {
+                    BigDecimal priceSale = bill.getTotalMerchandise().multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
+                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
+                    priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
+                    totalAmount = bill.getTotalMerchandise().subtract(priceDiscount);
+                }
+            }
+        }
+        bill.setPriceDiscount(priceDiscount);
+        bill.setTotalAmount(totalAmount);
+        Bill updateBill = billRepository.save(bill);
+        Optional<PayBill> optionalPayBill = payBillRepository.findByBill(updateBill);
+        if (optionalPayBill.isPresent()) {
+            optionalPayBill.get().setAmount(totalAmount);
+        }
+        payBillRepository.save(optionalPayBill.get());
+        billDetailRepository.delete(billDetailOptional.get());
+    }
 }
