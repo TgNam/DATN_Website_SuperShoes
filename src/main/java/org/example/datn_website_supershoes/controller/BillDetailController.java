@@ -220,6 +220,7 @@ public class BillDetailController {
                     );
         }
     }
+
     @PostMapping("/subtractBillDetail")
     private ResponseEntity<?> subtractBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
@@ -263,6 +264,7 @@ public class BillDetailController {
                     );
         }
     }
+
     @DeleteMapping("/deleteBillDetail")
     private ResponseEntity<?> deleteBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
