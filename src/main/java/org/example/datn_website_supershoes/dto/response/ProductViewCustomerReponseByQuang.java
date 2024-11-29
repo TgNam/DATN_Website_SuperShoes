@@ -49,5 +49,8 @@ public class ProductViewCustomerReponseByQuang {
     private String nameSize;
 
     private Long idColor;
+
     private String nameColor;
+
+    private Boolean gender;
 }

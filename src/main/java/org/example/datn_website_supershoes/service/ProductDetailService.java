@@ -174,9 +174,9 @@ public class ProductDetailService {
     }
 
     public List<ProductViewCustomerReponseByQuang> getFilteredProducts(
-            String nameProduct, Long idColor, Long idSize, Long idBrand, Long idCategory, BigDecimal minPrice, BigDecimal maxPrice) {
+            String nameProduct, Long idColor, Long idSize, Long idBrand, Long idCategory, BigDecimal minPrice, BigDecimal maxPrice, Boolean gender) {
         return productDetailRepository.findProductPriceRangeWithPromotionByQuang(
-                nameProduct, idColor, idSize, idBrand, idCategory, minPrice, maxPrice);
+                nameProduct, idColor, idSize, idBrand, idCategory, minPrice, maxPrice,gender);
     }
 
     public ProductPromotionResponse findProductPromotionByIdProcuctAndIdColorAndIdSize(Long idProduct, Long idColor, Long idSize) {

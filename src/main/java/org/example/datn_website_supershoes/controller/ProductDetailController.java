@@ -57,12 +57,13 @@ public class ProductDetailController {
         List<ProductDetailResponseByNam> productDetails = productDetailService.findProductDetailRequests(idProducts);
         return ResponseEntity.ok(productDetails);
     }
+
     @PutMapping("/update-status")
     private ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
-    ){
-        try{
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean
+    ) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -71,9 +72,9 @@ public class ProductDetailController {
                                 .build()
                 );
             }
-            ProductDetail product  = productDetailService.updateStatus(id,aBoolean);
+            ProductDetail product = productDetailService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(product);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -83,6 +84,7 @@ public class ProductDetailController {
                     );
         }
     }
+
     @GetMapping("/filterListProductDetail")
     public List<ProductDetailResponseByNam> getAllProductDetailSearch(
             @RequestParam("idProducts") List<Long> idProducts,
@@ -98,16 +100,18 @@ public class ProductDetailController {
         List<ProductPromotionResponse> productDetails = productDetailService.findProductPromotion();
         return ResponseEntity.ok(productDetails);
     }
+
     @GetMapping("/filterListProductPromotion")
     public List<ProductPromotionResponse> getAllProductPromotionSearch(
             @RequestParam("search") String search,
             @RequestParam("nameSize") String nameSize,
             @RequestParam("nameColor") String nameColor,
             @RequestParam("priceRange") String priceRange) {
-        return productDetailService.filterListProductPromotion(search,nameSize,nameColor,priceRange);
+        return productDetailService.filterListProductPromotion(search, nameSize, nameColor, priceRange);
     }
+
     @GetMapping("/findProductDetailByIdProductDetail")
-    public ResponseEntity<?> findProductDetailByIdProductDetail(@RequestParam(value = "idProductDetail", required = false) Long idProductDetail){
+    public ResponseEntity<?> findProductDetailByIdProductDetail(@RequestParam(value = "idProductDetail", required = false) Long idProductDetail) {
         try {
             if (idProductDetail == null) {
                 return ResponseEntity.badRequest().body(
@@ -118,7 +122,7 @@ public class ProductDetailController {
                 );
             }
             return ResponseEntity.ok(productDetailService.findProductDetailByIdProductDetail(idProductDetail));
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -128,6 +132,7 @@ public class ProductDetailController {
                     );
         }
     }
+
     @GetMapping("/productPriceRangePromotion")
     public ResponseEntity<List<ProductViewCustomerReponse>> getProductPriceRangeWithPromotion() {
         List<ProductViewCustomerReponse> response = productDetailService.getProductPriceRangeWithPromotion();
@@ -142,10 +147,11 @@ public class ProductDetailController {
             @RequestParam(value = "idBrand", required = false) Long idBrand,
             @RequestParam(value = "idCategory", required = false) Long idCategory,
             @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
-            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(value = "gender", required = false) Boolean gender
     ) {
         List<ProductViewCustomerReponseByQuang> response = productDetailService.getFilteredProducts(
-                nameProduct, idColor, idSize, idBrand, idCategory, minPrice, maxPrice
+                nameProduct, idColor, idSize, idBrand, idCategory, minPrice, maxPrice, gender
         );
         return ResponseEntity.ok(response);
     }
