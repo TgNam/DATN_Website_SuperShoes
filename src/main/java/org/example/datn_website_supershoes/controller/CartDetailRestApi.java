@@ -20,54 +20,6 @@ public class CartDetailRestApi {
     @Autowired
     private CartDetailService cartDetailService;
 
-    @GetMapping("/codeCart")
-    public ResponseEntity<?> findByAccountId(@RequestParam("id") Long id) {
-        try {
-            List<String> codeCart = cartDetailService.listCodeCartByIdCart(id);
-            return ResponseEntity.ok(codeCart);
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Response.builder()
-                            .status(HttpStatus.CONFLICT.toString())
-                            .mess(e.getMessage())
-                            .build()
-                    );
-        }
-    }
-
-    @GetMapping("/listCactDetail")
-    public ResponseEntity<?> listCartDetailResponseById(@RequestParam("id") Long id, @RequestParam("codeCart") String codeCart) {
-        try {
-            List<CartDetailResponse> cartDetailResponses = cartDetailService.listCartDetailResponseById(id, codeCart);
-            return ResponseEntity.ok(cartDetailResponses);
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Response.builder()
-                            .status(HttpStatus.CONFLICT.toString())
-                            .mess(e.getMessage())
-                            .build()
-                    );
-        }
-    }
-
-    @DeleteMapping("/deleteById")
-    public ResponseEntity<?> deleteById(@RequestParam("id") Long id) {
-        try {
-            cartDetailService.deleteByIdCartDetail(id);
-            return ResponseEntity.ok("Xóa thành công!");
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Response.builder()
-                            .status(HttpStatus.CONFLICT.toString())
-                            .mess(e.getMessage())
-                            .build()
-                    );
-        }
-    }
-
     @PostMapping("/add-product-to-cart/{idUser}")
     public ResponseEntity<?> createCartDetail(@RequestBody CartDetailRequest cartDetailRequest,
                                               @PathVariable("idUser") long id) {
@@ -103,6 +55,92 @@ public class CartDetailRestApi {
         try {
             List<CartDetailProductDetailResponse> cartDetailByAccountId = cartDetailService.getCartDetailByAccountIdAndIdCartDetail(accountId,idCartDetail);
             return ResponseEntity.ok(cartDetailByAccountId);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+    @PostMapping("/plusCartDetail")
+    public ResponseEntity<?> plusCartDetail (
+            @RequestParam(value ="idCartDetail", required = false) Long idCartDetail,
+            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+    ){
+        try {
+            if (idCartDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            if (idProductDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity
+                    .ok(cartDetailService.plusCartDetail(idCartDetail,idProductDetail));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PostMapping("/subtractCartDetail")
+    public ResponseEntity<?> subtractCartDetail (
+            @RequestParam(value ="idCartDetail", required = false) Long idCartDetail
+    ){
+        try {
+            if (idCartDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity
+                    .ok(cartDetailService.subtractCartDetail(idCartDetail));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @DeleteMapping("/deleteCartDetail")
+    private ResponseEntity<?> deleteBillDetail(
+            @RequestParam(value ="idCartDetail", required = false) Long idCartDetail
+    ){
+        try {
+            if (idCartDetail == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID hóa đơn chi tiết không được để trống!")
+                                .build()
+                );
+            }
+            cartDetailService.deleteCartDetail(idCartDetail);
+            return ResponseEntity
+                    .ok("Xóa thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

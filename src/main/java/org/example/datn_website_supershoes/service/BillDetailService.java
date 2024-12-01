@@ -817,7 +817,7 @@ public class BillDetailService {
         List<BillDetail> billDetails = billDetailRepository.findByIdBill(bill.getId());
 
         if (billDetails.size() <= 1) {
-            throw new RuntimeException("Cần tối thiểu 1 sản phẩm có trong giỏ hàng");
+            throw new RuntimeException("Cần tối thiểu 1 sản phẩm có trong hóa đơn");
         }
         Optional<BillDetail> billDetailOptional = billDetailRepository.findById(idBillDetail);
 
