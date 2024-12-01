@@ -121,7 +121,9 @@ public class ProductDetailService {
     public List<ProductDetailResponseByNam> findProductDetailRequests(List<Long> idProducts) {
         return productDetailRepository.findProductDetailRequests(idProducts);
     }
-
+    public List<ProductPromotionResponse> findProductDetailActiveRequests(Long idProducts) {
+        return productDetailRepository.findProductDetailActiveRequests(idProducts);
+    }
     public List<ProductPromotionResponse> findProductPromotion() {
         return productDetailRepository.findProductPromotion();
     }

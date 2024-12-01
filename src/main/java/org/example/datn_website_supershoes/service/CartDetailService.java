@@ -39,28 +39,31 @@ public class CartDetailService {
     @Autowired
     private ProductDetailRepository productDetailRepository;
 
-    public List<String> listCodeCartByIdCart(Long id){
+    public List<String> listCodeCartByIdCart(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID không được để trống.");
         }
         return cartDetailRepository.listCodeCartByIdCart(id);
     }
-    public List<CartDetailResponse> listCartDetailResponseById( Long id, String codeCart){
+
+    public List<CartDetailResponse> listCartDetailResponseById(Long id, String codeCart) {
         if (id == null) {
             throw new IllegalArgumentException("ID không được để trống.");
         } else if (codeCart == null) {
             throw new IllegalArgumentException("codeCart không được để trống.");
         }
-        return cartDetailRepository.listCartDetailResponseById(id,codeCart);
+        return cartDetailRepository.listCartDetailResponseById(id, codeCart);
     }
-    public void deleteByIdCartDetail(Long id){
+
+    public void deleteByIdCartDetail(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID không được để trống.");
-        }else{
+        } else {
             cartDetailRepository.deleteById(id);
         }
     }
-    public Cart addToCart(CartDetailRequest cartDetailRequest, long accountId){
+
+    public Cart addToCart(CartDetailRequest cartDetailRequest, long accountId) {
         Cart cart = cartService.getCartByAccountId(accountId);
         ProductDetail productDetail = productDetailService.getById(cartDetailRequest.getIdProductDetail());
         CartDetail existingCartDetail = cart.getCartDetails().stream()
@@ -68,9 +71,15 @@ public class CartDetailService {
                 .findFirst()
                 .orElse(null);
         if (existingCartDetail != null) {
+            if (existingCartDetail.getQuantity() + cartDetailRequest.getQuantity() > productDetail.getQuantity()) {
+                throw new RuntimeException("Đã có " + existingCartDetail.getQuantity() + " sản phẩm trong giỏ hàng!");
+            }
             existingCartDetail.setQuantity(existingCartDetail.getQuantity() + cartDetailRequest.getQuantity());
             cartDetailRepository.save(existingCartDetail);
         } else {
+            if (cartDetailRequest.getQuantity() > productDetail.getQuantity()) {
+                throw new RuntimeException("Số lượng mua vượt quá số lượng sản phẩm trong kho!");
+            }
             CartDetail newCartDetail = new CartDetail();
             newCartDetail.setCart(cart);
             newCartDetail.setProductDetail(productDetail);
@@ -78,10 +87,10 @@ public class CartDetailService {
             cart.getCartDetails().add(newCartDetail);
             cartDetailRepository.save(newCartDetail);
         }
-
         return cartRepository.save(cart);
     }
-    public CartDetail convertCartDetailRequestDTO(CartDetailRequest cartDetailRequest){
+
+    public CartDetail convertCartDetailRequestDTO(CartDetailRequest cartDetailRequest) {
         Cart cart = cartRepository.findById(cartDetailRequest.getIdCart()).get();
         ProductDetail productDetail = productDetailRepository.findById(cartDetailRequest.getIdCart()).get();
         CartDetail cartDetail = CartDetail.builder()
@@ -94,9 +103,9 @@ public class CartDetailService {
         return cartDetail;
     }
 
-    public List<CartDetailProductDetailResponse> getCartDetailByAccountId (long accountId){
+    public List<CartDetailProductDetailResponse> getCartDetailByAccountId(long accountId) {
         Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
-        if(cartOptional.isPresent()) {
+        if (cartOptional.isPresent()) {
             List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccount(accountId);
             return cartDetailProductDetailResponse;
         }
@@ -108,10 +117,11 @@ public class CartDetailService {
         List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccount(accountId);
         return cartDetailProductDetailResponse;
     }
-    public List<CartDetailProductDetailResponse> getCartDetailByAccountIdAndIdCartDetail (long accountId, List<Long> idCartDetail){
+
+    public List<CartDetailProductDetailResponse> getCartDetailByAccountIdAndIdCartDetail(long accountId, List<Long> idCartDetail) {
         Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
-        if(cartOptional.isPresent()) {
-            List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId,idCartDetail);
+        if (cartOptional.isPresent()) {
+            List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
             return cartDetailProductDetailResponse;
         }
         Account account = accountRepository.findById(accountId)
@@ -119,7 +129,8 @@ public class CartDetailService {
         cartRepository.save(Cart.builder()
                 .account(account)
                 .build());
-        List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId,idCartDetail);;
+        List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
+        ;
         return cartDetailProductDetailResponse;
     }
 }

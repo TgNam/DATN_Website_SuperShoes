@@ -617,17 +617,6 @@ public class BillByEmployeeService {
                     billDetail.setPriceDiscount(productDetailOptional.get().getPrice());
                     billDetailRepository.save(billDetail);
                 }
-                //Số lượng còn lại của sản phẩm
-                Integer newProductQuantity = quantityProductDetail - request.getQuantityCartDetail();
-                //Cập nhật số lượng cho sản phẩm
-                productDetailOptional.get().setQuantity(newProductQuantity);
-                //Nếu số lượng <= 0 thì chuyển productDetail sang trạng thái INACTIVE
-                if (newProductQuantity <= 0) {
-                    productDetailOptional.get().setStatus(Status.INACTIVE.toString());
-                }
-                //Cập nhật lại sản phẩm chi tiết
-                productDetailRepository.save(productDetailOptional.get());
-
                 cartDetailRepository.deleteById(request.getIdCartDetail());
             }
 
