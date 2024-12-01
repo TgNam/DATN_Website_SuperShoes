@@ -57,7 +57,11 @@ public class ProductDetailController {
         List<ProductDetailResponseByNam> productDetails = productDetailService.findProductDetailRequests(idProducts);
         return ResponseEntity.ok(productDetails);
     }
-
+    @GetMapping("/listProductDetailActive")
+    public ResponseEntity<?> getProductDetailActive(@RequestParam("idProducts") Long idProducts) {
+        List<ProductPromotionResponse> productDetails = productDetailService.findProductDetailActiveRequests(idProducts);
+        return ResponseEntity.ok(productDetails);
+    }
     @PutMapping("/update-status")
     private ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
