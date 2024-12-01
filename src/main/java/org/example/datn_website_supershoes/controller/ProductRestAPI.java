@@ -5,7 +5,6 @@ import org.example.datn_website_supershoes.dto.request.ProductRequest;
 import org.example.datn_website_supershoes.dto.request.updateProduct.UpdateProductRequest;
 import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.Product;
-import org.example.datn_website_supershoes.model.Size;
 import org.example.datn_website_supershoes.service.ProductDetailService;
 import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/product")
-public class ProductController {
+public class ProductRestAPI {
 
     @Autowired
     private ProductService productService;
