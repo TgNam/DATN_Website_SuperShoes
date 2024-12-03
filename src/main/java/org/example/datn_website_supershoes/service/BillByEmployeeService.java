@@ -11,6 +11,8 @@ import org.example.datn_website_supershoes.model.*;
 import org.example.datn_website_supershoes.repository.*;
 import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,10 +41,6 @@ public class BillByEmployeeService {
     @Autowired
     private PayBillService PayBillService;
     @Autowired
-    private CartService cartService;
-    @Autowired
-    private CartRepository cartRepository;
-    @Autowired
     private ProductDetailRepository productDetailRepository;
     @Autowired
     private CartDetailRepository cartDetailRepository;
@@ -52,10 +50,42 @@ public class BillByEmployeeService {
     private NotificationController notificationController;
     //Lấy tối đa 5 phần tử
     private static final int MAX_DISPLAY_BILLS = 5;
+    public Account getUseLogin(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Account user = accountRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Lỗi liên quan đến đăng nhập vui lòng thử lại"));
+        return  user;
+    }
+    @Transactional
+    public void findBillsOlderThanOneDay(){
+        List<Bill> bills = billByEmployeeRepository.findBillsOlderThanOneDay(Status.WAITING_FOR_PAYMENT.toString());
+        for (Bill bill : bills){
+            List<BillDetail> listBillDetail = billDetailRepository.findByIdBill(bill.getId());
+            for (BillDetail billDetail : listBillDetail){
+                //Tìm kiếm sản phẩm chi tiết theo id và trạng thái
+                Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(billDetail.getProductDetail().getId());
+                // Kiểm tra sản phẩm có tồn tại không
+                if (!productDetailOptional.isPresent()) {
+                    throw new RuntimeException("Id " + billDetail.getProductDetail().getId() + " của sản phẩm không tồn tại trong hệ thống.");
+                }
+                ProductDetail productDetail = productDetailOptional.get();
+                //Số lượng sản phẩm của sản phẩm chi tiết
+                int quantityProductDetail = productDetail.getQuantity();
+                //Cộng sô lượng sản phẩm
+                quantityProductDetail = quantityProductDetail + billDetail.getQuantity();
+                productDetail.setQuantity(quantityProductDetail);
+                //Cập nhật lại sản phẩm
+                productDetailRepository.save(productDetail);
+            }
+            //Xóa hóa đơn
+            billRepository.deleteById(bill.getId());
+        }
+    }
 
     //Lấy danh sách hóa đơn hiển thị và hóa đơn chờ
     public Map<String, List<String>> getDisplayAndWaitingBills() {
-        Long idEmployees = 2L;
+
+        Long idEmployees = getUseLogin().getId();
         //Lấy tất cả hóa đơn
         List<String> allBills = billByEmployeeRepository.findCodeBillWaitingForPayment(idEmployees, Status.WAITING_FOR_PAYMENT.toString());
         Map<String, List<String>> response = new HashMap<>();
@@ -80,7 +110,7 @@ public class BillByEmployeeService {
         // Khởi tạo map phản hồi
         Map<String, List<String>> response = new HashMap<>();
 
-        Long idEmployees = 2L; // ID của nhân viên (có thể thay đổi nếu cần)
+        Long idEmployees = getUseLogin().getId(); // ID của nhân viên (có thể thay đổi nếu cần)
 
         // Lấy danh sách tất cả hóa đơn đang chờ thanh toán
         List<String> allBills = billByEmployeeRepository.findCodeBillWaitingForPayment(idEmployees, Status.WAITING_FOR_PAYMENT.toString());
@@ -194,7 +224,7 @@ public class BillByEmployeeService {
         // Khởi tạo map phản hồi
         Map<String, List<String>> response = new HashMap<>();
 
-        Long idEmployees = 2L; // ID của nhân viên (có thể thay đổi nếu cần)
+        Long idEmployees = getUseLogin().getId(); // ID của nhân viên (có thể thay đổi nếu cần)
 
         // Lấy danh sách tất cả hóa đơn đang chờ thanh toán
         List<String> allBills = billByEmployeeRepository.findCodeBillWaitingForPayment(idEmployees, Status.WAITING_FOR_PAYMENT.toString());
@@ -275,7 +305,7 @@ public class BillByEmployeeService {
     public Bill convertBill() {
         //get lấy id của người dùng từ đăng nhập
         // vd lấy id của người đăng nhập đó bằng 2
-        Long id = 2L;
+        Long id = getUseLogin().getId();
         Account employee = accountRepository.findById(id).get();
         UUID uuid = UUID.randomUUID();
         String generatedCode = this.generateRandomCode() + "-" + uuid;
@@ -406,12 +436,13 @@ public class BillByEmployeeService {
             if (postpaid && !delivery) {
                 throw new RuntimeException("Chức năng trả sau chỉ áp dụng khi giao hàng");
             } else if (postpaid) {
+                //Cần ở đây thêm 1 cái check phần thanh toán đã đủ tiền hay chưa nếu rồi ko tạo payBill
                 PayBillRequest payBillRequest = PayBillRequest.builder()
                         .amount(totalAmount.subtract(totalPaid))
                         .codeBill(codeBill)
-                        .type(1)
+                        .type(2)
                         .build();
-                PayBillService.createPayBill(payBillRequest, 1, Status.WAITING_FOR_PAYMENT.toString());
+                PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
                 bill.setStatus(Status.SHIPPED.toString());
             } else if (totalPaid.compareTo(totalAmount) < 0) {
                 throw new RuntimeException("Vui lòng thanh toán đủ số tiền trước khi thanh toán hóa đơn");
@@ -623,9 +654,9 @@ public class BillByEmployeeService {
             PayBillRequest payBillRequest = PayBillRequest.builder()
                     .amount(totalAmount)
                     .codeBill(saveBill.getCodeBill())
-                    .type(1)
+                    .type(2)
                     .build();
-            PayBillService.createPayBill(payBillRequest, 1, Status.WAITING_FOR_PAYMENT.toString());
+            PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
             if (checkVoucher) {
                 voucherRepository.save(voucher);
             }
