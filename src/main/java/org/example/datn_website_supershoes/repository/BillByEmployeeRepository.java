@@ -18,5 +18,14 @@ public interface BillByEmployeeRepository extends JpaRepository<Bill, Long> {
         """)
     List<String> findCodeBillWaitingForPayment(@Param("idEmployees") Long idEmployees, @Param("status") String status);
 
+    @Query(value = """
+       SELECT * 
+       FROM bill 
+       WHERE status = :status 
+         AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
+       """, nativeQuery = true)
+    List<Bill> findBillsOlderThanOneDay(@Param("status") String status);
+
+
 
 }

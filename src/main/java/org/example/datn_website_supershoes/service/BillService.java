@@ -1,18 +1,25 @@
 package org.example.datn_website_supershoes.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.BillRequest;
 import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.dto.response.BillStatisticalPieResponse;
 import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
+import org.example.datn_website_supershoes.model.BillDetail;
+import org.example.datn_website_supershoes.model.ProductDetail;
+import org.example.datn_website_supershoes.repository.BillDetailRepository;
 import org.example.datn_website_supershoes.repository.BillRepository;
+import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,6 +32,10 @@ public class BillService {
 
     @Autowired
     private BillRepository billRepository;
+    @Autowired
+    private BillDetailRepository billDetailRepository;
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
 
     public List<BillStatisticalPieResponse> getCompletedBillStatistics() {
         List<Object[]> results = billRepository.findCompletedBillStatisticsByYear();
@@ -42,19 +53,20 @@ public class BillService {
         return statistics;
     }
 
-
+    @Transactional
     public void updateBillStatusAndNoteByCode(String codeBill, String status, String note) {
 
         Bill bill = billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new RuntimeException("Bill not found with code: " + codeBill));
-
+        //Cập nhật số lượng
+        updateQuantityProductDetail(bill.getId(),bill.getStatus(),status);
         bill.setStatus(status);
         bill.setNote(note);
 
         billRepository.save(bill);
-
+        //Trả số lượng sản phẩm
     }
-
+    @Transactional
     public void updateBillStatus(String codeBill) {
         Bill bill = billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new RuntimeException("Bill not found"));
@@ -62,6 +74,8 @@ public class BillService {
         // Assuming you have some logic for updating status
         if (bill.getStatus().equals("PENDING")) {
             bill.setStatus("CONFIRMED");
+            //Cập nhật số lượng
+            updateQuantityProductDetail(bill.getId(),"PENDING","CONFIRMED");
         } else if (bill.getStatus().equals("CONFIRMED")) {
             bill.setStatus("WAITTING_FOR_SHIPPED");
         } else if (bill.getStatus().equals("WAITTING_FOR_SHIPPED")) {
@@ -83,50 +97,6 @@ public class BillService {
 
     public Page<BillResponse> getBills(Specification<Bill> spec, Pageable pageable) {
         return billRepository.findAll(spec, pageable).map(this::convertToBillResponse);
-    }
-
-
-    public List<Bill> getAllBills2() {
-        return billRepository.findAll();
-    }
-
-
-    public Optional<Bill> getBillById(Long id) {
-        return billRepository.findById(id);
-    }
-
-    public Bill updateCodeBill(String codeBill, Bill bill) {
-
-        Bill existingBill = billRepository.findByCodeBill(codeBill)
-                .orElseThrow(() -> new RuntimeException("Bill not found with codeBill: " + codeBill));
-
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(bill, existingBill, ignoredProperties);
-
-
-        if (bill.getVoucher() != null) {
-            existingBill.setVoucher(bill.getVoucher());
-        }
-        if (bill.getCustomer() != null) {
-            existingBill.setCustomer(bill.getCustomer());
-        }
-        if (bill.getEmployees() != null) {
-            existingBill.setEmployees(bill.getEmployees());
-        }
-
-        if (bill.getPayBills() != null) {
-            existingBill.setPayBills(bill.getPayBills());
-        }
-        if (bill.getBillHistories() != null) {
-            existingBill.setBillHistories(bill.getBillHistories());
-        }
-        if (bill.getBillDetails() != null) {
-            existingBill.setBillDetails(bill.getBillDetails());
-        }
-
-        // Save the updated bill entity
-        return billRepository.save(existingBill);
     }
 
     // Update an existing Bill
@@ -171,11 +141,6 @@ public class BillService {
     public Optional<BillResponse> getBillByCodeBill(String codeBill) {
         Optional<Bill> optionalBill = billRepository.findByCodeBill(codeBill);
         return optionalBill.map(this::convertToBillResponse);
-    }
-
-
-    public Optional<BillSummaryResponse> getBillSummaryByCodeBill(String codeBill) {
-        return billRepository.findBillSummaryByCodeBill(codeBill);
     }
 
     private BillResponse convertToBillResponse(Bill bill) {
@@ -233,24 +198,6 @@ public class BillService {
         );
     }
 
-    public BillSummaryResponse updateBillByCode(String codeBill, BillRequest billRequest) {
-
-        Bill bill = billRepository.findByCodeBill(codeBill)
-                .orElseThrow(() -> new EntityNotFoundException("Bill not found with code: " + codeBill));
-
-
-        bill.setNameCustomer(billRequest.getNameCustomer());
-        bill.setPhoneNumber(billRequest.getPhoneNumber());
-        bill.setAddress(billRequest.getAddress());
-        bill.setNote(billRequest.getNote());
-
-
-        bill = billRepository.save(bill);
-
-
-        return new BillSummaryResponse(bill);
-    }
-
     public Bill findBillByCode(String codeBill) {
         return billRepository.findByCodeBill(codeBill)
                 .orElseThrow(() -> new EntityNotFoundException("Bill not found with code: " + codeBill));
@@ -259,5 +206,45 @@ public class BillService {
     public Bill save(Bill bill) {
         return billRepository.save(bill);
     }
+    @Transactional
+    public void updateQuantityProductDetail (Long idBill, String statusNow , String statusNew ){
+        //Tìm kiếm list hóa đơn chi tiết
+        List<BillDetail> billDetailList = billDetailRepository.findByIdBill(idBill);
+        for (BillDetail billDetail : billDetailList){
+            //Tìm kiếm sản phẩm chi tiết theo id và trạng thái
+            Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(billDetail.getProductDetail().getId(), Status.ACTIVE.toString());
+            // Kiểm tra sản phẩm có tồn tại không
+            if (!productDetailOptional.isPresent()) {
+                throw new RuntimeException("Id " + billDetail.getProductDetail().getId() + " của sản phẩm không tồn tại trong hệ thống.");
+            }
+            ProductDetail productDetail = productDetailOptional.get();
+            //Số lượng sản phẩm của sản phẩm chi tiết
+            int quantityProductDetail = productDetail.getQuantity();
 
+            if(statusNew.equals("CONFIRMED")){
+                if(statusNow.equals("PENDING")){
+                    // Kiểm tra số lượng sản phẩm số lượng mua so với sản phẩm còn lại trong kho
+                    if (billDetail.getQuantity() > quantityProductDetail || quantityProductDetail <= 0) {
+                        throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " không đủ số lượng.");
+                    }
+                    //Trừ số lượng sản phẩm
+                    quantityProductDetail = quantityProductDetail - billDetail.getQuantity();
+                    if (quantityProductDetail <= 0) {
+                        productDetailOptional.get().setStatus(Status.INACTIVE.toString());
+                    }
+                    productDetail.setQuantity(quantityProductDetail);
+                }else{
+                    throw new RuntimeException("Có lỗi xảy ra khi cập nhật trạng thái hóa đơn");
+                }
+            } else if (statusNew.equals("CANCELLED")) {
+                if(!statusNow.equals("PENDING")){
+                    //Cộng số lượng sản phẩm
+                    quantityProductDetail = quantityProductDetail + billDetail.getQuantity();
+                    productDetail.setQuantity(quantityProductDetail);
+                }
+            }
+            //Cập nhật lại sản phẩm
+            productDetailRepository.save(productDetail);
+        }
+    }
 }

@@ -286,7 +286,7 @@ public class BillDetailService {
 
                 // Kiểm tra số lượng sản phẩm số lượng mua so với sản phẩm còn lại trong kho
                 if (request.getQuantity() > quantityProductDetail || quantityProductDetail <= 0) {
-                    throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " đang hết hàng.");
+                    throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " không đủ số lượng.");
                 }
 
                 //Giá tiền sản phẩm
@@ -465,7 +465,7 @@ public class BillDetailService {
 
                 // Kiểm tra số lượng sản phẩm số lượng mua so với sản phẩm còn lại trong kho
                 if (request.getQuantity() > quantityProductDetail || quantityProductDetail <= 0) {
-                    throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " đang hết hàng.");
+                    throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " không đủ số lượng.");
                 }
 
                 //Giá tiền sản phẩm
@@ -618,17 +618,6 @@ public class BillDetailService {
                             )
                     );
                 }
-                //Số lượng còn lại của sản phẩm
-                Integer newProductQuantity = quantityProductDetail - request.getQuantity();
-                //Cập nhật số lượng cho sản phẩm
-                productDetailOptional.get().setQuantity(newProductQuantity);
-                //Nếu số lượng <= 0 thì chuyển productDetail sang trạng thái INACTIVE
-                if (newProductQuantity <= 0) {
-                    productDetailOptional.get().setStatus(Status.INACTIVE.toString());
-                }
-                //Cập nhật lại sản phẩm chi tiết
-                productDetailRepository.save(productDetailOptional.get());
-
             }
 
             BigDecimal priceDiscount = BigDecimal.ZERO;
@@ -830,15 +819,8 @@ public class BillDetailService {
         if (optionalProductDetail.isEmpty()) {
             throw new RuntimeException("Sản phẩm không tồn tại!");
         }
-
-        Integer newQuantity = billDetailOptional.get().getQuantity() + optionalProductDetail.get().getQuantity();
-
-        optionalProductDetail.get().setQuantity(newQuantity);
-
-        productDetailRepository.save(optionalProductDetail.get());
-
         bill.setTotalMerchandise(
-                bill.getTotalMerchandise().subtract(optionalProductDetail.get().getPrice().multiply(BigDecimal.valueOf(optionalProductDetail.get().getQuantity())))
+                bill.getTotalMerchandise().subtract(billDetailOptional.get().getPriceDiscount().multiply(BigDecimal.valueOf(billDetailOptional.get().getQuantity())))
         );
 
         BigDecimal priceDiscount = BigDecimal.ZERO;
@@ -867,4 +849,5 @@ public class BillDetailService {
         payBillRepository.save(optionalPayBill.get());
         billDetailRepository.delete(billDetailOptional.get());
     }
+
 }

@@ -2,15 +2,7 @@ package org.example.datn_website_supershoes.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
@@ -78,16 +70,16 @@ public class Bill extends BaseEntity {
 
     @JsonIgnore
     @JsonManagedReference(value = "billPayBillReference")
-    @OneToMany(mappedBy = "bill")
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PayBill> payBills;
 
     @JsonIgnore
     @JsonManagedReference(value = "billBillHistoryReference")
-    @OneToMany(mappedBy = "bill")
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillHistory> billHistories;
 
     @JsonIgnore
     @JsonManagedReference(value = "billBillDetailReference")
-    @OneToMany(mappedBy = "bill")
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillDetail> billDetails;
 }
