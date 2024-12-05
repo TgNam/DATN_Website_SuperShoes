@@ -1,6 +1,8 @@
 package org.example.datn_website_supershoes.auto;
 
+import org.example.datn_website_supershoes.model.CartDetail;
 import org.example.datn_website_supershoes.service.BillByEmployeeService;
+import org.example.datn_website_supershoes.service.CartDetailService;
 import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,10 +15,13 @@ public class DiscountScheduler {
     PromotionService promotionService;
     @Autowired
     private BillByEmployeeService billByEmployeeService;
-    @Scheduled(fixedRate = 30000)
+    @Autowired
+    private CartDetailService cartDetailService;
+    @Scheduled(fixedRate = 20000)
     public void checkAndUpdateExpiredDiscounts() {
         promotionService.updateUpcomingDiscounts();
         promotionService.updateFinishedDiscounts();
         billByEmployeeService.findBillsOlderThanOneDay();
+        cartDetailService.findCartDetailsOlderThanOneDay();
     }
 }

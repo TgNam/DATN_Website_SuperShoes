@@ -21,8 +21,10 @@ public class CartService {
     AccountRepository accountRepository;
 
     public CartResponse getCartResponseByAccountId(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found!"));
         Optional<CartResponse> cartResponse = cartRepository.CartResponse(accountId);
-        if (!cartResponse.isPresent()){
+        if (cartResponse.isEmpty()){
             CartRequest cartRequest = new CartRequest();
             cartRequest.setIdAccount(accountId);
             Cart cart = cartRepository.save(convertCartRequestDTO(cartRequest));
@@ -35,13 +37,16 @@ public class CartService {
         }
     }
     public Cart getCartByAccountId (long accountId){
-        Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
-        if(cartOptional.isPresent()) return cartOptional.get();
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found!"));
-        return cartRepository.save(Cart.builder()
-                        .account(account)
-                        .build());
+        Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
+        if (cartOptional.isEmpty()){
+            CartRequest cartRequest = new CartRequest();
+            cartRequest.setIdAccount(accountId);
+            return cartRepository.save(convertCartRequestDTO(cartRequest));
+        }else{
+            return cartOptional.get();
+        }
     }
 
     public void deleteCartById(Long id) {

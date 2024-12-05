@@ -37,7 +37,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Optional<ProductResponse> findProductRequestsById(@Param("id") Long id);
 
     @Query("""
-        select new org.example.datn_website_supershoes.dto.response.ProductProductDetailResponse(p.id, p.name, p.productCode, p.imageByte, p.gender, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, coalesce(sum(pd.quantity), 0), p.status)
+        select new org.example.datn_website_supershoes.dto.response.ProductProductDetailResponse(
+        p.id, p.name, p.productCode, p.imageByte, p.gender, 
+        b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, 
+        coalesce(sum(pd.quantity), 0), p.status, p.createdAt
+        )
         from Product p 
         inner join p.productDetails pd
         inner join p.brand b 
@@ -45,8 +49,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         inner join p.material m 
         inner join p.shoeSole ss
         group by p.id, p.name, p.productCode, p.imageByte, p.gender, 
-                 b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, p.status
-        order by p.name desc 
+                 b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, p.status, p.createdAt
+        order by p.createdAt desc 
         """)
     List<ProductProductDetailResponse> findProductProductDetailResponse();
 
