@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.repository;
 
 import org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse;
 import org.example.datn_website_supershoes.dto.response.CartDetailResponse;
+import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.CartDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -73,4 +74,10 @@ public interface CartDetailRepository extends JpaRepository<CartDetail, Long> {
             """)
     List<CartDetailProductDetailResponse> findCartDetailByIdAccountAndIdCartDetail(@Param("idAccount") Long idAccount,@Param("idCartDetail") List<Long> idCartDetail);
 
+    @Query(value = """
+       SELECT * 
+       FROM cart_detail 
+       WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
+       """, nativeQuery = true)
+    List<CartDetail> findCartDetailOlderThanOneDay();
 }

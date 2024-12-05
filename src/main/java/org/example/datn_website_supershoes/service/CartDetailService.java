@@ -1,5 +1,6 @@
 package org.example.datn_website_supershoes.service;
 
+import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.CartDetailRequest;
 import org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse;
@@ -12,9 +13,11 @@ import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.CartDetailRepository;
 import org.example.datn_website_supershoes.repository.CartRepository;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,12 +41,34 @@ public class CartDetailService {
 
     @Autowired
     private ProductDetailRepository productDetailRepository;
+    @Autowired
+    private NotificationController notificationController;
 
+    @Transactional
+    public void findCartDetailsOlderThanOneDay(){
+        List<CartDetail> cartDetails = cartDetailRepository.findCartDetailOlderThanOneDay();
+        if(!cartDetails.isEmpty()){
+            cartDetailRepository.deleteAll(cartDetails);
+            notificationController.sendNotification("UPDATE_CART");
+            notificationController.sendNotification("UPDATE_PAYMENT");
+        }
+    }
 
     public Cart addToCart(CartDetailRequest cartDetailRequest, long accountId) {
         Cart cart = cartService.getCartByAccountId(accountId);
-        ProductDetail productDetail = productDetailService.getById(cartDetailRequest.getIdProductDetail());
-        CartDetail existingCartDetail = cart.getCartDetails().stream()
+
+        Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(cartDetailRequest.getIdProductDetail(),Status.ACTIVE.toString());
+        if(productDetailOptional.isEmpty()){
+            throw new RuntimeException("Sản phẩm không còn hàng!");
+        }
+        ProductDetail productDetail = productDetailOptional.get();
+
+        List<CartDetail> cartDetails = cart.getCartDetails();
+        if (cartDetails == null) {
+            cartDetails = new ArrayList<>();
+            cart.setCartDetails(cartDetails);
+        }
+        CartDetail existingCartDetail = cartDetails.stream()
                 .filter(cd -> Objects.equals(cd.getProductDetail().getId(), productDetail.getId()))
                 .findFirst()
                 .orElse(null);
@@ -64,6 +89,8 @@ public class CartDetailService {
             cart.getCartDetails().add(newCartDetail);
             cartDetailRepository.save(newCartDetail);
         }
+        notificationController.sendNotification("UPDATE_CART");
+        notificationController.sendNotification("UPDATE_PAYMENT");
         return cartRepository.save(cart);
     }
 
@@ -117,7 +144,10 @@ public class CartDetailService {
             throw new RuntimeException("Đã vượt quá số lượng hàng trong kho!");
         }
         optionalCartDetail.get().setQuantity(newQuantity);
-        return cartDetailRepository.save(optionalCartDetail.get());
+        CartDetail detail = cartDetailRepository.save(optionalCartDetail.get());
+        notificationController.sendNotification("UPDATE_CART");
+        notificationController.sendNotification("UPDATE_PAYMENT");
+        return detail;
     }
     public  CartDetail subtractCartDetail (Long idCartDetail){
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
@@ -129,7 +159,10 @@ public class CartDetailService {
             throw new RuntimeException("Cần có tổi thiểu một sản phẩm!");
         }
         optionalCartDetail.get().setQuantity(newQuantity);
-        return cartDetailRepository.save(optionalCartDetail.get());
+        CartDetail detail = cartDetailRepository.save(optionalCartDetail.get());
+        notificationController.sendNotification("UPDATE_CART");
+        notificationController.sendNotification("UPDATE_PAYMENT");
+        return detail;
     }
     public void deleteCartDetail(Long idCartDetail){
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
@@ -137,5 +170,7 @@ public class CartDetailService {
             throw new RuntimeException("Giỏ hàng không tồn tại!");
         }
         cartDetailRepository.delete(optionalCartDetail.get());
+        notificationController.sendNotification("UPDATE_CART");
+        notificationController.sendNotification("UPDATE_PAYMENT");
     }
 }

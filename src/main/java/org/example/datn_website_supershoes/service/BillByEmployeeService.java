@@ -59,26 +59,28 @@ public class BillByEmployeeService {
     @Transactional
     public void findBillsOlderThanOneDay(){
         List<Bill> bills = billByEmployeeRepository.findBillsOlderThanOneDay(Status.WAITING_FOR_PAYMENT.toString());
-        for (Bill bill : bills){
-            List<BillDetail> listBillDetail = billDetailRepository.findByIdBill(bill.getId());
-            for (BillDetail billDetail : listBillDetail){
-                //Tìm kiếm sản phẩm chi tiết theo id và trạng thái
-                Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(billDetail.getProductDetail().getId());
-                // Kiểm tra sản phẩm có tồn tại không
-                if (!productDetailOptional.isPresent()) {
-                    throw new RuntimeException("Id " + billDetail.getProductDetail().getId() + " của sản phẩm không tồn tại trong hệ thống.");
+        if (!bills.isEmpty()) {
+            for (Bill bill : bills) {
+                List<BillDetail> listBillDetail = billDetailRepository.findByIdBill(bill.getId());
+                for (BillDetail billDetail : listBillDetail) {
+                    //Tìm kiếm sản phẩm chi tiết theo id và trạng thái
+                    Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(billDetail.getProductDetail().getId());
+                    // Kiểm tra sản phẩm có tồn tại không
+                    if (!productDetailOptional.isPresent()) {
+                        throw new RuntimeException("Id " + billDetail.getProductDetail().getId() + " của sản phẩm không tồn tại trong hệ thống.");
+                    }
+                    ProductDetail productDetail = productDetailOptional.get();
+                    //Số lượng sản phẩm của sản phẩm chi tiết
+                    int quantityProductDetail = productDetail.getQuantity();
+                    //Cộng sô lượng sản phẩm
+                    quantityProductDetail = quantityProductDetail + billDetail.getQuantity();
+                    productDetail.setQuantity(quantityProductDetail);
+                    //Cập nhật lại sản phẩm
+                    productDetailRepository.save(productDetail);
                 }
-                ProductDetail productDetail = productDetailOptional.get();
-                //Số lượng sản phẩm của sản phẩm chi tiết
-                int quantityProductDetail = productDetail.getQuantity();
-                //Cộng sô lượng sản phẩm
-                quantityProductDetail = quantityProductDetail + billDetail.getQuantity();
-                productDetail.setQuantity(quantityProductDetail);
-                //Cập nhật lại sản phẩm
-                productDetailRepository.save(productDetail);
+                //Xóa hóa đơn
+                billRepository.deleteById(bill.getId());
             }
-            //Xóa hóa đơn
-            billRepository.deleteById(bill.getId());
         }
     }
 
@@ -436,13 +438,14 @@ public class BillByEmployeeService {
             if (postpaid && !delivery) {
                 throw new RuntimeException("Chức năng trả sau chỉ áp dụng khi giao hàng");
             } else if (postpaid) {
-                //Cần ở đây thêm 1 cái check phần thanh toán đã đủ tiền hay chưa nếu rồi ko tạo payBill
-                PayBillRequest payBillRequest = PayBillRequest.builder()
-                        .amount(totalAmount.subtract(totalPaid))
-                        .codeBill(codeBill)
-                        .type(2)
-                        .build();
-                PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
+                if (totalPaid.compareTo(totalAmount) < 0) {
+                    PayBillRequest payBillRequest = PayBillRequest.builder()
+                            .amount(totalAmount.subtract(totalPaid))
+                            .codeBill(codeBill)
+                            .type(2)
+                            .build();
+                    PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
+                }
                 bill.setStatus(Status.SHIPPED.toString());
             } else if (totalPaid.compareTo(totalAmount) < 0) {
                 throw new RuntimeException("Vui lòng thanh toán đủ số tiền trước khi thanh toán hóa đơn");
@@ -664,6 +667,7 @@ public class BillByEmployeeService {
                 accountVoucherRepository.save(accountVoucher);
             }
             notificationController.sendNotification("UPDATE_CART");
+            notificationController.sendNotification("UPDATE_PAYMENT");
         }catch (Exception e){
             throw new RuntimeException(e);
         }

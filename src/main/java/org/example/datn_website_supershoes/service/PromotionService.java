@@ -11,6 +11,7 @@ import org.example.datn_website_supershoes.model.Promotion;
 import org.example.datn_website_supershoes.model.PromotionDetail;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.repository.PromotionRepository;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
@@ -31,19 +32,26 @@ public class PromotionService {
     private ProductDetailRepository productDetailRepository;
     @Autowired
     private RandomPasswordGeneratorService randomCodePromotion;
+    @Autowired
+    private NotificationController notificationController;
     //chuyển trạng thái từ sắp diễn ra thành diễn ra
     @Transactional
     public void updateUpcomingDiscounts() {
         LocalDateTime now = LocalDateTime.now();
         //tìm kiếm trạng thái đang diễn ra
         List<Promotion> expiredDiscounts = promotionRepository.findUpcomingDiscounts(now,Status.UPCOMING.toString());
-        for (Promotion discount : expiredDiscounts) {
-            //cập nhật trạng thái
-            discount.setStatus(Status.ONGOING.toString());
-            //cập nhật trạng thái cho promotionDetail
-            promotionDetailService.updatePromotionDetailUpcoming(discount.getId());
+        if(!expiredDiscounts.isEmpty()){
+            for (Promotion discount : expiredDiscounts) {
+                //cập nhật trạng thái
+                discount.setStatus(Status.ONGOING.toString());
+                //cập nhật trạng thái cho promotionDetail
+                promotionDetailService.updatePromotionDetailUpcoming(discount.getId());
+            }
+            promotionRepository.saveAll(expiredDiscounts);
+            notificationController.sendNotification("UPDATE_CART");
+            notificationController.sendNotification("UPDATE_PAYMENT");
+            notificationController.sendNotification("UPDATE_PROMOTION");
         }
-        promotionRepository.saveAll(expiredDiscounts);
     }
     //chuyển các trạng thái sắp diễn ra, đang diễn ra, kết thúc sớm thành kết thúc
     @Transactional
@@ -52,13 +60,18 @@ public class PromotionService {
         //tìm kiếm trạng thái đang sắp diễn ra, đang diễn ra, kết thúc sớm
         List<String> status = new ArrayList<>(Arrays.asList(Status.ONGOING.toString(),Status.UPCOMING.toString(),Status.ENDING_SOON.toString()));
         List<Promotion> expiredDiscounts = promotionRepository.findFinishedDiscounts(now,status);
-        for (Promotion discount : expiredDiscounts) {
-            //cập nhật trạng thái
-            discount.setStatus(Status.FINISHED.toString());
-            //cập nhật trạng thái cho promotionDetail
-            promotionDetailService.updatePromotionDetailFinished(discount.getId());
+        if(!expiredDiscounts.isEmpty()){
+            for (Promotion discount : expiredDiscounts) {
+                //cập nhật trạng thái
+                discount.setStatus(Status.FINISHED.toString());
+                //cập nhật trạng thái cho promotionDetail
+                promotionDetailService.updatePromotionDetailFinished(discount.getId());
+            }
+            promotionRepository.saveAll(expiredDiscounts);
+            notificationController.sendNotification("UPDATE_CART");
+            notificationController.sendNotification("UPDATE_PAYMENT");
+            notificationController.sendNotification("UPDATE_PROMOTION");
         }
-        promotionRepository.saveAll(expiredDiscounts);
     }
 
     public Promotion updateStatus(Long id, boolean aBoolean){
@@ -86,6 +99,8 @@ public class PromotionService {
         // Lưu lại promotion đã được cập nhật
         Promotion promotion = promotionRepository.save(promotionOptional.get());
         promotionDetailService.updateStatusPromotionDetail(promotion.getId(),promotion.getStatus());
+        notificationController.sendNotification("UPDATE_CART");
+        notificationController.sendNotification("UPDATE_PAYMENT");
         return promotion;
     }
     public List<PromotionResponse> getAllPromotion() {
@@ -126,6 +141,8 @@ public class PromotionService {
             if (promotionUpdatesRequest.getPromotionDetailRequest() != null && !promotionUpdatesRequest.getPromotionDetailRequest().isEmpty()) {
                 promotionDetailService.updatePromotionDetail(promotion, promotionUpdatesRequest.getPromotionDetailRequest());
             }
+            notificationController.sendNotification("UPDATE_CART");
+            notificationController.sendNotification("UPDATE_PAYMENT");
             return promotion;
         }catch (Exception e){
             System.out.println(e.getMessage());
