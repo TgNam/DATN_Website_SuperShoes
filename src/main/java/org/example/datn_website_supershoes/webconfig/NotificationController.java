@@ -1,32 +1,26 @@
 package org.example.datn_website_supershoes.webconfig;
 
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-
-import java.time.Duration;
+import reactor.core.publisher.Sinks;
 
 @RestController
 public class NotificationController {
 
-    private final EmitterProcessor<String> emitterProcessor = EmitterProcessor.create();
+    private final Sinks.Many<String> sink = Sinks.many().multicast().onBackpressureBuffer();
 
-    // API này để client có thể nhận thông báo khi có thay đổi
     @GetMapping(value = "/sse/notifications", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> streamNotifications() {
-        return emitterProcessor; // Trả về một Flux để phát đi thông báo
+        return sink.asFlux(); // Trả về Flux để phát dữ liệu
     }
 
-    // Phương thức này sẽ được gọi khi có thay đổi trong database (cập nhật size chẳng hạn)
-    public void sendNotification(String message) {
-        emitterProcessor.onNext(message);  // Phát đi sự kiện
-    }
-    // Scheduler: Phát thông báo "UPDATE_SIZE" mỗi 20 giây
-    @Scheduled(fixedRate = 20000) // 20 giây
-    public void sendPeriodicNotification() {
-        sendNotification("UPDATE_SIZE");
+    public void sendNotification() {
+        sink.tryEmitNext("UPDATE_CART");
+        sink.tryEmitNext("UPDATE_PAYMENT");
+        sink.tryEmitNext("UPDATE_PROMOTION");
+        sink.tryEmitNext("UPDATE_VOUCHER");
     }
 }
+

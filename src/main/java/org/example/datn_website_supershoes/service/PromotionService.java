@@ -48,9 +48,7 @@ public class PromotionService {
                 promotionDetailService.updatePromotionDetailUpcoming(discount.getId());
             }
             promotionRepository.saveAll(expiredDiscounts);
-            notificationController.sendNotification("UPDATE_CART");
-            notificationController.sendNotification("UPDATE_PAYMENT");
-            notificationController.sendNotification("UPDATE_PROMOTION");
+            notificationController.sendNotification();
         }
     }
     //chuyển các trạng thái sắp diễn ra, đang diễn ra, kết thúc sớm thành kết thúc
@@ -68,9 +66,7 @@ public class PromotionService {
                 promotionDetailService.updatePromotionDetailFinished(discount.getId());
             }
             promotionRepository.saveAll(expiredDiscounts);
-            notificationController.sendNotification("UPDATE_CART");
-            notificationController.sendNotification("UPDATE_PAYMENT");
-            notificationController.sendNotification("UPDATE_PROMOTION");
+            notificationController.sendNotification();
         }
     }
 
@@ -99,8 +95,7 @@ public class PromotionService {
         // Lưu lại promotion đã được cập nhật
         Promotion promotion = promotionRepository.save(promotionOptional.get());
         promotionDetailService.updateStatusPromotionDetail(promotion.getId(),promotion.getStatus());
-        notificationController.sendNotification("UPDATE_CART");
-        notificationController.sendNotification("UPDATE_PAYMENT");
+        notificationController.sendNotification();
         return promotion;
     }
     public List<PromotionResponse> getAllPromotion() {
@@ -141,8 +136,7 @@ public class PromotionService {
             if (promotionUpdatesRequest.getPromotionDetailRequest() != null && !promotionUpdatesRequest.getPromotionDetailRequest().isEmpty()) {
                 promotionDetailService.updatePromotionDetail(promotion, promotionUpdatesRequest.getPromotionDetailRequest());
             }
-            notificationController.sendNotification("UPDATE_CART");
-            notificationController.sendNotification("UPDATE_PAYMENT");
+            notificationController.sendNotification();
             return promotion;
         }catch (Exception e){
             System.out.println(e.getMessage());

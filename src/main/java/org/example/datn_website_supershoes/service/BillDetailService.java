@@ -10,6 +10,7 @@ import org.example.datn_website_supershoes.dto.response.BillStatisticalPieRespon
 import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
 import org.example.datn_website_supershoes.model.*;
 import org.example.datn_website_supershoes.repository.*;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,8 @@ public class BillDetailService {
     private VoucherRepository voucherRepository;
     @Autowired
     private PayBillRepository payBillRepository;
+    @Autowired
+    private NotificationController notificationController;
 
     public Page<BillDetailResponse> getBillDetails(Specification<BillDetail> spec, Pageable pageable) {
         return billDetailRepository.findAll(spec, pageable).map(this::convertToBillDetailResponse);
@@ -230,6 +233,7 @@ public class BillDetailService {
                 }
                 //Cập nhật lại sản phẩm chi tiết
                 productDetailRepository.save(productDetailOptional.get());
+                notificationController.sendNotification();
             }
     }
 
@@ -467,6 +471,7 @@ public class BillDetailService {
             optionalPayBill.get().setAmount(totalAmount);
         }
         payBillRepository.save(optionalPayBill.get());
+        notificationController.sendNotification();
     }
 
     public List<BillDetailStatisticalProductRespone> getBillStatistics() {
@@ -548,8 +553,9 @@ public class BillDetailService {
             optionalPayBill.get().setAmount(totalAmount);
         }
         payBillRepository.save(optionalPayBill.get());
-
-        return billDetailRepository.save(billDetailOptional.get());
+        BillDetail detail = billDetailRepository.save(billDetailOptional.get());
+        notificationController.sendNotification();
+        return detail;
     }
 
     public BillDetail subtractBillDetail(String codeBill, Long idBillDetail, Long idProductDetail) {
@@ -613,8 +619,9 @@ public class BillDetailService {
             optionalPayBill.get().setAmount(totalAmount);
         }
         payBillRepository.save(optionalPayBill.get());
-
-        return billDetailRepository.save(billDetailOptional.get());
+        BillDetail billDetail = billDetailRepository.save(billDetailOptional.get());
+        notificationController.sendNotification();
+        return billDetail;
     }
 
     public void deleteBillDetail(String codeBill, Long idBillDetail, Long idProductDetail) {
@@ -673,6 +680,7 @@ public class BillDetailService {
         }
         payBillRepository.save(optionalPayBill.get());
         billDetailRepository.delete(billDetailOptional.get());
+        notificationController.sendNotification();
     }
 
 }

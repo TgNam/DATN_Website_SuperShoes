@@ -8,6 +8,7 @@ import org.example.datn_website_supershoes.dto.request.updateProduct.UpdateProdu
 import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.*;
 import org.example.datn_website_supershoes.repository.*;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,8 @@ public class ProductDetailService {
     private ProductImageService productImageService;
     @Autowired
     private ProductImageRepository productImageRepository;
-
+    @Autowired
+    private NotificationController notificationController;
     @Transactional
     public boolean createProductDetail(Product product, List<ProductDetailRequest> productDetailRequest) {
             for (ProductDetailRequest request : productDetailRequest) {
@@ -105,12 +107,9 @@ public class ProductDetailService {
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         optionalProductDetail.get().setStatus(newStatus);
-        return productDetailRepository.save(optionalProductDetail.get());
-    }
-
-    public ProductDetail getById(Long id) {
-        return productDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product Details not found!"));
+        ProductDetail productDetail = productDetailRepository.save(optionalProductDetail.get());
+        notificationController.sendNotification();
+        return productDetail;
     }
 
     public List<ProductDetailResponseByNam> findProductDetailRequests(List<Long> idProducts) {

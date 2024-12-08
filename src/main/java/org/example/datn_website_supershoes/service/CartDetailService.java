@@ -49,8 +49,7 @@ public class CartDetailService {
         List<CartDetail> cartDetails = cartDetailRepository.findCartDetailOlderThanOneDay();
         if(!cartDetails.isEmpty()){
             cartDetailRepository.deleteAll(cartDetails);
-            notificationController.sendNotification("UPDATE_CART");
-            notificationController.sendNotification("UPDATE_PAYMENT");
+            notificationController.sendNotification();
         }
     }
 
@@ -89,8 +88,7 @@ public class CartDetailService {
             cart.getCartDetails().add(newCartDetail);
             cartDetailRepository.save(newCartDetail);
         }
-        notificationController.sendNotification("UPDATE_CART");
-        notificationController.sendNotification("UPDATE_PAYMENT");
+        notificationController.sendNotification();
         return cartRepository.save(cart);
     }
 
@@ -145,8 +143,7 @@ public class CartDetailService {
         }
         optionalCartDetail.get().setQuantity(newQuantity);
         CartDetail detail = cartDetailRepository.save(optionalCartDetail.get());
-        notificationController.sendNotification("UPDATE_CART");
-        notificationController.sendNotification("UPDATE_PAYMENT");
+        notificationController.sendNotification();
         return detail;
     }
     public  CartDetail subtractCartDetail (Long idCartDetail){
@@ -160,8 +157,7 @@ public class CartDetailService {
         }
         optionalCartDetail.get().setQuantity(newQuantity);
         CartDetail detail = cartDetailRepository.save(optionalCartDetail.get());
-        notificationController.sendNotification("UPDATE_CART");
-        notificationController.sendNotification("UPDATE_PAYMENT");
+        notificationController.sendNotification();
         return detail;
     }
     public void deleteCartDetail(Long idCartDetail){
@@ -170,7 +166,6 @@ public class CartDetailService {
             throw new RuntimeException("Giỏ hàng không tồn tại!");
         }
         cartDetailRepository.delete(optionalCartDetail.get());
-        notificationController.sendNotification("UPDATE_CART");
-        notificationController.sendNotification("UPDATE_PAYMENT");
+        notificationController.sendNotification();
     }
 }
