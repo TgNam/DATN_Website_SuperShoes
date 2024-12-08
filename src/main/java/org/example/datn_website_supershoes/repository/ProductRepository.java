@@ -60,4 +60,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             p.imageByte)  FROM Product p WHERE p.id = :id
             """)
     ProductImageResponse findImageByIdProduct(@Param("id") Long id);
+
 }

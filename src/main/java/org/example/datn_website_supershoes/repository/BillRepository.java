@@ -22,22 +22,9 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
 
     Page<Bill> findAll(Specification<Bill> spec, Pageable pageable);
 
-    @Query("SELECT new org.example.datn_website_supershoes.dto.response.BillSummaryResponse(" +
-            "b.codeBill,b.status, b.nameCustomer, b.address, b.phoneNumber, b.note) " +
-            "FROM Bill b " +
-            "WHERE b.codeBill = :codeBill")
-    Optional<BillSummaryResponse> findBillSummaryByCodeBill(@Param("codeBill") String codeBill);
-
     //dùng cho bán hàng
     @Query("SELECT b FROM Bill b WHERE b.codeBill = :codeBill")
     Optional<Bill> findByCodeBill(@Param("codeBill") String codeBill);
-
-
-//    @Query("UPDATE bill b" +
-//            "JOIN pay_bill pb ON b.id = pb.id_bill" +
-//            "SET pb.status = 'COMPLETED'" +
-//            "WHERE b.code_Bill = :codeBill")
-//    Optional<Bill> updateBillPayment(@Param("codeBill") String codeBill);
 
     @Query("""
             SELECT new org.example.datn_website_supershoes.dto.response.BillResponse(
@@ -52,11 +39,6 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
             WHERE b.codeBill = :codeBill
             """)
     Optional<BillResponse> findBillResponseByCodeBill(@Param("codeBill") String codeBill);
-
-
-
-
-
 
     @Query(value = """
                 SELECT 

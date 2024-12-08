@@ -36,7 +36,6 @@ public class ProductDetailService {
 
     @Transactional
     public boolean createProductDetail(Product product, List<ProductDetailRequest> productDetailRequest) {
-        try {
             for (ProductDetailRequest request : productDetailRequest) {
                 Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
                 Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
@@ -61,10 +60,6 @@ public class ProductDetailService {
                 }
             }
             return true;
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return false;
-        }
     }
     public void updateProduct(List<UpdateProductDetailRequest> productDetailRequests){
         for (UpdateProductDetailRequest request : productDetailRequests) {

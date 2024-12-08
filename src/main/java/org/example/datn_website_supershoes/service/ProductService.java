@@ -61,7 +61,6 @@ public class ProductService {
 
     @Transactional
     public void addProduct(ProductRequest productRequest) {
-        try {
             Optional<Brand> optionalBrand = brandRepository.findByIdAndStatus(productRequest.getIdBrand(), Status.ACTIVE.toString());
             Optional<Category> optionalCategory = categoryRepository.findByIdAndStatus(productRequest.getIdCategory(), Status.ACTIVE.toString());
             Optional<Material> optionalMaterial = materialRepository.findByIdAndStatus(productRequest.getIdMaterial(), Status.ACTIVE.toString());
@@ -94,10 +93,6 @@ public class ProductService {
             if (!checkProductDetail) {
                 throw new RuntimeException("Xảy ra lỗi khi thêm sản phẩm chi tiết");
             }
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
     }
     @Transactional
     public void updateProduct(UpdateProductRequest updateProductRequest){
