@@ -2,6 +2,7 @@ package org.example.datn_website_supershoes.Enum;
 
 public enum Status {
     ACTIVE,
+
     INACTIVE,
     SUSPENDED,
     CLOSED,
@@ -14,5 +15,7 @@ public enum Status {
     EXPIRED,
     ENDED_EARLY,
     COMPLETED,
-    SHIPPED
+    SHIPPED,
+    CONFIRMED
+
 }
