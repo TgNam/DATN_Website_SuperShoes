@@ -14,6 +14,7 @@ import org.example.datn_website_supershoes.model.ProductImage;
 import org.example.datn_website_supershoes.model.ShoeSole;
 import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.*;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -53,7 +54,8 @@ public class ProductService {
     private ShoeSoleRepository shoeSoleRepository;
     @Autowired
     private RandomPasswordGeneratorService randomCodePromotion;
-
+    @Autowired
+    private NotificationController notificationController;
 
     private String generatePromotionCode() {
         return "SS" + randomCodePromotion.getCodePromotion();
@@ -129,6 +131,7 @@ public class ProductService {
         }
         Product updateProduct = productRepository.save(product);
         productDetailService.updateProduct(updateProductRequest.getProductDetailRequest());
+        notificationController.sendNotification();
     }
 
     public ProductResponse findProductById(Long id){
@@ -190,6 +193,7 @@ public class ProductService {
                 productDetailRepository.save(detail);
             }
         }
+        notificationController.sendNotification();
         return product;
     }
 

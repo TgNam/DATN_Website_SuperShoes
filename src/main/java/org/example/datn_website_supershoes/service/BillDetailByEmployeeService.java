@@ -6,6 +6,7 @@ import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.BillDetailByEmployeeRepository;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,8 @@ public class BillDetailByEmployeeService {
     private   BillDetailByEmployeeRepository billDetailByEmployeeRepository;
     @Autowired
     private ProductDetailRepository productDetailRepository;
-
+    @Autowired
+    private NotificationController notificationController;
     public List<BillDetailOrderResponse> getBillDetailsByCodeBill(String codeBill){
         return billDetailByEmployeeRepository.getBillDetailsByCodeBill(codeBill);
     }
@@ -44,7 +46,9 @@ public class BillDetailByEmployeeService {
         }
         productDetailRepository.save(optionalProductDetail.get());
         billDetailOptional.get().setQuantity(billDetailOptional.get().getQuantity() + 1);
-        return billDetailByEmployeeRepository.save(billDetailOptional.get());
+        BillDetail billDetail = billDetailByEmployeeRepository.save(billDetailOptional.get());
+        notificationController.sendNotification();
+        return billDetail;
     }
 
     public BillDetail subtractBillDetail(Long idBillDetail, Long idProductDetail){
@@ -69,8 +73,9 @@ public class BillDetailByEmployeeService {
         optionalProductDetail.get().setQuantity(optionalProductDetail.get().getQuantity() + 1);
 
         productDetailRepository.save(optionalProductDetail.get());
-
-        return billDetailByEmployeeRepository.save(billDetailOptional.get());
+        BillDetail billDetail = billDetailByEmployeeRepository.save(billDetailOptional.get());
+        notificationController.sendNotification();
+        return billDetail;
     }
 
     public void deleteBillDetail(Long idBillDetail, Long idProductDetail){
@@ -92,5 +97,6 @@ public class BillDetailByEmployeeService {
         productDetailRepository.save(optionalProductDetail.get());
 
         billDetailByEmployeeRepository.delete(billDetailOptional.get());
+        notificationController.sendNotification();
     }
 }

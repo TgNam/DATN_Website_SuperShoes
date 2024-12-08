@@ -42,7 +42,6 @@ public class SizeService {
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
             sizeOt.get().setStatus(newStatus);
             Size size = sizeRepository.save(sizeOt.get());
-        notificationController.sendNotification("UPDATE_SIZE");
             return size;
 
     }

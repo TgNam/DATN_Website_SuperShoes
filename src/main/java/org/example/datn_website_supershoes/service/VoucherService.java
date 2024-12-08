@@ -12,6 +12,7 @@ import org.example.datn_website_supershoes.model.Voucher;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
 import org.example.datn_website_supershoes.repository.VoucherRepository;
+import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -43,7 +44,8 @@ public class VoucherService {
 
     @Autowired
     private AccountVoucherRepository accountVoucherRepository;
-
+    @Autowired
+    private NotificationController notificationController;
     private static final Logger logger = LoggerFactory.getLogger(VoucherService.class);
 
     private String generateVoucherCode() {
@@ -72,9 +74,9 @@ public class VoucherService {
 
             if (!oldStatus.equals(voucher.getStatus())) {
                 logger.info("Voucher {} status changed from {} to {}", voucher.getCodeVoucher(), oldStatus, voucher.getStatus());
+                voucherRepository.save(voucher); // Chỉ lưu nếu trạng thái thay đổi
+                notificationController.sendNotification();
             }
-
-            voucherRepository.save(voucher);
         }
     }
 
@@ -143,6 +145,7 @@ public class VoucherService {
         updateVoucherStatus(voucher, currentDate);
 
         Voucher updatedVoucher = voucherRepository.save(voucher);
+        notificationController.sendNotification();
         return updatedVoucher;
     }
 
@@ -225,6 +228,7 @@ public class VoucherService {
         } else {
             voucher.setStatus(Status.EXPIRED.toString());
         }
+        notificationController.sendNotification();
     }
 
     private VoucherResponse convertToVoucherResponse(Voucher voucher) {

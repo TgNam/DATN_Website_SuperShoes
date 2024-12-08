@@ -12,6 +12,7 @@ public enum Status {
     ENDING_SOON,
     PENDING,
     WAITING_FOR_PAYMENT,
+    WAITTING_FOR_SHIPPED,
     EXPIRED,
     ENDED_EARLY,
     COMPLETED,

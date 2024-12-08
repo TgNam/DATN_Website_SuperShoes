@@ -82,6 +82,7 @@ public class BillByEmployeeService {
                 }
                 //Xóa hóa đơn
                 billRepository.deleteById(bill.getId());
+                notificationController.sendNotification();
             }
         }
     }
@@ -421,9 +422,10 @@ public class BillByEmployeeService {
                     checkAccountVoucher = true;
                 }
 
-                voucher.setQuantity(voucher.getQuantity() - 1);
-                if (voucher.getQuantity() == 0) {
-                    voucher.setStatus(Status.FINISHED.toString());
+                int newQuantityVoucher = voucher.getQuantity() - 1;
+                voucher.setQuantity(newQuantityVoucher);
+                if (newQuantityVoucher <= 0) {
+                    voucher.setStatus(Status.EXPIRED.toString());
                 }
                 checkVoucher = true;
                 bill.setVoucher(voucher);
@@ -448,11 +450,11 @@ public class BillByEmployeeService {
                         .build();
                 PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
             }
-            bill.setStatus(Status.SHIPPED.toString());
+            bill.setStatus(Status.WAITTING_FOR_SHIPPED.toString());
         } else if (totalPaid.compareTo(totalAmount) < 0) {
             throw new RuntimeException("Vui lòng thanh toán đủ số tiền trước khi thanh toán hóa đơn");
         } else {
-            bill.setStatus(delivery ? Status.SHIPPED.toString() : Status.COMPLETED.toString());
+            bill.setStatus(delivery ? Status.WAITTING_FOR_SHIPPED.toString() : Status.COMPLETED.toString());
         }
 
         if (checkVoucher) {
@@ -462,7 +464,7 @@ public class BillByEmployeeService {
             accountVoucherRepository.save(accountVoucher);
         }
         billRepository.save(bill);
-
+        notificationController.sendNotification();
     }
 
     @Transactional
@@ -539,10 +541,10 @@ public class BillByEmployeeService {
                         accountVoucher.setStatus(Status.INACTIVE.toString());
                         checkAccountVoucher = true;
                     }
-
-                    voucher.setQuantity(voucher.getQuantity() - 1);
-                    if (voucher.getQuantity() == 0) {
-                        voucher.setStatus(Status.FINISHED.toString());
+                    int newQuantityVoucher = voucher.getQuantity() - 1;
+                    voucher.setQuantity(newQuantityVoucher);
+                    if (newQuantityVoucher <= 0) {
+                        voucher.setStatus(Status.EXPIRED.toString());
                     }
                     checkVoucher = true;
                     bill.setVoucher(voucher);
@@ -664,8 +666,7 @@ public class BillByEmployeeService {
             if (checkAccountVoucher) {
                 accountVoucherRepository.save(accountVoucher);
             }
-            notificationController.sendNotification("UPDATE_CART");
-            notificationController.sendNotification("UPDATE_PAYMENT");
+            notificationController.sendNotification();
     }
 
     public BigDecimal calculateTotalCartPriceForSelected(List<CartDetailProductDetailResponse> cartDetails) {

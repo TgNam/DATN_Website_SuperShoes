@@ -17,7 +17,7 @@ public class DiscountScheduler {
     private BillByEmployeeService billByEmployeeService;
     @Autowired
     private CartDetailService cartDetailService;
-    @Scheduled(fixedRate = 20000)
+    @Scheduled(cron = "0 * * * * *")
     public void checkAndUpdateExpiredDiscounts() {
         promotionService.updateUpcomingDiscounts();
         promotionService.updateFinishedDiscounts();
