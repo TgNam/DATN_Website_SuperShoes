@@ -68,16 +68,16 @@ public class ProductService {
             Optional<Material> optionalMaterial = materialRepository.findByIdAndStatus(productRequest.getIdMaterial(), Status.ACTIVE.toString());
             Optional<ShoeSole> optionalShoeSole = shoeSoleRepository.findByIdAndStatus(productRequest.getIdShoeSole(), Status.ACTIVE.toString());
             if (optionalBrand.isEmpty()) {
-                throw new RuntimeException("IdBrand: " + productRequest.getIdBrand() + " không tồn tại trong hệ thống");
+                throw new RuntimeException("Thương hiệu với Id là: " + productRequest.getIdBrand() + " không tồn tại trong hệ thống");
             }
             if (optionalCategory.isEmpty()) {
-                throw new RuntimeException("IdCategory: " + productRequest.getIdCategory() + " không tồn tại trong hệ thống");
+                throw new RuntimeException("Danh mục với Id là: " + productRequest.getIdCategory() + " không tồn tại trong hệ thống");
             }
             if (optionalMaterial.isEmpty()) {
-                throw new RuntimeException("IdMaterial: " + productRequest.getIdMaterial() + " không tồn tại trong hệ thống");
+                throw new RuntimeException("Chất liệu với Id là: " + productRequest.getIdMaterial() + " không tồn tại trong hệ thống");
             }
             if (optionalShoeSole.isEmpty()) {
-                throw new RuntimeException("IdShoeSole: " + productRequest.getIdShoeSole() + " không tồn tại trong hệ thống");
+                throw new RuntimeException("Đế giày với Id là: " + productRequest.getIdShoeSole() + " không tồn tại trong hệ thống");
             }
             Product product = Product.builder()
                     .productCode(generatePromotionCode())
@@ -104,19 +104,19 @@ public class ProductService {
         Optional<Material> optionalMaterial = materialRepository.findByIdAndStatus(updateProductRequest.getIdMaterial(), Status.ACTIVE.toString());
         Optional<ShoeSole> optionalShoeSole = shoeSoleRepository.findByIdAndStatus(updateProductRequest.getIdShoeSole(), Status.ACTIVE.toString());
         if (optionalProduct.isEmpty()) {
-            throw new RuntimeException("IdProduct: " + updateProductRequest.getId() + " không tồn tại trong hệ thống");
+            throw new RuntimeException("Sản phẩm với Id là:  " + updateProductRequest.getId() + " không tồn tại trong hệ thống");
         }
         if (optionalBrand.isEmpty()) {
-            throw new RuntimeException("IdBrand: " + updateProductRequest.getIdBrand() + " không tồn tại trong hệ thống");
+            throw new RuntimeException("Thương hiệu với Id là: " + updateProductRequest.getIdBrand() + " không tồn tại trong hệ thống");
         }
         if (optionalCategory.isEmpty()) {
-            throw new RuntimeException("IdCategory: " + updateProductRequest.getIdCategory() + " không tồn tại trong hệ thống");
+            throw new RuntimeException("Danh mục với Id là: " + updateProductRequest.getIdCategory() + " không tồn tại trong hệ thống");
         }
         if (optionalMaterial.isEmpty()) {
-            throw new RuntimeException("IdMaterial: " + updateProductRequest.getIdMaterial() + " không tồn tại trong hệ thống");
+            throw new RuntimeException("Chất liệu với Id là: " + updateProductRequest.getIdMaterial() + " không tồn tại trong hệ thống");
         }
         if (optionalShoeSole.isEmpty()) {
-            throw new RuntimeException("IdShoeSole: " + updateProductRequest.getIdShoeSole() + " không tồn tại trong hệ thống");
+            throw new RuntimeException("Đế giày với Id là: " + updateProductRequest.getIdShoeSole() + " không tồn tại trong hệ thống");
         }
         Product product = optionalProduct.get();
         product.setStatus(Status.ACTIVE.toString());
