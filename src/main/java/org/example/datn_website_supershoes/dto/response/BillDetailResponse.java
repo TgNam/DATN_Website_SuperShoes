@@ -41,4 +41,6 @@ public class BillDetailResponse {
 
     private BigDecimal totalMerchandise;
 
+    private int type;
+
 }

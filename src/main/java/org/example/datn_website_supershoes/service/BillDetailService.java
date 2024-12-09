@@ -56,6 +56,7 @@ public class BillDetailService {
         response.setPriceDiscount(billDetail.getBill().getPriceDiscount());
         response.setTotalMerchandise(billDetail.getBill().getTotalMerchandise());
         response.setTotalAmount(billDetail.getBill().getTotalAmount());
+        response.setType(billDetail.getBill().getType());
 
         return response;
     }
