@@ -99,10 +99,10 @@ public class ProductService {
     @Transactional
     public void updateProduct(UpdateProductRequest updateProductRequest){
         Optional<Product> optionalProduct = productRepository.findById(updateProductRequest.getId());
-        Optional<Brand> optionalBrand = brandRepository.findByIdAndStatus(updateProductRequest.getIdBrand(), Status.ACTIVE.toString());
-        Optional<Category> optionalCategory = categoryRepository.findByIdAndStatus(updateProductRequest.getIdCategory(), Status.ACTIVE.toString());
-        Optional<Material> optionalMaterial = materialRepository.findByIdAndStatus(updateProductRequest.getIdMaterial(), Status.ACTIVE.toString());
-        Optional<ShoeSole> optionalShoeSole = shoeSoleRepository.findByIdAndStatus(updateProductRequest.getIdShoeSole(), Status.ACTIVE.toString());
+        Optional<Brand> optionalBrand = brandRepository.findById(updateProductRequest.getIdBrand());
+        Optional<Category> optionalCategory = categoryRepository.findById(updateProductRequest.getIdCategory());
+        Optional<Material> optionalMaterial = materialRepository.findById(updateProductRequest.getIdMaterial());
+        Optional<ShoeSole> optionalShoeSole = shoeSoleRepository.findById(updateProductRequest.getIdShoeSole());
         if (optionalProduct.isEmpty()) {
             throw new RuntimeException("Sản phẩm với Id là:  " + updateProductRequest.getId() + " không tồn tại trong hệ thống");
         }
@@ -120,17 +120,40 @@ public class ProductService {
         }
         Product product = optionalProduct.get();
         product.setStatus(Status.ACTIVE.toString());
-        product.setBrand(optionalBrand.get());
-        product.setCategory(optionalCategory.get());
-        product.setMaterial(optionalMaterial.get());
-        product.setShoeSole(optionalShoeSole.get());
+        if(!product.getBrand().getId().equals(optionalBrand.get().getId())){
+            if(optionalBrand.get().getStatus().equals(Status.INACTIVE.toString())){
+                throw new RuntimeException("Thương hiệu " + optionalBrand.get().getName() + " không còn hoạt động");
+            }
+            product.setBrand(optionalBrand.get());
+        }
+        if(!product.getCategory().getId().equals(optionalCategory.get().getId())){
+            if(optionalCategory.get().getStatus().equals(Status.INACTIVE.toString())){
+                throw new RuntimeException("Danh mục " + optionalCategory.get().getName() + " không còn hoạt động");
+            }
+            product.setCategory(optionalCategory.get());
+        }
+        if(!product.getMaterial().getId().equals(optionalMaterial.get().getId())){
+            if(optionalMaterial.get().getStatus().equals(Status.INACTIVE.toString())){
+                throw new RuntimeException("Chất liệu " + optionalMaterial.get().getName() + " không còn hoạt động");
+            }
+            product.setMaterial(optionalMaterial.get());
+        }
+        if(!product.getShoeSole().getId().equals(optionalShoeSole.get().getId())){
+            if(optionalShoeSole.get().getStatus().equals(Status.INACTIVE.toString())){
+                throw new RuntimeException("Đế giày " + optionalShoeSole.get().getName() + " không còn hoạt động");
+            }
+            product.setShoeSole(optionalShoeSole.get());
+        }
         product.setName(updateProductRequest.getName());
         product.setGender(updateProductRequest.isGender());
         if(updateProductRequest.getImage()!=null){
             product.setImageByte(updateProductRequest.getImage());
         }
-        Product updateProduct = productRepository.save(product);
-        productDetailService.updateProduct(updateProductRequest.getProductDetailRequest());
+        productRepository.save(product);
+        if(!updateProductRequest.getProductDetailRequest().isEmpty()){
+            System.out.println("Cap nhat san pham chi tiet");
+            productDetailService.updateProduct(updateProductRequest.getProductDetailRequest());
+        }
         notificationController.sendNotification();
     }
 

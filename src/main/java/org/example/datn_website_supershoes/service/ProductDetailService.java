@@ -66,17 +66,17 @@ public class ProductDetailService {
     public void updateProduct(List<UpdateProductDetailRequest> productDetailRequests){
         for (UpdateProductDetailRequest request : productDetailRequests) {
             Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(request.getId());
-            Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
-            Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
+//            Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
+//            Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
             if (optionalProductDetail.isEmpty()) {
                 throw new RuntimeException("Id sản phẩm chi tiết: " + request.getId() + " không tồn tại trong hệ thống");
             }
-            if (optionalSize.isEmpty()) {
-                throw new RuntimeException("Id kích cỡ: " + request.getIdSize() + " không tồn tại trong hệ thống");
-            }
-            if (optionalColor.isEmpty()) {
-                throw new RuntimeException("Id màu sắc: " + request.getIdColor() + " không tồn tại trong hệ thống");
-            }
+//            if (optionalSize.isEmpty()) {
+//                throw new RuntimeException("Id kích cỡ: " + request.getIdSize() + " không tồn tại trong hệ thống");
+//            }
+//            if (optionalColor.isEmpty()) {
+//                throw new RuntimeException("Id màu sắc: " + request.getIdColor() + " không tồn tại trong hệ thống");
+//            }
             if (request.getQuantity()<=0){
                 throw new RuntimeException("Vui lòng cập nhật số lượng lớn hơn 0");
             }
@@ -84,8 +84,8 @@ public class ProductDetailService {
             detail.setStatus(Status.ACTIVE.toString());
             detail.setQuantity(request.getQuantity());
             detail.setPrice(request.getPrice());
-            detail.setColor(optionalColor.get());
-            detail.setSize(optionalSize.get());
+//            detail.setColor(optionalColor.get());
+//            detail.setSize(optionalSize.get());
             ProductDetail updateProductDetail = productDetailRepository.save(detail);
             if (!request.getListImage().isEmpty()){
                 productImageRepository.deleteByProductDetail(updateProductDetail);

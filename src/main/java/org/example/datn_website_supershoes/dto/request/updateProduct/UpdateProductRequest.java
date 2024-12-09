@@ -41,7 +41,7 @@ public class UpdateProductRequest {
     @NotNull(message = "Đế giày không được để trống")
     private Long idShoeSole;
 
-    @NotNull(message = "Danh sách chi tiết sản phẩm không được để trống")
-    @Size(min = 1, message = "Phải có ít nhất một chi tiết sản phẩm")
+//    @NotNull(message = "Danh sách chi tiết sản phẩm không được để trống")
+//    @Size(min = 1, message = "Phải có ít nhất một chi tiết sản phẩm")
     private List<@Valid UpdateProductDetailRequest> productDetailRequest;
 }
