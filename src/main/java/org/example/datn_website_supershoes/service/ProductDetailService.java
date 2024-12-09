@@ -42,10 +42,10 @@ public class ProductDetailService {
                 Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
                 Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
                 if (optionalSize.isEmpty()) {
-                    throw new RuntimeException("Id kích cỡ: " + request.getIdSize() + " không tồn tại trong hệ thống");
+                    throw new RuntimeException("Kích cỡ với Id là:  " + request.getIdSize() + " không tồn tại trong hệ thống");
                 }
                 if (optionalColor.isEmpty()) {
-                    throw new RuntimeException("Id màu sắc: " + request.getIdColor() + " không tồn tại trong hệ thống");
+                    throw new RuntimeException("Màu sắc với Id là:  " + request.getIdColor() + " không tồn tại trong hệ thống");
                 }
                 ProductDetail productDetail = ProductDetail.builder()
                         .quantity(request.getQuantity())
