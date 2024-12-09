@@ -26,10 +26,8 @@ public class UpdateProductDetailRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá phải lớn hơn 0")
     private BigDecimal price;
 
-    @NotNull(message = "Màu sắc không được để trống")
     private Long idColor;
 
-    @NotNull(message = "Kích cỡ không được để trống")
     private Long idSize;
 
     private List<byte[]> listImage;

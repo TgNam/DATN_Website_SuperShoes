@@ -497,7 +497,6 @@ public class BillByEmployeeService {
             if (cartDetails == null || cartDetails.isEmpty()) {
                 throw new RuntimeException("Chưa có sản phẩm nào trong giỏ hàng");
             }
-
             Bill bill = Bill.builder()
                     .customer(account)
                     .codeBill(generatedCode)

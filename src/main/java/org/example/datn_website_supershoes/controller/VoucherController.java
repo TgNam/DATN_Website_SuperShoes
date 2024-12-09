@@ -6,7 +6,9 @@ import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.VoucherBillResponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
+import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Voucher;
+import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.service.VoucherService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +44,14 @@ public class VoucherController {
 
     @Autowired
     private VoucherService voucherService;
-
+    @Autowired
+    private AccountRepository accountRepository;
+    public Account getUseLogin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Account user = accountRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Lỗi liên quan đến đăng nhập vui lòng thử lại"));
+        return user;
+    }
     @PutMapping("/update-statuses")
     public ResponseEntity<?> updateVoucherStatusesManually() {
         try {
