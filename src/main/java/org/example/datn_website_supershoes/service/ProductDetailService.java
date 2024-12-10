@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ProductDetailService {
     @Autowired
+    private ProductRepository productRepository;
+    @Autowired
     private ProductDetailRepository productDetailRepository;
     @Autowired
     private SizeRepository sizeRepository;
@@ -66,17 +68,9 @@ public class ProductDetailService {
     public void updateProduct(List<UpdateProductDetailRequest> productDetailRequests){
         for (UpdateProductDetailRequest request : productDetailRequests) {
             Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(request.getId());
-//            Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
-//            Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
             if (optionalProductDetail.isEmpty()) {
-                throw new RuntimeException("Id sản phẩm chi tiết: " + request.getId() + " không tồn tại trong hệ thống");
+                throw new RuntimeException("Sản phẩm chi tiết với Id là " + request.getId() + " không tồn tại trong hệ thống");
             }
-//            if (optionalSize.isEmpty()) {
-//                throw new RuntimeException("Id kích cỡ: " + request.getIdSize() + " không tồn tại trong hệ thống");
-//            }
-//            if (optionalColor.isEmpty()) {
-//                throw new RuntimeException("Id màu sắc: " + request.getIdColor() + " không tồn tại trong hệ thống");
-//            }
             if (request.getQuantity()<=0){
                 throw new RuntimeException("Vui lòng cập nhật số lượng lớn hơn 0");
             }
@@ -84,8 +78,6 @@ public class ProductDetailService {
             detail.setStatus(Status.ACTIVE.toString());
             detail.setQuantity(request.getQuantity());
             detail.setPrice(request.getPrice());
-//            detail.setColor(optionalColor.get());
-//            detail.setSize(optionalSize.get());
             ProductDetail updateProductDetail = productDetailRepository.save(detail);
             if (!request.getListImage().isEmpty()){
                 productImageRepository.deleteByProductDetail(updateProductDetail);
@@ -100,7 +92,14 @@ public class ProductDetailService {
     public ProductDetail updateStatus(Long id, boolean aBoolean) {
         Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(id);
         if (!optionalProductDetail.isPresent()) {
-            throw new RuntimeException("Id: " + id + " của sản phẩm không tồn tại");
+            throw new RuntimeException("Sản phẩm chi tiết với Id là " + id + " không tồn tại trong hệ thống!");
+        }
+        Optional<Product> optionalProduct = productRepository.findById(optionalProductDetail.get().getProduct().getId());
+        if (!optionalProduct.isPresent()) {
+            throw new RuntimeException("Sản phẩm với Id là " + optionalProductDetail.get().getProduct().getId() + " không tồn tại trong hệ thống!");
+        }
+        if(optionalProduct.get().getStatus().equals(Status.INACTIVE.toString())){
+            throw new RuntimeException("Vui lòng bật trạng thái của sản phẩm trước khi thay đổi trạng thái");
         }
         if (optionalProductDetail.get().getQuantity() <= 0) {
             throw new RuntimeException("Vui lòng cập nhập số lượng của sản phẩm trước khi thay đổi trạng thái");
