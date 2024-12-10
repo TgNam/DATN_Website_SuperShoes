@@ -112,6 +112,17 @@ public class VoucherController {
                 p = criteriaBuilder.and(p, endAtPredicate);
             }
 
+//            // Thêm thứ tự ưu tiên theo CASE WHEN
+//            query.orderBy(
+//                    criteriaBuilder.asc(criteriaBuilder.selectCase()
+//                            .when(criteriaBuilder.equal(root.get("status"), "UPCOMING"), 1)
+//                            .when(criteriaBuilder.equal(root.get("status"), "ONGOING"), 2)
+//                            .otherwise(3)),
+//                    criteriaBuilder.desc(root.get("startAt")) // Thêm sắp xếp phụ (nếu cần)
+//            );
+
+            query.orderBy(criteriaBuilder.desc(root.get("id")));
+
             return p;
         };
 
@@ -128,6 +139,7 @@ public class VoucherController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/create")
     public ResponseEntity<?> createVoucher(@RequestBody @Valid VoucherRequest voucherRequest,
