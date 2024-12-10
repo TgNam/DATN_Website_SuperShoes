@@ -9,6 +9,7 @@ import org.example.datn_website_supershoes.service.BillDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ public class BillDetailRestAPI {
     @Autowired
     private BillDetailByEmployeeService billDetailByEmployeeService;
     @PostMapping("/createBillDetailByEmployee")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     private ResponseEntity<?> createBillDetailByEmployee(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestBody @Valid List<ProductDetailPromoRequest> productDetail, BindingResult result
