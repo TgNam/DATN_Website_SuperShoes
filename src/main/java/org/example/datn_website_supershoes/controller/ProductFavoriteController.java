@@ -25,7 +25,7 @@ import java.util.Optional;
 public class ProductFavoriteController {
 
     @Autowired
-    private ProductFavoriteService productFavoriteService;
+    ProductFavoriteService productFavoriteService;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllProductFavorite() {

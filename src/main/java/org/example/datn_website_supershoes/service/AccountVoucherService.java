@@ -14,7 +14,7 @@ import java.util.List;
 public class AccountVoucherService {
 
     @Autowired
-    private AccountVoucherRepository accountVoucherRepository;
+    AccountVoucherRepository accountVoucherRepository;
 
     public List<AccountVoucherResponse> getAllAccountVouchers() {
         return accountVoucherRepository.listAccountVoucherResponsesByStatus(Status.ACTIVE.toString());
@@ -32,7 +32,7 @@ public class AccountVoucherService {
         return accountVoucherRepository.save(accountVoucher);
     }
 
-    private AccountVoucher convertAccountVoucherRequestDTO(AccountVoucherRequest accountVoucherRequest) {
+    public AccountVoucher convertAccountVoucherRequestDTO(AccountVoucherRequest accountVoucherRequest) {
         return AccountVoucher.builder()
                 .build();
     }

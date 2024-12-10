@@ -37,15 +37,15 @@ import java.util.stream.Collectors;
 public class VoucherService {
 
     @Autowired
-    private VoucherRepository voucherRepository;
+    VoucherRepository voucherRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    AccountRepository accountRepository;
 
     @Autowired
-    private AccountVoucherRepository accountVoucherRepository;
+    AccountVoucherRepository accountVoucherRepository;
     @Autowired
-    private NotificationController notificationController;
+    NotificationController notificationController;
     private static final Logger logger = LoggerFactory.getLogger(VoucherService.class);
 
     private String generateVoucherCode() {
@@ -168,6 +168,7 @@ public class VoucherService {
         }
         return voucherResponse;
     }
+
     public VoucherResponse getVoucherBycodeVoucher(String codeVoucher) {
         Voucher voucher = voucherRepository.findByCodeVoucher(codeVoucher)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));

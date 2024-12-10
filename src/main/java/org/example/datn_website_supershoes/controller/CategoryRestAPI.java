@@ -20,23 +20,23 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/category")
 public class CategoryRestAPI {
     @Autowired
-    private CategoryService categoryService;
+    CategoryService categoryService;
     @GetMapping("/list-category")
-    private List<CategoryResponse> findAllCategory(){
+    public List<CategoryResponse> findAllCategory(){
         return categoryService.findAllCategory();
     }
     @GetMapping("/list-categoryActive")
-    private List<CategoryResponse> findByStatusActive(){
+    public List<CategoryResponse> findByStatusActive(){
         return categoryService.findByStatus();
     }
     @GetMapping("/list-category-search")
-    private List<CategoryResponse> findByStatusSearch(@RequestParam("search") String search){
+    public List<CategoryResponse> findByStatusSearch(@RequestParam("search") String search){
         return categoryService.findByStatus().stream()
                 .filter(CategoryResponse -> CategoryResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value ="id", required = false) Long id,
             @RequestParam(value ="aBoolean", required = false) boolean aBoolean
     ){
@@ -62,7 +62,7 @@ public class CategoryRestAPI {
         }
     }
     @PostMapping("/create-category")
-    private ResponseEntity<?> createCategory(@RequestBody @Valid CategoryRequest categoryRequest, BindingResult result){
+    public ResponseEntity<?> createCategory(@RequestBody @Valid CategoryRequest categoryRequest, BindingResult result){
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()

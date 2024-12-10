@@ -1,4 +1,5 @@
 package org.example.datn_website_supershoes.controller;
+
 ;
 import jakarta.validation.Valid;
 import org.example.datn_website_supershoes.dto.request.ProductRequest;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 public class ProductRestAPI {
 
     @Autowired
-    private ProductService productService;
+    ProductService productService;
 
     @Autowired
     ProductDetailService productDetailService;
@@ -47,11 +49,13 @@ public class ProductRestAPI {
                     );
         }
     }
+
     @GetMapping("/findProductProductDetailResponse")
     public List<ProductProductDetailResponse> findProductProductDetailResponse() {
         List<ProductProductDetailResponse> productResponse = productService.findProductProductDetailResponse();
         return productResponse;
     }
+
     @GetMapping("/filterProductProductDetailResponse")
     public List<ProductProductDetailResponse> filterProductProductDetailResponse(
             @RequestParam("search") String search,
@@ -59,7 +63,7 @@ public class ProductRestAPI {
             @RequestParam("idBrand") String idBrand,
             @RequestParam("status") String status
     ) {
-        return productService.filterProductProductDetailResponse(search,idCategory,idBrand,status);
+        return productService.filterProductProductDetailResponse(search, idCategory, idBrand, status);
     }
 
     @PostMapping("/addProduct")
@@ -83,6 +87,7 @@ public class ProductRestAPI {
                     );
         }
     }
+
     @PutMapping("/updateProduct")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequest updateProductRequest, BindingResult result) {
         try {
@@ -107,17 +112,18 @@ public class ProductRestAPI {
 
     @GetMapping("/productImage")
     public ProductImageResponse findImageByIdProduct(@RequestParam(value = "idProduct", required = false) Long id) {
-        if (id==null){
+        if (id == null) {
             id = 0L;
         }
         return productService.findImageByIdProduct(id);
     }
+
     @PutMapping("/update-status")
     private ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
-    ){
-        try{
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean
+    ) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -126,9 +132,9 @@ public class ProductRestAPI {
                                 .build()
                 );
             }
-            Product product  = productService.updateStatus(id,aBoolean);
+            Product product = productService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(product);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()

@@ -20,26 +20,30 @@ import java.util.stream.Collectors;
 public class ShoeSoleRestAPI {
 
     @Autowired
-    private ShoeSoleService shoeSoleService;
+    ShoeSoleService shoeSoleService;
+
     @GetMapping("/list-shoeSole")
-    private List<ShoeSoleResponse> findAllShoeSole(){
+    public List<ShoeSoleResponse> findAllShoeSole() {
         return shoeSoleService.findAllShoeSole();
     }
+
     @GetMapping("/list-shoeSoleActive")
-    private List<ShoeSoleResponse> findByStatusActive(){
+    public List<ShoeSoleResponse> findByStatusActive() {
         return shoeSoleService.findByStatus();
     }
+
     @GetMapping("/list-shoeSole-search")
-    private List<ShoeSoleResponse> findByStatusSearch(@RequestParam("search") String search){
+    public List<ShoeSoleResponse> findByStatusSearch(@RequestParam("search") String search) {
         return shoeSoleService.findByStatus().stream()
                 .filter(ShoeSoleResponse -> ShoeSoleResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
+
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean){
-        try{
+    public ResponseEntity<?> updateStatus(
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -50,7 +54,7 @@ public class ShoeSoleRestAPI {
             }
             ShoeSole shoeSole = shoeSoleService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(shoeSole);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -60,8 +64,9 @@ public class ShoeSoleRestAPI {
                     );
         }
     }
+
     @PostMapping("/create-shoeSole")
-    private ResponseEntity<?> createShoeSole(@RequestBody @Valid ShoeSoleRequest shoeSoleRequest, BindingResult result){
+    public ResponseEntity<?> createShoeSole(@RequestBody @Valid ShoeSoleRequest shoeSoleRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()

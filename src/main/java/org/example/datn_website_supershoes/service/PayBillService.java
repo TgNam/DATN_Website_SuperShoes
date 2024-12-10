@@ -26,59 +26,13 @@ import java.util.UUID;
 @Service
 public class PayBillService {
     @Autowired
-    private BillRepository billRepository;
+     BillRepository billRepository;
     @Autowired
-    private PaymentMethodRepository paymentMethodRepository;
-    private final PayBillRepository payBillRepository;
-
-    // Constructor-based dependency injection
-    public PayBillService(PayBillRepository payBillRepository) {
-        this.payBillRepository = payBillRepository;
-    }
-
-    // Method to create a new PayBill
-    public PayBill createPayBill(PayBill payBill) {
-        return payBillRepository.save(payBill);
-    }
-
-    // Fetch all PayBillResponse objects for a specific bill code
-    public List<PayBillResponse> getAllPayBills(String codeBill) {
-        return payBillRepository.listPayBillResponseByCodeBill(codeBill);
-    }
-
-    // Paginated fetching of pay bills using Specification for filtering
+     PaymentMethodRepository paymentMethodRepository;
+    @Autowired
+    PayBillRepository payBillRepository;
     public Page<PayBillResponse> getPayBills(Specification<PayBill> spec, Pageable pageable) {
         return payBillRepository.findAll(spec, pageable).map(this::convertToPayBillResponse);
-    }
-
-    // Fetch all PayBill entities
-    public List<PayBill> getAllPayBillEntities() {  // Renamed method for better clarity
-        return payBillRepository.findAll();
-    }
-
-    // Fetch PayBill by ID
-    public Optional<PayBill> getPayBillById(Long id) {
-        return payBillRepository.findById(id);
-    }
-
-    // Update an existing PayBill
-    public PayBill updatePayBill(Long id, PayBill payBill) {
-        PayBill existingPayBill = payBillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PayBill not found"));  // Consider using a custom exception
-
-        // List of properties to ignore during update
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(payBill, existingPayBill, ignoredProperties);
-
-        // Set related entities if they are not null
-        if (payBill.getBill() != null) {
-            existingPayBill.setBill(payBill.getBill());
-        }
-        if (payBill.getPaymentMethod() != null) {
-            existingPayBill.setPaymentMethod(payBill.getPaymentMethod());
-        }
-
-        return payBillRepository.save(existingPayBill);
     }
 
     public void updatePaymentBill(String codeBill, String status) {
@@ -95,28 +49,6 @@ public class PayBillService {
             payBillRepository.save(payBill);
         });
     }
-
-
-    @Transactional
-    @Scheduled(cron = "0 * * * * *")
-    public void updatePaymentBillAuto() {
-        // Fetch the list of PayBill objects from the repository
-        List<PayBill> payBills = payBillRepository.findAll(); // Ensure this method fetches all PayBill records
-
-        // Loop through the payBills list
-        payBills.forEach(payBill -> {
-            Bill bill = payBill.getBill();
-            if (bill != null && "COMPLETED".equals(bill.getStatus())) {
-                payBill.setStatus("COMPLETED");
-                payBillRepository.save(payBill);
-            } else {
-
-            }
-        });
-
-    }
-
-
     // Delete a PayBill by ID and return whether it was successful
     public boolean deletePayBill(Long id) {
         if (payBillRepository.existsById(id)) {

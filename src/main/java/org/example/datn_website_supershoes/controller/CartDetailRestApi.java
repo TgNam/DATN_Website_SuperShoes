@@ -18,7 +18,7 @@ import java.util.List;
 public class CartDetailRestApi {
 
     @Autowired
-    private CartDetailService cartDetailService;
+    CartDetailService cartDetailService;
 
     @PostMapping("/add-product-to-cart/{idUser}")
     public ResponseEntity<?> createCartDetail(@RequestBody CartDetailRequest cartDetailRequest,
@@ -126,7 +126,7 @@ public class CartDetailRestApi {
         }
     }
     @DeleteMapping("/deleteCartDetail")
-    private ResponseEntity<?> deleteBillDetail(
+    public ResponseEntity<?> deleteBillDetail(
             @RequestParam(value ="idCartDetail", required = false) Long idCartDetail
     ){
         try {

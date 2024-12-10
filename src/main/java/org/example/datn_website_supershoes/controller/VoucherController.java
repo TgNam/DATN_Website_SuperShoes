@@ -43,9 +43,9 @@ import java.util.stream.Collectors;
 public class VoucherController {
 
     @Autowired
-    private VoucherService voucherService;
+     VoucherService voucherService;
     @Autowired
-    private AccountRepository accountRepository;
+     AccountRepository accountRepository;
     public Account getUseLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Account user = accountRepository.findByEmail(authentication.getName())
@@ -245,7 +245,7 @@ public class VoucherController {
         }
     }
 
-    private VoucherResponse convertToVoucherResponse(Voucher voucher) {
+    public VoucherResponse convertToVoucherResponse(Voucher voucher) {
         VoucherResponse response = new VoucherResponse();
         BeanUtils.copyProperties(voucher, response);
         return response;

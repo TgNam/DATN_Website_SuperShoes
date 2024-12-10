@@ -17,7 +17,7 @@ import java.util.Map;
 public class BillHistoryController {
 
     @Autowired
-    private BillHistoryService billHistoryService;
+    BillHistoryService billHistoryService;
 
     @GetMapping("/viewHistory/{codeBill}")
     public ResponseEntity<Map<String, Object>> getBillHistoryByBillCode(@PathVariable String codeBill) {

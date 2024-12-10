@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
 public class PromotionRestAPI {
 
     @Autowired
-    private PromotionService promotionService;
+    PromotionService promotionService;
     @Autowired
-    private PromotionDetailService promotionDetailService;
+    PromotionDetailService promotionDetailService;
 
     @GetMapping("/listPromotion")
     public List<PromotionResponse> getAllPromotion() {
@@ -173,7 +173,7 @@ public class PromotionRestAPI {
     }
 
     @PutMapping("/updateStatus")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
     ) {
@@ -200,7 +200,7 @@ public class PromotionRestAPI {
     }
 
     @PostMapping("/get-by-product-details")
-    private ResponseEntity<?> findPromotionDetailByIdProductDetailAndStatus(@RequestBody List<Long> ids) {
+    public ResponseEntity<?> findPromotionDetailByIdProductDetailAndStatus(@RequestBody List<Long> ids) {
         try {
             if (ids == null) {
                 return ResponseEntity.badRequest().body(

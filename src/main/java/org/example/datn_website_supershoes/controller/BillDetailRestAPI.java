@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/billDetailByEmployee")
 public class BillDetailRestAPI {
     @Autowired
-    private BillDetailService billDetailService;
+     BillDetailService billDetailService;
     @Autowired
-    private BillDetailByEmployeeService billDetailByEmployeeService;
+     BillDetailByEmployeeService billDetailByEmployeeService;
     @PostMapping("/createBillDetailByEmployee")
     @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
-    private ResponseEntity<?> createBillDetailByEmployee(
+    public ResponseEntity<?> createBillDetailByEmployee(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestBody @Valid List<ProductDetailPromoRequest> productDetail, BindingResult result
     ){
@@ -61,7 +61,7 @@ public class BillDetailRestAPI {
 
 
     @PostMapping("/updateBillAndCreateBillDetailByIdBill")
-    private ResponseEntity<?> updateBillAndCreateBillDetailByIdBill(
+    public ResponseEntity<?> updateBillAndCreateBillDetailByIdBill(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestBody @Valid List<ProductDetailPromoRequest> productDetail, BindingResult result
     ){
@@ -108,7 +108,7 @@ public class BillDetailRestAPI {
         return ResponseEntity.ok(billDetailOrderResponses);
     }
     @PostMapping("/plusBillDetail")
-    private ResponseEntity<?> plusBillDetail(
+    public ResponseEntity<?> plusBillDetail(
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
     ){
@@ -142,7 +142,7 @@ public class BillDetailRestAPI {
         }
     }
     @PostMapping("/subtractBillDetail")
-    private ResponseEntity<?> subtractBillDetail(
+    public ResponseEntity<?> subtractBillDetail(
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
     ){
@@ -176,7 +176,7 @@ public class BillDetailRestAPI {
         }
     }
     @DeleteMapping("/deleteBillDetail")
-    private ResponseEntity<?> deleteBillDetail(
+    public ResponseEntity<?> deleteBillDetail(
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
     ){

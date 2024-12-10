@@ -19,23 +19,23 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/color")
 public class ColorRestAPI {
     @Autowired
-    private ColorService colorService;
+    ColorService colorService;
     @GetMapping("/list-color")
-    private List<ColorResponse> findAllColor(){
+    public List<ColorResponse> findAllColor(){
         return colorService.findAllColor();
     }
     @GetMapping("/listColorACTIVE")
-    private List<ColorResponse> findByStatusActive(){
+    public List<ColorResponse> findByStatusActive(){
         return colorService.findColorByStatusACTIVE();
     }
     @GetMapping("/list-color-search")
-    private List<ColorResponse> findByStatusSearch(@RequestParam("search") String search){
+    public List<ColorResponse> findByStatusSearch(@RequestParam("search") String search){
         return colorService.findAllColor().stream()
                 .filter(ColorResponse -> ColorResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value ="id", required = false) Long id,
             @RequestParam(value ="aBoolean", required = false) boolean aBoolean
     ){
@@ -61,7 +61,7 @@ public class ColorRestAPI {
         }
     }
     @PostMapping("/create-color")
-    private ResponseEntity<?> createColor(@RequestBody @Valid ColorRequest ColorRequest, BindingResult result){
+    public ResponseEntity<?> createColor(@RequestBody @Valid ColorRequest ColorRequest, BindingResult result){
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()

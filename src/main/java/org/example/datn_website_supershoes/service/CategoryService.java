@@ -15,11 +15,12 @@ import java.util.Optional;
 @Service
 public class CategoryService {
     @Autowired
-    private CategoryRepository categoryRepository;
+    CategoryRepository categoryRepository;
 
-    public List<CategoryResponse> findAllCategory(){
+    public List<CategoryResponse> findAllCategory() {
         return categoryRepository.findAllCategory();
     }
+
     public List<CategoryResponse> findByStatus() {
         return categoryRepository.findByStatus(Status.ACTIVE.toString());
     }
@@ -33,13 +34,13 @@ public class CategoryService {
     }
 
     public Category updateStatus(Long id, boolean aBoolean) {
-            Optional<Category> category = categoryRepository.findById(id);
-            if (!category.isPresent()) {
-                throw new RuntimeException("Id "+category.get().getId()+" của danh mục không tồn tại");
-            }
+        Optional<Category> category = categoryRepository.findById(id);
+        if (!category.isPresent()) {
+            throw new RuntimeException("Id " + category.get().getId() + " của danh mục không tồn tại");
+        }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
-            category.get().setStatus(newStatus);
-            return categoryRepository.save(category.get());
+        category.get().setStatus(newStatus);
+        return categoryRepository.save(category.get());
 
     }
 

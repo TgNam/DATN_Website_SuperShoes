@@ -26,29 +26,31 @@ import java.util.stream.Collectors;
 public class SizeRestAPI {
 
     @Autowired
-    private SizeService sizeService;
+    SizeService sizeService;
 
     @GetMapping("/list-size")
-    private List<SizeResponse> findAllSize(){
+    public List<SizeResponse> findAllSize() {
         return sizeService.findAllSize();
     }
+
     @GetMapping("/listSizeACTIVE")
-    private List<SizeResponse> findByStatusActive(){
+    public List<SizeResponse> findByStatusActive() {
         return sizeService.findSizeByStatusACTIVE();
     }
+
     @GetMapping("/list-size-search")
-    private List<SizeResponse> findByStatusSearch(@RequestParam("search") String search){
+    public List<SizeResponse> findByStatusSearch(@RequestParam("search") String search) {
         return sizeService.findAllSize().stream()
                 .filter(sizeResponse -> sizeResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
 
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
-    ){
-        try{
+    public ResponseEntity<?> updateStatus(
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean
+    ) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -57,9 +59,9 @@ public class SizeRestAPI {
                                 .build()
                 );
             }
-            Size size  = sizeService.updateStatus(id,aBoolean);
+            Size size = sizeService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(size);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -69,8 +71,9 @@ public class SizeRestAPI {
                     );
         }
     }
+
     @PostMapping("/create-size")
-    private ResponseEntity<?> createSize(@RequestBody @Valid SizeRequest sizeRequest, BindingResult result) {
+    public ResponseEntity<?> createSize(@RequestBody @Valid SizeRequest sizeRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()
