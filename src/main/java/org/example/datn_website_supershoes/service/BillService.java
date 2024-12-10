@@ -31,11 +31,11 @@ import java.util.Optional;
 public class BillService {
 
     @Autowired
-    private BillRepository billRepository;
+     BillRepository billRepository;
     @Autowired
-    private BillDetailRepository billDetailRepository;
+     BillDetailRepository billDetailRepository;
     @Autowired
-    private ProductDetailRepository productDetailRepository;
+     ProductDetailRepository productDetailRepository;
 
     public List<BillStatisticalPieResponse> getCompletedBillStatistics() {
         List<Object[]> results = billRepository.findCompletedBillStatisticsByYear();

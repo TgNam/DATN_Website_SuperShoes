@@ -26,7 +26,7 @@ import java.util.*;
 public class BillDetailController {
 
     @Autowired
-    private BillDetailService billDetailService;
+    BillDetailService billDetailService;
 
     @GetMapping("/statisticsProduct")
     public ResponseEntity<List<BillDetailStatisticalProductRespone>> getBillStatistics() {
@@ -83,7 +83,7 @@ public class BillDetailController {
         return billDetailService.getBillDetails(spec, pageable);
     }
     @PostMapping("/plusBillDetail")
-    private ResponseEntity<?> plusBillDetail(
+    public ResponseEntity<?> plusBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
@@ -127,7 +127,7 @@ public class BillDetailController {
     }
 
     @PostMapping("/subtractBillDetail")
-    private ResponseEntity<?> subtractBillDetail(
+    public ResponseEntity<?> subtractBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
@@ -171,7 +171,7 @@ public class BillDetailController {
     }
 
     @DeleteMapping("/deleteBillDetail")
-    private ResponseEntity<?> deleteBillDetail(
+    public ResponseEntity<?> deleteBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail

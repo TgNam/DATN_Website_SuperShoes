@@ -26,13 +26,13 @@ import java.util.*;
 public class AccountVoucherController {
 
     @Autowired
-    private AccountVoucherService accountVoucherService;
+    AccountVoucherService accountVoucherService;
 
     @Autowired
-    private AccountService accountService;
+    AccountService accountService;
 
     @Autowired
-    private EmailService emailService;
+    EmailService emailService;
 
     @PostMapping("/emails")
     public ResponseEntity<?> getEmailsByCustomerIds(@RequestBody Map<String, List<Long>> customerIdsMap) {

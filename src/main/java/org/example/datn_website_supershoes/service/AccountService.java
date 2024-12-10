@@ -27,15 +27,15 @@ import java.util.Optional;
 public class AccountService {
 
     @Autowired
-    private AccountRepository accountRepository;
+     AccountRepository accountRepository;
     @Autowired
-    private AddressService addressService;
+     AddressService addressService;
     @Autowired
-    private AccountVoucherRepository accountVoucherRepository;
+     AccountVoucherRepository accountVoucherRepository;
     @Autowired
-    private EmailService emailService;
+     EmailService emailService;
     @Autowired
-    private RandomPasswordGeneratorService randomPassword;
+     RandomPasswordGeneratorService randomPassword;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 

@@ -19,23 +19,23 @@ import java.util.stream.Collectors;
 @RequestMapping("api/v1/brand")
 public class BrandRestAPI {
     @Autowired
-    private BrandService brandService;
+    BrandService brandService;
     @GetMapping("/list-brand")
-    private List<BrandResponse> findAllBrand(){
+    public List<BrandResponse> findAllBrand(){
         return brandService.findAllBrand();
     }
     @GetMapping("/list-brandActive")
-    private List<BrandResponse> findByStatusActive(){
+    public List<BrandResponse> findByStatusActive(){
         return brandService.findByStatus();
     }
     @GetMapping("/list-brand-search")
-    private List<BrandResponse> findByStatusSearch(@RequestParam("search") String search){
+    public List<BrandResponse> findByStatusSearch(@RequestParam("search") String search){
         return brandService.findAllBrand().stream()
                 .filter(brandResponse -> brandResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value ="id", required = false) Long id,
             @RequestParam(value ="aBoolean", required = false) boolean aBoolean
     ){
@@ -61,7 +61,7 @@ public class BrandRestAPI {
         }
     }
     @PostMapping("/create-brand")
-    private ResponseEntity<?> createSize(@RequestBody @Valid BrandRequest brandRequest, BindingResult result){
+    public ResponseEntity<?> createSize(@RequestBody @Valid BrandRequest brandRequest, BindingResult result){
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()

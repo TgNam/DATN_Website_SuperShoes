@@ -10,38 +10,43 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class ShoeSoleService {
 
     @Autowired
-    private ShoeSoleRepository shoeSoleRepository;
+    ShoeSoleRepository shoeSoleRepository;
 
-    public List<ShoeSoleResponse> findAllShoeSole(){
+    public List<ShoeSoleResponse> findAllShoeSole() {
         return shoeSoleRepository.findAllShoeSole();
     }
-    public List<ShoeSoleResponse> findByStatus(){
+
+    public List<ShoeSoleResponse> findByStatus() {
         return shoeSoleRepository.findByStatus(Status.ACTIVE.toString());
     }
-    public ShoeSole createShoeSole(ShoeSoleRequest shoeSoleRequest){
+
+    public ShoeSole createShoeSole(ShoeSoleRequest shoeSoleRequest) {
         Optional<ShoeSole> shoeSole = shoeSoleRepository.findByName(shoeSoleRequest.getName());
-        if(shoeSole.isPresent()){
-            throw new RuntimeException("Loại đế "+ shoeSoleRequest.getName() +" đã tồn tại");
+        if (shoeSole.isPresent()) {
+            throw new RuntimeException("Loại đế " + shoeSoleRequest.getName() + " đã tồn tại");
         }
         return shoeSoleRepository.save(convertShoeSoleRequestDTO(shoeSoleRequest));
     }
-    public ShoeSole updateStatus(Long id, boolean aBoolean){
-            Optional<ShoeSole> shoeSole = shoeSoleRepository.findById(id);
-            if(!shoeSole.isPresent()){
-                throw new RuntimeException("Id "+shoeSole.get().getId()+" của loại đế giày không tồn tại");
-            }
-        String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
-            shoeSole.get().setStatus(newStatus);
 
-            return shoeSoleRepository.save(shoeSole.get());
+    public ShoeSole updateStatus(Long id, boolean aBoolean) {
+        Optional<ShoeSole> shoeSole = shoeSoleRepository.findById(id);
+        if (!shoeSole.isPresent()) {
+            throw new RuntimeException("Id " + shoeSole.get().getId() + " của loại đế giày không tồn tại");
+        }
+        String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
+        shoeSole.get().setStatus(newStatus);
+
+        return shoeSoleRepository.save(shoeSole.get());
 
 
     }
-    public ShoeSole convertShoeSoleRequestDTO(ShoeSoleRequest ShoeSoleRequest){
+
+    public ShoeSole convertShoeSoleRequestDTO(ShoeSoleRequest ShoeSoleRequest) {
         ShoeSole shoeSole = ShoeSole.builder()
                 .name(ShoeSoleRequest.getName())
                 .build();

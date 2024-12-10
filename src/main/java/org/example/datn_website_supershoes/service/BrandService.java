@@ -15,7 +15,7 @@ import java.util.Optional;
 public class BrandService {
 
     @Autowired
-    private BrandRepository brandRepository;
+    BrandRepository brandRepository;
 
     public List<BrandResponse> findAllBrand(){
         return brandRepository.findAllBrand();

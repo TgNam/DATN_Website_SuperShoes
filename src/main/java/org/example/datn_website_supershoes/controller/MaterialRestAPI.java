@@ -19,27 +19,31 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/material")
 public class MaterialRestAPI {
     @Autowired
-    private MaterialService materialService;
+    MaterialService materialService;
+
     @GetMapping("/list-material")
-    private List<MaterialResponse> findAllMaterial(){
+    public List<MaterialResponse> findAllMaterial() {
         return materialService.findAllMaterial();
     }
+
     @GetMapping("/list-materialActive")
-    private List<MaterialResponse> findByStatusActive(){
+    public List<MaterialResponse> findByStatusActive() {
         return materialService.findByStatus();
     }
+
     @GetMapping("/list-material-search")
-    private List<MaterialResponse> findByStatusSearch(@RequestParam("search") String search){
+    public List<MaterialResponse> findByStatusSearch(@RequestParam("search") String search) {
         return materialService.findByStatus().stream()
                 .filter(MaterialResponse -> MaterialResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
+
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
-    ){
-        try{
+    public ResponseEntity<?> updateStatus(
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean
+    ) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -48,9 +52,9 @@ public class MaterialRestAPI {
                                 .build()
                 );
             }
-            Material material = materialService.updateStatus(id,aBoolean);
+            Material material = materialService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(material);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -60,8 +64,9 @@ public class MaterialRestAPI {
                     );
         }
     }
+
     @PostMapping("/create-material")
-    private ResponseEntity<?> createMaterial(@RequestBody @Valid MaterialRequest materialRequest, BindingResult result){
+    public ResponseEntity<?> createMaterial(@RequestBody @Valid MaterialRequest materialRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()

@@ -24,20 +24,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/v1/image")
 public class ProductImageRestAPI {
     @Autowired
-    private ProductImageService productImageService;
+    ProductImageService productImageService;
 
     @GetMapping("/listAllProductImage")
     public List<ProductImageResponse> getAllProductImage() {
         List<ProductImageResponse> productImage = productImageService.findAll();
         return productImage;
     }
+
     @GetMapping("/listProductImage")
     public List<ProductImageResponse> findListImageByIdProductDetail(@RequestParam(value = "idProductDetail", required = false) Long id) {
-        if (id==null){
+        if (id == null) {
             id = 0L;
         }
         return productImageService.findListImageByIdProductDetail(id);

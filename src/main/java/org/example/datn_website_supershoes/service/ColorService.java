@@ -15,32 +15,36 @@ import java.util.Optional;
 public class ColorService {
 
     @Autowired
-    private ColorRepository colorRepository;
+    ColorRepository colorRepository;
 
-    public List<ColorResponse> findAllColor(){
+    public List<ColorResponse> findAllColor() {
         return colorRepository.findAllColor();
     }
-    public List<ColorResponse> findColorByStatusACTIVE(){
+
+    public List<ColorResponse> findColorByStatusACTIVE() {
         return colorRepository.findColorByStatus(Status.ACTIVE.toString());
     }
-    public Color createColor(ColorRequest ColorRequest){
+
+    public Color createColor(ColorRequest ColorRequest) {
         Optional<Color> color = colorRepository.findByCodeColor(ColorRequest.getCodeColor());
-        if(color.isPresent()){
-            throw new RuntimeException("Màu "+ ColorRequest.getCodeColor() +" đã tồn tại");
+        if (color.isPresent()) {
+            throw new RuntimeException("Màu " + ColorRequest.getCodeColor() + " đã tồn tại");
         }
         return colorRepository.save(convertColorRequestDTO(ColorRequest));
     }
-    public Color updateStatus(Long id, boolean aBoolean){
-            Optional<Color> color = colorRepository.findById(id);
-            if(!color.isPresent()){
-                throw new RuntimeException("Id "+color.get().getId()+" của màu sắc không tồn tại");
-            }
+
+    public Color updateStatus(Long id, boolean aBoolean) {
+        Optional<Color> color = colorRepository.findById(id);
+        if (!color.isPresent()) {
+            throw new RuntimeException("Id " + color.get().getId() + " của màu sắc không tồn tại");
+        }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
-            color.get().setStatus(newStatus);
-            return colorRepository.save(color.get());
+        color.get().setStatus(newStatus);
+        return colorRepository.save(color.get());
 
     }
-    public Color convertColorRequestDTO(ColorRequest ColorRequest){
+
+    public Color convertColorRequestDTO(ColorRequest ColorRequest) {
         Color color = Color.builder()
                 .name(ColorRequest.getName())
                 .codeColor(ColorRequest.getCodeColor())

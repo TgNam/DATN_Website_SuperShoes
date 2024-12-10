@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.PastOrPresent;
 import org.example.datn_website_supershoes.dto.request.AccountUpdateRequest;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.EmployeeCreationRequest;
@@ -28,6 +29,7 @@ public class AccountRestAPI {
     AccountService accountService;
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createAccount(@RequestBody @Valid AccountRequest accountRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -152,7 +154,7 @@ public class AccountRestAPI {
     }
 
     @PutMapping("/updateStatus")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
     ) {

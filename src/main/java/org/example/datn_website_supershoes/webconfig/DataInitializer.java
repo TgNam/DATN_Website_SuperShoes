@@ -38,7 +38,9 @@ public class DataInitializer implements ApplicationListener<ContextRefreshedEven
         Date birthday = calendar.getTime();
         addPaymentMethodIfNotExist("QR payment", "Thanh toán QR", 1);
         addPaymentMethodIfNotExist("Cash payment", "Thanh toán tiền mặt", 2);
-        addAccountAdminIfNotExist("Nguyễn Trường Nam","admin@gmail.com","0983729351","1",birthday);
+        addAccountAdminIfNotExist("Nguyễn Trường Nam","admin@gmail.com","0983729351","1",birthday,Role.ADMIN.toString());
+        addAccountAdminIfNotExist("Nguyễn Trường Nam","employee@gmail.com","0983729351","1",birthday,Role.EMPLOYEE.toString());
+        addAccountAdminIfNotExist("Nguyễn Trường Nam","customer@gmail.com","0983729351","1",birthday,Role.CUSTOMER.toString());
     }
 
     private void addPaymentMethodIfNotExist(String methodName, String note, Integer type) {
@@ -51,7 +53,7 @@ public class DataInitializer implements ApplicationListener<ContextRefreshedEven
             paymentMethodRepository.save(paymentMethod);
         }
     }
-    private void addAccountAdminIfNotExist(String name, String email, String phoneNumber, String password, Date birthday){
+    private void addAccountAdminIfNotExist(String name, String email, String phoneNumber, String password, Date birthday, String role){
         Optional<Account> accountOP = accountRepository.findByEmail(email);
         if (accountOP.isEmpty()) {
             Account account = Account.builder()
@@ -59,7 +61,7 @@ public class DataInitializer implements ApplicationListener<ContextRefreshedEven
                     .email(email)
                     .phoneNumber(phoneNumber)
                     .password(passwordEncoder.encode(password))
-                    .role(Role.ADMIN.toString())
+                    .role(role)
                     .gender(1)
                     .birthday(birthday)
                     .rewards(0)
