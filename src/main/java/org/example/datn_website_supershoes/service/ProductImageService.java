@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProductImageService {
     @Autowired
-    private  ProductImageRepository productImageRepository;
+    ProductImageRepository productImageRepository;
 
     public List<ProductImageResponse> findAll() {
         return productImageRepository.listProductImageResponse();

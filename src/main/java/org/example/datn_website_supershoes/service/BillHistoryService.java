@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 public class BillHistoryService {
 
     @Autowired
-    private BillHistoryRepository billHistoryRepository;
+    BillHistoryRepository billHistoryRepository;
 
     @Autowired
-    private BillRepository billRepository;
+    BillRepository billRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    AccountRepository accountRepository;
 
     public List<BillHistoryResponse> getBillHistoryByBillCode(String codeBill) {
         List<BillHistory> billHistories = billHistoryRepository.findBillHistoryByBillCode(codeBill);

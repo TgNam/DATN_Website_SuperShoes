@@ -25,29 +25,29 @@ import java.util.stream.Collectors;
 public class BillByEmployeeService {
 
     @Autowired
-    private BillByEmployeeRepository billByEmployeeRepository;
+     BillByEmployeeRepository billByEmployeeRepository;
     @Autowired
-    private BillRepository billRepository;
+     BillRepository billRepository;
     @Autowired
-    private BillDetailRepository billDetailRepository;
+     BillDetailRepository billDetailRepository;
     @Autowired
-    private VoucherRepository voucherRepository;
+     VoucherRepository voucherRepository;
     @Autowired
-    private AccountRepository accountRepository;
+     AccountRepository accountRepository;
     @Autowired
-    private AccountVoucherRepository accountVoucherRepository;
+     AccountVoucherRepository accountVoucherRepository;
     @Autowired
-    private PayBillRepository payBillRepository;
+     PayBillRepository payBillRepository;
     @Autowired
-    private PayBillService PayBillService;
+     PayBillService PayBillService;
     @Autowired
-    private ProductDetailRepository productDetailRepository;
+     ProductDetailRepository productDetailRepository;
     @Autowired
-    private CartDetailRepository cartDetailRepository;
+     CartDetailRepository cartDetailRepository;
     @Autowired
-    private PromotionDetailRepository promotionDetailRepository;
+     PromotionDetailRepository promotionDetailRepository;
     @Autowired
-    private NotificationController notificationController;
+     NotificationController notificationController;
     //Lấy tối đa 5 phần tử
     private static final int MAX_DISPLAY_BILLS = 5;
 

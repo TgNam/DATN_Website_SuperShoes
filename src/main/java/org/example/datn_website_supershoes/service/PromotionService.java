@@ -25,22 +25,23 @@ import java.util.*;
 public class PromotionService {
 
     @Autowired
-    private PromotionRepository promotionRepository;
+    PromotionRepository promotionRepository;
     @Autowired
-    private PromotionDetailService promotionDetailService;
+    PromotionDetailService promotionDetailService;
     @Autowired
-    private ProductDetailRepository productDetailRepository;
+    ProductDetailRepository productDetailRepository;
     @Autowired
-    private RandomPasswordGeneratorService randomCodePromotion;
+    RandomPasswordGeneratorService randomCodePromotion;
     @Autowired
-    private NotificationController notificationController;
+    NotificationController notificationController;
+
     //chuyển trạng thái từ sắp diễn ra thành diễn ra
     @Transactional
     public void updateUpcomingDiscounts() {
         LocalDateTime now = LocalDateTime.now();
         //tìm kiếm trạng thái đang diễn ra
-        List<Promotion> expiredDiscounts = promotionRepository.findUpcomingDiscounts(now,Status.UPCOMING.toString());
-        if(!expiredDiscounts.isEmpty()){
+        List<Promotion> expiredDiscounts = promotionRepository.findUpcomingDiscounts(now, Status.UPCOMING.toString());
+        if (!expiredDiscounts.isEmpty()) {
             for (Promotion discount : expiredDiscounts) {
                 //cập nhật trạng thái
                 discount.setStatus(Status.ONGOING.toString());
@@ -51,14 +52,15 @@ public class PromotionService {
             notificationController.sendNotification();
         }
     }
+
     //chuyển các trạng thái sắp diễn ra, đang diễn ra, kết thúc sớm thành kết thúc
     @Transactional
     public void updateFinishedDiscounts() {
         LocalDateTime now = LocalDateTime.now();
         //tìm kiếm trạng thái đang sắp diễn ra, đang diễn ra, kết thúc sớm
-        List<String> status = new ArrayList<>(Arrays.asList(Status.ONGOING.toString(),Status.UPCOMING.toString(),Status.ENDING_SOON.toString()));
-        List<Promotion> expiredDiscounts = promotionRepository.findFinishedDiscounts(now,status);
-        if(!expiredDiscounts.isEmpty()){
+        List<String> status = new ArrayList<>(Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
+        List<Promotion> expiredDiscounts = promotionRepository.findFinishedDiscounts(now, status);
+        if (!expiredDiscounts.isEmpty()) {
             for (Promotion discount : expiredDiscounts) {
                 //cập nhật trạng thái
                 discount.setStatus(Status.FINISHED.toString());
@@ -70,9 +72,9 @@ public class PromotionService {
         }
     }
 
-    public Promotion updateStatus(Long id, boolean aBoolean){
+    public Promotion updateStatus(Long id, boolean aBoolean) {
         Date now = new Date();  // Sử dụng Date thay vì LocalDateTime
-        Optional<Promotion> promotionOptional = promotionRepository.findPromotionByIdAndStatus(id,Arrays.asList(Status.ONGOING.toString(),Status.UPCOMING.toString(),Status.ENDING_SOON.toString()));
+        Optional<Promotion> promotionOptional = promotionRepository.findPromotionByIdAndStatus(id, Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
 
         // Kiểm tra nếu promotion không tồn tại
         if (!promotionOptional.isPresent()) {
@@ -94,10 +96,11 @@ public class PromotionService {
         promotionOptional.get().setStatus(newStatus);
         // Lưu lại promotion đã được cập nhật
         Promotion promotion = promotionRepository.save(promotionOptional.get());
-        promotionDetailService.updateStatusPromotionDetail(promotion.getId(),promotion.getStatus());
+        promotionDetailService.updateStatusPromotionDetail(promotion.getId(), promotion.getStatus());
         notificationController.sendNotification();
         return promotion;
     }
+
     public List<PromotionResponse> getAllPromotion() {
         return promotionRepository.listPromotionResponse();
     }
@@ -110,13 +113,14 @@ public class PromotionService {
         }
         return promotion;
     }
-    public Promotion updatePromotion (PromotionUpdatesRequest promotionUpdatesRequest){
+
+    public Promotion updatePromotion(PromotionUpdatesRequest promotionUpdatesRequest) {
         try {
             Optional<Promotion> promotionOptional = promotionRepository.findById(promotionUpdatesRequest.getPromotionRequest().getId());
-            if(!promotionOptional.isPresent()){
+            if (!promotionOptional.isPresent()) {
                 throw new RuntimeException("Đợt giảm giá không tồn tại!");
             }
-            if(promotionOptional.get().getStatus().equals(Status.ENDING_SOON.toString())){
+            if (promotionOptional.get().getStatus().equals(Status.ENDING_SOON.toString())) {
                 throw new RuntimeException("Vui lòng bật trạng thái ENDING_SOON lên trước khi thao tác");
             }
             if (promotionUpdatesRequest.getPromotionRequest().getStartAt() != null &&
@@ -138,11 +142,12 @@ public class PromotionService {
             }
             notificationController.sendNotification();
             return promotion;
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             return null;
         }
     }
+
     private Promotion convertPromotionRequestDTO(PromotionRequest promotionRequest) {
         String codePromotion = generatePromotionCode();
         Promotion promotion = Promotion.builder()
@@ -162,18 +167,19 @@ public class PromotionService {
         return "PROMO" + randomCodePromotion.getCodePromotion();
     }
 
-    public PromotionDetailResponse getPromotionDetailResponse(Long idPromotion){
+    public PromotionDetailResponse getPromotionDetailResponse(Long idPromotion) {
         Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
-        if(!promotion.isPresent()){
+        if (!promotion.isPresent()) {
             throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
         }
         List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.findProductPromotionResponseByIdPromotion(promotion.get().getId());
         PromotionDetailResponse promotionDetailResponse = new PromotionDetailResponse(promotion.get(), productPromotionResponses);
         return promotionDetailResponse;
     }
-    public PromotionDetailResponseByQuang getPromotionDetailResponseByQuang(Long idPromotion){
+
+    public PromotionDetailResponseByQuang getPromotionDetailResponseByQuang(Long idPromotion) {
         Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
-        if(!promotion.isPresent()){
+        if (!promotion.isPresent()) {
             throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
         }
         List<ProductPromotionResponseByQuang> productPromotionResponseByQuangs = promotionDetailService.findProductPromotionResponseByIdPromotionByQuang(promotion.get().getId());
@@ -182,17 +188,17 @@ public class PromotionService {
     }
 
 
-    public PromotionDetailResponse getSearchPromotionDetailResponse(Long idPromotion,String search, String nameSize, String nameColor,String priceRange){
+    public PromotionDetailResponse getSearchPromotionDetailResponse(Long idPromotion, String search, String nameSize, String nameColor, String priceRange) {
         Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
-        if(!promotion.isPresent()){
+        if (!promotion.isPresent()) {
             throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
         }
-        List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.filterListProductPromotion(promotion.get().getId(),search,nameSize,nameColor,priceRange);
+        List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.filterListProductPromotion(promotion.get().getId(), search, nameSize, nameColor, priceRange);
         PromotionDetailResponse promotionDetailResponse = new PromotionDetailResponse(promotion.get(), productPromotionResponses);
         return promotionDetailResponse;
     }
 
-    public  List<ProductPromotionResponse> findProductPromotionByLitsIdProductDetail( List<Long> idProductDetail){
+    public List<ProductPromotionResponse> findProductPromotionByLitsIdProductDetail(List<Long> idProductDetail) {
         return productDetailRepository.findProductPromotionByLitsIdProductDetail(idProductDetail);
     }
 }

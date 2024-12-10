@@ -2,8 +2,10 @@ package org.example.datn_website_supershoes.controller;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.example.datn_website_supershoes.dto.request.ProductDetailRequest;
 import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.Color;
 import org.example.datn_website_supershoes.model.Product;
@@ -23,6 +25,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,20 +53,68 @@ import java.util.stream.Collectors;
 public class ProductDetailController {
 
     @Autowired
-    private ProductDetailService productDetailService;
+    ProductDetailService productDetailService;
+    @Autowired
+    ProductRepository productRepository;
+    @PostMapping("/addProductDetail")
+    public ResponseEntity<?> addProductDetail(
+            @RequestParam(value = "idProduct", required = false) Long id,
+            @RequestBody List<@Valid ProductDetailRequest> productDetailRequest,
+            BindingResult result) {
+        try {
+            if (id == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            if (productDetailRequest == null || productDetailRequest.isEmpty()) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Danh sách sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            Optional<Product> optionalProduct = productRepository.findById(id);
+            if (optionalProduct.isEmpty()) {
+                throw new RuntimeException("Sản phẩm với Id là:  " + id + " không tồn tại trong hệ thống");
+            }
+            productDetailService.createProductDetail(optionalProduct.get(),productDetailRequest);
+            return ResponseEntity.ok("Thêm thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
 
     @GetMapping("/listProductDetail")
     public ResponseEntity<?> getProductDetail(@RequestParam("idProducts") List<Long> idProducts) {
         List<ProductDetailResponseByNam> productDetails = productDetailService.findProductDetailRequests(idProducts);
         return ResponseEntity.ok(productDetails);
     }
+
     @GetMapping("/listProductDetailActive")
     public ResponseEntity<?> getProductDetailActive(@RequestParam("idProducts") Long idProducts) {
         List<ProductPromotionResponse> productDetails = productDetailService.findProductDetailActiveRequests(idProducts);
         return ResponseEntity.ok(productDetails);
     }
+
     @PutMapping("/update-status")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
     ) {

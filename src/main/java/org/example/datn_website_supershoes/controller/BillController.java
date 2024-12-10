@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class BillController {
 
     @Autowired
-    private BillService billService;
+    BillService billService;
 
     @GetMapping("/statistics/completed")
     public ResponseEntity<List<BillStatisticalPieResponse>> getCompletedBillStatistics() {
@@ -170,7 +170,7 @@ public class BillController {
     }
 
     // Helper method to parse dates
-    private Date parseDate(String dateStr) {
+    public Date parseDate(String dateStr) {
         if (dateStr == null) return null;
 
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -259,7 +259,7 @@ public class BillController {
     }
 
     // Helper method to update only non-null fields
-    private void updateBillFields(Bill bill, BillRequest billRequest) {
+    public void updateBillFields(Bill bill, BillRequest billRequest) {
         if (billRequest.getNameCustomer() != null) {
             bill.setNameCustomer(billRequest.getNameCustomer());
         }

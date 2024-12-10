@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class CartRestAPI {
 
     @Autowired
-    private CartService cartService;
+    CartService cartService;
     @GetMapping("/find")
     public ResponseEntity<?> findByAccountId() {
         try {

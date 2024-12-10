@@ -16,7 +16,7 @@ import java.util.Optional;
 public class CartService {
 
     @Autowired
-    private CartRepository cartRepository;
+    CartRepository cartRepository;
     @Autowired
     AccountRepository accountRepository;
 
@@ -24,7 +24,7 @@ public class CartService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found!"));
         Optional<CartResponse> cartResponse = cartRepository.CartResponse(accountId);
-        if (cartResponse.isEmpty()){
+        if (cartResponse.isEmpty()) {
             CartRequest cartRequest = new CartRequest();
             cartRequest.setIdAccount(accountId);
             Cart cart = cartRepository.save(convertCartRequestDTO(cartRequest));
@@ -32,19 +32,20 @@ public class CartService {
             newCartResponse.setId(cart.getId());
             newCartResponse.setIdAccount(cart.getAccount().getId());
             return newCartResponse;
-        }else{
+        } else {
             return cartResponse.get();
         }
     }
-    public Cart getCartByAccountId (long accountId){
+
+    public Cart getCartByAccountId(long accountId) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found!"));
         Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
-        if (cartOptional.isEmpty()){
+        if (cartOptional.isEmpty()) {
             CartRequest cartRequest = new CartRequest();
             cartRequest.setIdAccount(accountId);
             return cartRepository.save(convertCartRequestDTO(cartRequest));
-        }else{
+        } else {
             return cartOptional.get();
         }
     }
@@ -56,7 +57,8 @@ public class CartService {
             throw new RuntimeException("Cart với id " + id + " không tồn tại.");
         }
     }
-    public Cart convertCartRequestDTO(CartRequest cartRequest){
+
+    public Cart convertCartRequestDTO(CartRequest cartRequest) {
         Account account = accountRepository.findById(cartRequest.getIdAccount())
                 .orElseThrow(() -> new RuntimeException("Không tìm tài khoản này!"));
         Cart cart = Cart.builder()

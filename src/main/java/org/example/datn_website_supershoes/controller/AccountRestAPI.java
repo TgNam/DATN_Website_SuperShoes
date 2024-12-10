@@ -29,6 +29,7 @@ public class AccountRestAPI {
     AccountService accountService;
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createAccount(@RequestBody @Valid AccountRequest accountRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -153,7 +154,7 @@ public class AccountRestAPI {
     }
 
     @PutMapping("/updateStatus")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
     ) {

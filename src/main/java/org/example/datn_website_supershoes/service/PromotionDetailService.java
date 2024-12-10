@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 public class PromotionDetailService {
 
     @Autowired
-    private PromotionDetailRepository promotionDetailRepository;
+     PromotionDetailRepository promotionDetailRepository;
     @Autowired
-    private ProductDetailRepository productDetailRepository;
+     ProductDetailRepository productDetailRepository;
     @Autowired
-    private ProductDetailService productDetailService;
+     ProductDetailService productDetailService;
     //cập nhật trạng thái từ sắp diễn ra thành diễn ra
     public List<ProductPromotionResponse> findProductPromotionResponseByIdPromotion(Long idPromotion){
         return promotionDetailRepository.findProductByIdPromotion(idPromotion);

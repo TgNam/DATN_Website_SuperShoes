@@ -31,35 +31,7 @@ import java.util.stream.Collectors;
 public class PayBillController {
 
     @Autowired
-    private PayBillService payBillService;
-
-    @PutMapping("/update-statuses-payment")
-    public ResponseEntity<?> updatePaymentManually() {
-        try {
-            // Gọi logic cập nhật trạng thái thanh toán
-            payBillService.updatePaymentBillAuto();
-
-            // Trả về phản hồi thành công
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .status(HttpStatus.OK.toString())
-                            .mess("Statuses updated successfully.")
-                            .build()
-            );
-        } catch (RuntimeException e) {
-            // Ghi log lỗi
-
-
-            // Trả về phản hồi lỗi
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Response.builder()
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
-                            .mess("An error occurred: " + e.getMessage())
-                            .build()
-                    );
-        }
-    }
-
+    PayBillService payBillService;
 
     @GetMapping("/list-pay-bills")
     public Page<PayBillResponse> getAllPayBills(
@@ -169,45 +141,6 @@ public class PayBillController {
         }
     }
 
-
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<PayBill> getPayBillById(@PathVariable Long id) {
-        Optional<PayBill> payBill = payBillService.getPayBillById(id);
-        return payBill.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createPayBill(@RequestBody PayBill payBill) {
-        PayBill createdPayBill = payBillService.createPayBill(payBill);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdPayBill);
-        response.put("EC", 0);
-        response.put("EM", "PayBill added successfully");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updatePayBill(@PathVariable Long id, @RequestBody PayBill payBillDetails) {
-        PayBill updatedPayBill = payBillService.updatePayBill(id, payBillDetails);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedPayBill);
-        response.put("EC", 0);
-        response.put("EM", "PayBill updated successfully");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deletePayBill(@PathVariable Long id) {
-        try {
-            payBillService.deletePayBill(id);
-            return ResponseEntity.status(HttpStatus.OK).body("PayBill deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting PayBill");
-        }
-    }
-
     @GetMapping("/listPayBill")
     public ResponseEntity<?> findPayBillOrderByCodeBill(@RequestParam(value = "codeBill", required = false) String codeBill) {
         try {
@@ -240,7 +173,7 @@ public class PayBillController {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            PayBill payBill = payBillService.createPayBill(payBillRequest,1, Status.COMPLETED.toString());
+            PayBill payBill = payBillService.createPayBill(payBillRequest, 1, Status.COMPLETED.toString());
             return ResponseEntity.ok(payBill);
         } catch (RuntimeException e) {
             return ResponseEntity

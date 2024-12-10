@@ -26,9 +26,9 @@ import java.util.Optional;
 public class CartDetailService {
 
     @Autowired
-    private CartDetailRepository cartDetailRepository;
+    CartDetailRepository cartDetailRepository;
     @Autowired
-    private CartRepository cartRepository;
+    CartRepository cartRepository;
 
     @Autowired
     CartService cartService;
@@ -40,14 +40,14 @@ public class CartDetailService {
     AccountRepository accountRepository;
 
     @Autowired
-    private ProductDetailRepository productDetailRepository;
+    ProductDetailRepository productDetailRepository;
     @Autowired
-    private NotificationController notificationController;
+    NotificationController notificationController;
 
     @Transactional
-    public void findCartDetailsOlderThanOneDay(){
+    public void findCartDetailsOlderThanOneDay() {
         List<CartDetail> cartDetails = cartDetailRepository.findCartDetailOlderThanOneDay();
-        if(!cartDetails.isEmpty()){
+        if (!cartDetails.isEmpty()) {
             cartDetailRepository.deleteAll(cartDetails);
             notificationController.sendNotification();
         }
@@ -56,8 +56,8 @@ public class CartDetailService {
     public Cart addToCart(CartDetailRequest cartDetailRequest, long accountId) {
         Cart cart = cartService.getCartByAccountId(accountId);
 
-        Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(cartDetailRequest.getIdProductDetail(),Status.ACTIVE.toString());
-        if(productDetailOptional.isEmpty()){
+        Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(cartDetailRequest.getIdProductDetail(), Status.ACTIVE.toString());
+        if (productDetailOptional.isEmpty()) {
             throw new RuntimeException("Sản phẩm không còn hàng!");
         }
         ProductDetail productDetail = productDetailOptional.get();
@@ -123,22 +123,22 @@ public class CartDetailService {
         return cartDetailProductDetailResponse;
     }
 
-    public  CartDetail plusCartDetail (Long idCartDetail, Long idProductDetail){
+    public CartDetail plusCartDetail(Long idCartDetail, Long idProductDetail) {
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
-        if(optionalCartDetail.isEmpty()){
+        if (optionalCartDetail.isEmpty()) {
             throw new RuntimeException("Giỏ hàng không tồn tại!");
         }
-        Optional<ProductDetail> optionalProductDetail = productDetailRepository.findByIdAndAndStatus(idProductDetail,Status.ACTIVE.toString());
-        if(optionalProductDetail.isEmpty()){
+        Optional<ProductDetail> optionalProductDetail = productDetailRepository.findByIdAndAndStatus(idProductDetail, Status.ACTIVE.toString());
+        if (optionalProductDetail.isEmpty()) {
             throw new RuntimeException("Sản phẩm không tồn tại!");
         }
-        if(optionalProductDetail.get().getQuantity() <= 0){
+        if (optionalProductDetail.get().getQuantity() <= 0) {
             throw new RuntimeException("Sản phẩm đã hết hàng!");
         }
 
-        int newQuantity = optionalCartDetail.get().getQuantity()+1;
+        int newQuantity = optionalCartDetail.get().getQuantity() + 1;
 
-        if(newQuantity > optionalProductDetail.get().getQuantity()){
+        if (newQuantity > optionalProductDetail.get().getQuantity()) {
             throw new RuntimeException("Đã vượt quá số lượng hàng trong kho!");
         }
         optionalCartDetail.get().setQuantity(newQuantity);
@@ -146,13 +146,14 @@ public class CartDetailService {
         notificationController.sendNotification();
         return detail;
     }
-    public  CartDetail subtractCartDetail (Long idCartDetail){
+
+    public CartDetail subtractCartDetail(Long idCartDetail) {
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
-        if(optionalCartDetail.isEmpty()){
+        if (optionalCartDetail.isEmpty()) {
             throw new RuntimeException("Giỏ hàng không tồn tại!");
         }
         int newQuantity = optionalCartDetail.get().getQuantity() - 1;
-        if(newQuantity<=0){
+        if (newQuantity <= 0) {
             throw new RuntimeException("Cần có tổi thiểu một sản phẩm!");
         }
         optionalCartDetail.get().setQuantity(newQuantity);
@@ -160,9 +161,10 @@ public class CartDetailService {
         notificationController.sendNotification();
         return detail;
     }
-    public void deleteCartDetail(Long idCartDetail){
+
+    public void deleteCartDetail(Long idCartDetail) {
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
-        if(optionalCartDetail.isEmpty()){
+        if (optionalCartDetail.isEmpty()) {
             throw new RuntimeException("Giỏ hàng không tồn tại!");
         }
         cartDetailRepository.delete(optionalCartDetail.get());
