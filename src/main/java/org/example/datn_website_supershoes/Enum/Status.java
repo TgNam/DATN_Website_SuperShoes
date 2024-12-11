@@ -17,6 +17,8 @@ public enum Status {
     ENDED_EARLY,
     COMPLETED,
     SHIPPED,
+    FAILED,
+    CANCELLED,
     CONFIRMED
 
 }

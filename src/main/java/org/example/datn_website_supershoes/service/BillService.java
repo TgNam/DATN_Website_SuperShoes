@@ -212,10 +212,10 @@ public class BillService {
         List<BillDetail> billDetailList = billDetailRepository.findByIdBill(idBill);
         for (BillDetail billDetail : billDetailList){
             //Tìm kiếm sản phẩm chi tiết theo id và trạng thái
-            Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(billDetail.getProductDetail().getId(), Status.ACTIVE.toString());
+            Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(billDetail.getProductDetail().getId());
             // Kiểm tra sản phẩm có tồn tại không
             if (!productDetailOptional.isPresent()) {
-                throw new RuntimeException("Id " + billDetail.getProductDetail().getId() + " của sản phẩm không tồn tại trong hệ thống.");
+                throw new RuntimeException("Sản phẩm với Id  " + billDetail.getProductDetail().getId() + " không tồn tại trong hệ thống.");
             }
             ProductDetail productDetail = productDetailOptional.get();
             //Số lượng sản phẩm của sản phẩm chi tiết
@@ -223,6 +223,9 @@ public class BillService {
 
             if(statusNew.equals("CONFIRMED")){
                 if(statusNow.equals("PENDING")){
+                    if (!productDetailOptional.get().getStatus().equals(Status.ACTIVE.toString())) {
+                        throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " đã dừng bán.");
+                    }
                     // Kiểm tra số lượng sản phẩm số lượng mua so với sản phẩm còn lại trong kho
                     if (billDetail.getQuantity() > quantityProductDetail || quantityProductDetail <= 0) {
                         throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " không đủ số lượng.");

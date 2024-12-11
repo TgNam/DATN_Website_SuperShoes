@@ -21,7 +21,7 @@ public class DiscountScheduler {
     public void checkAndUpdateExpiredDiscounts() {
         promotionService.updateUpcomingDiscounts();
         promotionService.updateFinishedDiscounts();
-        billByEmployeeService.findBillsOlderThanOneDay();
+        billByEmployeeService.findBillsOlder();
         cartDetailService.findCartDetailsOlderThanOneDay();
     }
 }

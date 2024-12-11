@@ -21,10 +21,10 @@ public interface BillByEmployeeRepository extends JpaRepository<Bill, Long> {
     @Query(value = """
        SELECT * 
        FROM bill 
-       WHERE status = :status 
-         AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
+       WHERE status IN (:status) 
+         AND created_at < DATE_SUB(NOW(), INTERVAL :day DAY)
        """, nativeQuery = true)
-    List<Bill> findBillsOlderThanOneDay(@Param("status") String status);
+    List<Bill> findBillsOlder(@Param("day") int day, @Param("status") List<String> status);
 
 
 
