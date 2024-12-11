@@ -339,9 +339,11 @@ public class BillByEmployeeService {
     ) {
         Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
         if (billOptional.isEmpty()) {
-            throw new RuntimeException("Hóa đơn " + codeBill + " không tồn tại");
+            throw new RuntimeException("Hóa đơn " + codeBill + " không tồn tại!");
         }
-
+        if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
+            throw new RuntimeException("Hóa đơn " + codeBill + " không còn ở trạng thái thanh toán!");
+        }
         Bill bill = billOptional.get(); // Lấy giá trị bill để sử dụng sau này
 
         boolean checkVoucher = false;

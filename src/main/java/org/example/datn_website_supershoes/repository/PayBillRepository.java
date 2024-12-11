@@ -45,4 +45,12 @@ public interface PayBillRepository extends JpaRepository<PayBill, Long> {
     List<PayBill> findByBillCodeBill(@Param("codeBill") String codeBill);
 
     Optional<PayBill> findByBill(Bill bill);
+
+    @Query("""
+            SELECT b 
+            FROM PayBill p 
+            INNER JOIN p.bill b
+            WHERE p.id =:idPayBill
+            """)
+    Optional<Bill> findByIdPayBill(@Param("idPayBill") Long idPayBill);
 }
