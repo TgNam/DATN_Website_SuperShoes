@@ -71,7 +71,9 @@ public class BillDetailService {
         if (!billOptional.isPresent()) {
             throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
         }
-
+        if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
+            throw new RuntimeException("Hóa đơn " + codeBill + " không còn ở trạng thái thanh toán!");
+        }
         Bill bill = billOptional.get();
 
         // Thực hiện thêm hóa đơn chi tiết
@@ -500,7 +502,9 @@ public class BillDetailService {
         if (!billOptional.isPresent()) {
             throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
         }
-
+        if (!billOptional.get().getStatus().equals(Status.PENDING.toString())) {
+            throw new RuntimeException("Hóa đơn " + codeBill + " không còn ở trạng thái chờ xác nhận!");
+        }
         Bill bill = billOptional.get();
 
         Optional<BillDetail> billDetailOptional = billDetailRepository.findById(idBillDetail);
@@ -567,7 +571,9 @@ public class BillDetailService {
         if (!billOptional.isPresent()) {
             throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
         }
-
+        if (!billOptional.get().getStatus().equals(Status.PENDING.toString())) {
+            throw new RuntimeException("Hóa đơn " + codeBill + " không còn ở trạng thái chờ xác nhận!");
+        }
         Bill bill = billOptional.get();
 
         Optional<BillDetail> billDetailOptional = billDetailRepository.findById(idBillDetail);
@@ -633,7 +639,9 @@ public class BillDetailService {
         if (!billOptional.isPresent()) {
             throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
         }
-
+        if (!billOptional.get().getStatus().equals(Status.PENDING.toString())) {
+            throw new RuntimeException("Hóa đơn " + codeBill + " không còn ở trạng thái chờ xác nhận!");
+        }
         Bill bill = billOptional.get();
 
         List<BillDetail> billDetails = billDetailRepository.findByIdBill(bill.getId());

@@ -5,6 +5,7 @@ import org.example.datn_website_supershoes.dto.response.BillResponse;
 import org.example.datn_website_supershoes.dto.response.BillStatisticalPieResponse;
 import org.example.datn_website_supershoes.dto.response.BillSummaryResponse;
 import org.example.datn_website_supershoes.model.Bill;
+import org.example.datn_website_supershoes.model.BillDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +22,7 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
 
 
     Page<Bill> findAll(Specification<Bill> spec, Pageable pageable);
+    Optional<Bill> findBillByBillDetails(BillDetail billDetail);
 
     //dùng cho bán hàng
     @Query("SELECT b FROM Bill b WHERE b.codeBill = :codeBill")
