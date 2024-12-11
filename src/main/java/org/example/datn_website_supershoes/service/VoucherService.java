@@ -116,6 +116,7 @@ public class VoucherService {
                         accountVoucher.setCreatedBy(creator.getName());
                         accountVoucher.setStatus("ACTIVE");
                         accountVoucher.setCreatedAt(new Date());
+
                         return accountVoucher;
                     })
                     .collect(Collectors.toList());
@@ -239,7 +240,7 @@ public class VoucherService {
     }
 
     private Voucher convertVoucherRequestDTO(VoucherRequest voucherRequest) {
-        return Voucher.builder()
+        Voucher voucher = Voucher.builder()
                 .codeVoucher(voucherRequest.getCodeVoucher())
                 .name(voucherRequest.getName())
                 .note(voucherRequest.getNote())
@@ -249,9 +250,16 @@ public class VoucherService {
                 .type(voucherRequest.getType())
                 .minBillValue(voucherRequest.getMinBillValue())
                 .isPrivate(voucherRequest.getIsPrivate())
-                .startAt(voucherRequest.getStartAt())
-                .endAt(voucherRequest.getEndAt())
                 .build();
+
+        if (voucherRequest.getStartAt() != null) {
+            voucher.setStartAt(convertToUTC(voucherRequest.getStartAt()));
+        }
+        if (voucherRequest.getEndAt() != null) {
+            voucher.setEndAt(convertToUTC(voucherRequest.getEndAt()));
+        }
+
+        return voucher;
     }
 
     public Page<VoucherResponse> getVouchers(Specification<Voucher> spec, Pageable pageable) {
