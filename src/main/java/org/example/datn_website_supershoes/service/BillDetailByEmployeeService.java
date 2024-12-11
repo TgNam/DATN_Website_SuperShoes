@@ -2,9 +2,11 @@ package org.example.datn_website_supershoes.service;
 
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.response.BillDetailOrderResponse;
+import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.repository.BillDetailByEmployeeRepository;
+import org.example.datn_website_supershoes.repository.BillRepository;
 import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ public class BillDetailByEmployeeService {
     @Autowired
     ProductDetailRepository productDetailRepository;
     @Autowired
+    BillRepository billRepository;
+    @Autowired
     NotificationController notificationController;
 
     public List<BillDetailOrderResponse> getBillDetailsByCodeBill(String codeBill) {
@@ -32,7 +36,13 @@ public class BillDetailByEmployeeService {
         if (billDetailOptional.isEmpty()) {
             throw new RuntimeException("Hóa đơn không tồn tại!");
         }
-
+        Optional<Bill> billOptional = billRepository.findBillByBillDetails(billDetailOptional.get());
+        if (billOptional.isEmpty()) {
+            throw new RuntimeException("Hóa đơn không tồn tại!");
+        }
+        if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
+            throw new RuntimeException("Hóa đơn không còn ở trạng thái thanh toán!");
+        }
         Optional<ProductDetail> optionalProductDetail = productDetailRepository.findByIdAndAndStatusAndPrice(idProductDetail, Status.ACTIVE.toString(), billDetailOptional.get().getPriceDiscount());
 
         if (optionalProductDetail.isEmpty()) {
@@ -59,7 +69,13 @@ public class BillDetailByEmployeeService {
         if (billDetailOptional.isEmpty()) {
             throw new RuntimeException("Hóa đơn không tồn tại!");
         }
-
+        Optional<Bill> billOptional = billRepository.findBillByBillDetails(billDetailOptional.get());
+        if (billOptional.isEmpty()) {
+            throw new RuntimeException("Hóa đơn không tồn tại!");
+        }
+        if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
+            throw new RuntimeException("Hóa đơn không còn ở trạng thái thanh toán!");
+        }
         Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(idProductDetail);
 
         if (optionalProductDetail.isEmpty()) {
@@ -86,7 +102,13 @@ public class BillDetailByEmployeeService {
         if (billDetailOptional.isEmpty()) {
             throw new RuntimeException("Hóa đơn không tồn tại!");
         }
-
+        Optional<Bill> billOptional = billRepository.findBillByBillDetails(billDetailOptional.get());
+        if (billOptional.isEmpty()) {
+            throw new RuntimeException("Hóa đơn không tồn tại!");
+        }
+        if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
+            throw new RuntimeException("Hóa đơn không còn ở trạng thái thanh toán!");
+        }
         Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(idProductDetail);
 
         if (optionalProductDetail.isEmpty()) {

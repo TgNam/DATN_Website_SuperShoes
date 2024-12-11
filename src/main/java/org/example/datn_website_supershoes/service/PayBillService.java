@@ -1,6 +1,7 @@
 package org.example.datn_website_supershoes.service;
 
 import jakarta.transaction.Transactional;
+import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PayBillRequest;
 import org.example.datn_website_supershoes.dto.response.PayBillOrderResponse;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
@@ -94,6 +95,7 @@ public class PayBillService {
         if (billOptional.isEmpty()) {
             throw new RuntimeException("Hóa đơn không tồn tại");
         }
+
         Optional<PaymentMethod> optionalPaymentMethod = paymentMethodRepository.findByType(payBillRequest.getType());
         if (optionalPaymentMethod.isEmpty()) {
             throw new RuntimeException("Phương thức thanh toán không tồn tại");
@@ -114,6 +116,13 @@ public class PayBillService {
         Optional<PayBill> optionalPayBill = payBillRepository.findById(id);
         if (optionalPayBill.isEmpty()) {
             throw new RuntimeException("Phương thức thanh toán không tồn tại");
+        }
+        Optional<Bill> billOptional = payBillRepository.findByIdPayBill(id);
+        if (billOptional.isEmpty()) {
+            throw new RuntimeException("Hóa đơn không tồn tại!");
+        }
+        if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
+            throw new RuntimeException("Hóa đơn không còn ở trạng thái thanh toán!");
         }
         payBillRepository.delete(optionalPayBill.get());
     }

@@ -7,7 +7,9 @@ import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.PayBillRequest;
 import org.example.datn_website_supershoes.dto.response.PayBillResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
+import org.example.datn_website_supershoes.model.Bill;
 import org.example.datn_website_supershoes.model.PayBill;
+import org.example.datn_website_supershoes.repository.BillRepository;
 import org.example.datn_website_supershoes.service.PayBillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,7 +34,8 @@ public class PayBillController {
 
     @Autowired
     PayBillService payBillService;
-
+    @Autowired
+    BillRepository billRepository;
     @GetMapping("/list-pay-bills")
     public Page<PayBillResponse> getAllPayBills(
             @RequestParam(value = "status", required = false) String status,
@@ -172,6 +175,13 @@ public class PayBillController {
                         .map(error -> error.getDefaultMessage())
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
+            }
+            Optional<Bill> billOptional = billRepository.findByCodeBill(payBillRequest.getCodeBill());
+            if (billOptional.isEmpty()) {
+                throw new RuntimeException("Hóa đơn không tồn tại");
+            }
+            if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
+                throw new RuntimeException("Hóa đơn " + payBillRequest.getCodeBill() + " không còn ở trạng thái thanh toán!");
             }
             PayBill payBill = payBillService.createPayBill(payBillRequest, 1, Status.COMPLETED.toString());
             return ResponseEntity.ok(payBill);
