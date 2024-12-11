@@ -628,7 +628,7 @@ public class BillByEmployeeService {
                 //Giá sản phẩm sau khi sale
                 BigDecimal promotionPrice = productPromotionResponse.get().getProductDetailPrice()
                         .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
-                        .setScale(0, RoundingMode.DOWN); // Làm tròn đến 2 chữ số thập phân
+                        .setScale(0, RoundingMode.DOWN);
                 //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
                 if (request.getQuantityCartDetail() <= quantityProductPromotion) {
                     // Tạo hóa đơn chi tiết mới
