@@ -9,6 +9,7 @@ import org.example.datn_website_supershoes.service.SizeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,23 +30,36 @@ public class SizeRestAPI {
     SizeService sizeService;
 
     @GetMapping("/list-size")
-    public List<SizeResponse> findAllSize() {
-        return sizeService.findAllSize();
+    public ResponseEntity<?> findAllSize() {
+        try{
+            return ResponseEntity.ok(sizeService.findAllSize());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/listSizeACTIVE")
-    public List<SizeResponse> findByStatusActive() {
-        return sizeService.findSizeByStatusACTIVE();
+    public ResponseEntity<?> findByStatusActive() {
+        try{
+            return ResponseEntity.ok(sizeService.findSizeByStatusACTIVE());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/list-size-search")
-    public List<SizeResponse> findByStatusSearch(@RequestParam("search") String search) {
-        return sizeService.findAllSize().stream()
-                .filter(sizeResponse -> sizeResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> findByStatusSearch(@RequestParam("search") String search) {
+        try{
+            return ResponseEntity.ok(sizeService.findAllSize().stream()
+                    .filter(sizeResponse -> sizeResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                    .collect(Collectors.toList()));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update-status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
@@ -73,6 +87,7 @@ public class SizeRestAPI {
     }
 
     @PostMapping("/create-size")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createSize(@RequestBody @Valid SizeRequest sizeRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -92,6 +107,4 @@ public class SizeRestAPI {
                     );
         }
     }
-
-
 }

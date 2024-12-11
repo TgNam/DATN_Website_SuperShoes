@@ -8,6 +8,8 @@ import org.example.datn_website_supershoes.model.Cart;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,13 +22,18 @@ public class CartService {
     @Autowired
     AccountRepository accountRepository;
 
-    public CartResponse getCartResponseByAccountId(Long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found!"));
-        Optional<CartResponse> cartResponse = cartRepository.CartResponse(accountId);
+    public Account getUseLogin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Account user = accountRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Lỗi liên quan đến đăng nhập vui lòng thử lại"));
+        return user;
+    }
+    public CartResponse getCartResponseByAccountId() {
+        Long idEmployees = getUseLogin().getId();
+        Optional<CartResponse> cartResponse = cartRepository.CartResponse(idEmployees);
         if (cartResponse.isEmpty()) {
             CartRequest cartRequest = new CartRequest();
-            cartRequest.setIdAccount(accountId);
+            cartRequest.setIdAccount(idEmployees);
             Cart cart = cartRepository.save(convertCartRequestDTO(cartRequest));
             CartResponse newCartResponse = new CartResponse();
             newCartResponse.setId(cart.getId());

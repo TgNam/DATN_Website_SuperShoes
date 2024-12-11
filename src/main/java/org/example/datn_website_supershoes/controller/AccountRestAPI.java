@@ -29,7 +29,6 @@ public class AccountRestAPI {
     AccountService accountService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createAccount(@RequestBody @Valid AccountRequest accountRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -52,6 +51,7 @@ public class AccountRestAPI {
     }
 
     @PostMapping("/createEmployee")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createEmployee(@RequestBody @Valid EmployeeCreationRequest employeeCreationRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -75,6 +75,7 @@ public class AccountRestAPI {
     }
 
     @PutMapping("/updateEmployee")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateEmployee(
             @RequestParam(value = "idAccount", required = false) Long idAccount,
             @RequestParam(value = "idAddress", required = false) Long idAddress,
@@ -119,6 +120,7 @@ public class AccountRestAPI {
     }
 
     @PutMapping("/updateAccount")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> updateAccount(
             @RequestParam(value = "idAccount", required = false) Long idAccount,
             @RequestBody @Valid AccountUpdateRequest accountRequest,
@@ -154,6 +156,7 @@ public class AccountRestAPI {
     }
 
     @PutMapping("/updateStatus")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
@@ -181,18 +184,24 @@ public class AccountRestAPI {
     }
 
     @GetMapping("/list-accounts-customer")
-    public List<AccountResponse> getAllAccount() {
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    public ResponseEntity<?> getAllAccount() {
+        try{
         List<AccountResponse> accountResponses = accountService.getAllAccountCustomerActive();
-        return accountResponses;
+        return ResponseEntity.ok(accountResponses);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/list-accounts-customer-search")
-    public List<AccountResponse> getAllAccountCustomerSearch(
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    public ResponseEntity<?> getAllAccountCustomerSearch(
             @RequestParam("search") String search,
             @RequestParam("status") String status) {
-
+        try{
         String searchLower = search.trim().toLowerCase();
-        return accountService.getAllAccountCustomerActive().stream()
+        List<AccountResponse> accountResponses = accountService.getAllAccountCustomerActive().stream()
                 .filter(account -> {
                     String accountName = account.getName().toLowerCase();
                     String accountPhone = account.getPhoneNumber().toLowerCase();
@@ -200,9 +209,14 @@ public class AccountRestAPI {
                 })
                 .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(accountResponses);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/findAccounts")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> findAccounts(@RequestParam(value = "idAccount", required = false) Long idAccount) {
         try {
             if (idAccount == null) {
@@ -227,17 +241,23 @@ public class AccountRestAPI {
 
     @GetMapping("/list-accounts-employee")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<AccountResponse> getAllAccountEmployee() {
-        return accountService.getAllAccountEmployeeActive();
+    public ResponseEntity<?> getAllAccountEmployee() {
+        try{
+            List<AccountResponse> accountResponses = accountService.getAllAccountEmployeeActive();
+            return ResponseEntity.ok(accountResponses);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/list-accounts-employee-search")
-    public List<AccountResponse> getAllAccountEmployeeSearch(
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllAccountEmployeeSearch(
             @RequestParam("search") String search,
             @RequestParam("status") String status) {
-
+        try{
         String searchLower = search.trim().toLowerCase();
-        return accountService.getAllAccountEmployeeActive().stream()
+        List<AccountResponse> accountResponses = accountService.getAllAccountEmployeeActive().stream()
                 .filter(account -> {
                     String accountName = account.getName().toLowerCase();
                     String accountPhone = account.getPhoneNumber().toLowerCase();
@@ -245,9 +265,14 @@ public class AccountRestAPI {
                 })
                 .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
+            return ResponseEntity.ok(accountResponses);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/get-account-login")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public Account getAccountLogin(){
         return accountService.getUseLogin();
     }

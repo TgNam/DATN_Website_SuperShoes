@@ -15,6 +15,7 @@ import org.example.datn_website_supershoes.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -123,6 +124,7 @@ public class PromotionRestAPI {
     }
 
     @PostMapping("/createPromotion")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createPromotion(
             @RequestBody @Valid PromotionCreationRequest promotionCreationRequest,
             BindingResult result
@@ -148,6 +150,7 @@ public class PromotionRestAPI {
     }
 
     @PutMapping("/updatePromotion")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updatePromotion(
             @RequestBody @Valid PromotionUpdatesRequest promotionUpdatesRequest,
             BindingResult result
@@ -173,6 +176,7 @@ public class PromotionRestAPI {
     }
 
     @PutMapping("/updateStatus")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean

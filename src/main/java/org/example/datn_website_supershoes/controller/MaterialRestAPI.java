@@ -9,6 +9,7 @@ import org.example.datn_website_supershoes.service.MaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,23 +23,36 @@ public class MaterialRestAPI {
     MaterialService materialService;
 
     @GetMapping("/list-material")
-    public List<MaterialResponse> findAllMaterial() {
-        return materialService.findAllMaterial();
+    public ResponseEntity<?> findAllMaterial() {
+        try{
+            return ResponseEntity.ok(materialService.findAllMaterial());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/list-materialActive")
-    public List<MaterialResponse> findByStatusActive() {
-        return materialService.findByStatus();
+    public ResponseEntity<?> findByStatusActive() {
+        try{
+            return ResponseEntity.ok(materialService.findByStatus());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/list-material-search")
-    public List<MaterialResponse> findByStatusSearch(@RequestParam("search") String search) {
-        return materialService.findByStatus().stream()
-                .filter(MaterialResponse -> MaterialResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> findByStatusSearch(@RequestParam("search") String search) {
+        try{
+            return ResponseEntity.ok(materialService.findByStatus().stream()
+                    .filter(MaterialResponse -> MaterialResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                    .collect(Collectors.toList()));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update-status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
@@ -66,6 +80,7 @@ public class MaterialRestAPI {
     }
 
     @PostMapping("/create-material")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createMaterial(@RequestBody @Valid MaterialRequest materialRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
