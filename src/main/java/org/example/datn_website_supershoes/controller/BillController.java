@@ -115,6 +115,7 @@ public class BillController {
     }
 
 
+    // Updated method to handle filtering by deliveryDate and receiveDate
     @GetMapping("/list-bills")
     public Page<BillResponse> getAllBills(
             @RequestParam(value = "status", required = false) String status,
@@ -130,62 +131,72 @@ public class BillController {
         Date deliveryDate = parseDate(deliveryDateStr);
         Date receiveDate = parseDate(receiveDateStr);
 
+        if (deliveryDate != null && receiveDate != null && deliveryDate.after(receiveDate)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "deliveryDate must be before or equal to receiveDate"
+            );
+        }
+
         Specification<Bill> spec = (root, query, criteriaBuilder) -> {
             Predicate p = criteriaBuilder.conjunction();
 
-            // Filtering by status if provided
             if (status != null && !status.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("status"), status));
             } else {
                 p = criteriaBuilder.and(p, criteriaBuilder.notEqual(root.get("status"), "WAITING_FOR_PAYMENT"));
             }
-            // Partial matching for codeBill (search by each letter)
+
             if (codeBill != null && !codeBill.isEmpty()) {
                 p = criteriaBuilder.and(p, criteriaBuilder.like(root.get("codeBill"), "%" + codeBill + "%"));
             }
 
-            // Filtering by type if provided
             if (type != null) {
                 p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("type"), type));
             }
 
-            // Filtering by deliveryDate using >= comparison
             if (deliveryDate != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.greaterThanOrEqualTo(root.get("deliveryDate").as(Date.class), deliveryDate));
+                p = criteriaBuilder.and(p, criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt").as(Date.class), deliveryDate));
             }
 
-            // Filtering by receiveDate using <= comparison
             if (receiveDate != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.lessThanOrEqualTo(root.get("receiveDate").as(Date.class), receiveDate));
+                p = criteriaBuilder.and(p, criteriaBuilder.lessThanOrEqualTo(root.get("createdAt").as(Date.class), receiveDate));
             }
 
             return p;
         };
 
-        // Setting the sorting direction
         Sort.Direction direction = Sort.Direction.fromString(sortDirection);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
 
         return billService.getBills(spec, pageable);
     }
 
-    // Helper method to parse dates
+    // Enhanced parseDate method
     public Date parseDate(String dateStr) {
-        if (dateStr == null) return null;
-
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        try {
-            if (dateStr.length() == 10) {
-                return dateFormat.parse(dateStr);
-            } else {
-                return dateTimeFormat.parse(dateStr);
-            }
-        } catch (ParseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format: " + dateStr + ". Expected formats: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss", e);
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
         }
+
+        List<String> dateFormats = Arrays.asList(
+                "yyyy-MM-dd",
+                "yyyy-MM-dd'T'HH:mm:ss",
+                "dd-MM-yyyy"
+        );
+
+        for (String format : dateFormats) {
+            try {
+                return new SimpleDateFormat(format).parse(dateStr.trim());
+            } catch (ParseException ignored) {
+            }
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Invalid date format: " + dateStr + ". Supported formats: yyyy-MM-dd, yyyy-MM-dd'T'HH:mm:ss, dd-MM-yyyy"
+        );
     }
+
 
 
     @PostMapping("/add")

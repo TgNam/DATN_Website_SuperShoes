@@ -157,8 +157,8 @@ public class BillService {
         response.setAddress(bill.getAddress());
         response.setNote(bill.getNote());
         response.setType(bill.getType());
-        response.setDeliveryDate(bill.getDeliveryDate());
-        response.setReceiveDate(bill.getReceiveDate());
+        response.setDeliveryDate(bill.getCreatedAt());
+        response.setReceiveDate(bill.getCreatedAt());
         response.setTotalMerchandise(bill.getTotalMerchandise());
         response.setPriceDiscount(bill.getPriceDiscount());
         response.setTotalAmount(bill.getTotalAmount());
