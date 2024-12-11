@@ -18,8 +18,7 @@ public class CartRestAPI {
     @GetMapping("/find")
     public ResponseEntity<?> findByAccountId() {
         try {
-            Long id = 6L;
-            CartResponse cart = cartService.getCartResponseByAccountId(id);
+            CartResponse cart = cartService.getCartResponseByAccountId();
             return ResponseEntity.ok(cart);
         } catch (RuntimeException e) {
             return ResponseEntity

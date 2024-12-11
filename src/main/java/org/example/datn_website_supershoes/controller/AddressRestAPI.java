@@ -8,6 +8,7 @@ import org.example.datn_website_supershoes.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class AddressRestAPI {
     AddressService addressService;
 
     @PostMapping("/createAddress")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> addAddForAccount(@RequestBody @Valid AddressRequest addressRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -43,6 +45,7 @@ public class AddressRestAPI {
     }
 
     @GetMapping("/getAddressByidAccount")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> getAddresses(@RequestParam(value ="idAccount", required = false) Long idAccount) {
         try {
             if (idAccount == null) {
@@ -65,6 +68,7 @@ public class AddressRestAPI {
         }
     }
     @GetMapping("/findAddress")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> findAddress(@RequestParam(value ="idAddress", required = false) Long idAddress) {
         try {
             if (idAddress == null) {
@@ -87,6 +91,7 @@ public class AddressRestAPI {
         }
     }
     @GetMapping("/findAccountAddress")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> findAccountAddress(@RequestParam(value ="idAccount", required = false) Long idAccount) {
         try {
             if (idAccount == null) {
@@ -109,6 +114,7 @@ public class AddressRestAPI {
         }
     }
     @GetMapping("/getAccountAddress")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> getAccountAddresses() {
         try {
             return ResponseEntity.ok().body(addressService.listAccountAddressResponseByType());
@@ -123,6 +129,7 @@ public class AddressRestAPI {
         }
     }
     @GetMapping("/getAccountAddressSearch")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public List<AddressResponse> getAccountAddressesSearch(
             @RequestParam("search") String search) {
 
@@ -136,6 +143,7 @@ public class AddressRestAPI {
                 .collect(Collectors.toList());
     }
     @PutMapping("/updateAddress")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> updateAddress(
             @RequestParam(value = "addressId", required = false) Long addressId,
             @RequestBody @Valid AddressRequest addressRequest,
@@ -170,6 +178,7 @@ public class AddressRestAPI {
         }
     }
     @PutMapping("/updateAddressType")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> updateAddressType(@RequestParam(value = "addressId", required = false) Long addressId){
         try {
             // Kiểm tra nếu addressId bị trống (null)
@@ -196,6 +205,7 @@ public class AddressRestAPI {
 
     }
     @DeleteMapping("/delete")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> deleteAddress(@RequestParam(value = "addressId", required = false) Long addressId) {
         try {
             // Kiểm tra nếu addressId bị trống (null)
@@ -209,7 +219,6 @@ public class AddressRestAPI {
             }
 
             // Xóa địa chỉ nếu addressId hợp lệ
-
             return ResponseEntity.ok()
                     .body(addressService.deleteAddress(addressId));
         } catch (RuntimeException e){

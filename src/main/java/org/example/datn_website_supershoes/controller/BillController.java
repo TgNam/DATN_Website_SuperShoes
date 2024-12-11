@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,12 +36,18 @@ public class BillController {
     BillService billService;
 
     @GetMapping("/statistics/completed")
-    public ResponseEntity<List<BillStatisticalPieResponse>> getCompletedBillStatistics() {
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
+    public ResponseEntity<?> getCompletedBillStatistics() {
+        try{
         List<BillStatisticalPieResponse> statistics = billService.getCompletedBillStatistics();
         return ResponseEntity.ok(statistics);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update-status-note/{codeBill}")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> updateBillStatusAndNote(
             @PathVariable String codeBill,
             @RequestParam String status,
@@ -57,6 +64,7 @@ public class BillController {
     }
 
     @PutMapping("/update-status/{codeBill}")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> updateBillStatus(@PathVariable String codeBill) {
         try {
             billService.updateBillStatus(codeBill);
@@ -67,14 +75,21 @@ public class BillController {
     }
 
     @GetMapping("/detail/{codeBill}")
-    public ResponseEntity<BillResponse> getBillByCodeBill(@PathVariable String codeBill) {
-        Optional<BillResponse> billResponse = billService.getBillByCodeBill(codeBill);
-        return billResponse.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
+    public ResponseEntity<?> getBillByCodeBill(@PathVariable String codeBill) {
+        try {
+            Optional<BillResponse> billResponse = billService.getBillByCodeBill(codeBill);
+            return ResponseEntity.ok(billResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
+
     // New method for fetching Bill summary by codeBill
+    // tu sua
     @GetMapping("/list-bill-summaries")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public Page<BillSummaryResponse> getBillSummaries(
             @RequestParam(value = "codeBill", required = false) String codeBill,
             @RequestParam(value = "nameCustomer", required = false) String nameCustomer,
@@ -116,6 +131,7 @@ public class BillController {
 
 
     @GetMapping("/list-bills")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public Page<BillResponse> getAllBills(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "codeBill", required = false) String codeBill,
@@ -187,29 +203,8 @@ public class BillController {
         }
     }
 
-
-    @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> createBill(@RequestBody Bill bill) {
-        Bill createdBill = billService.createBill(bill);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", createdBill);
-        response.put("EC", 0);
-        response.put("EM", "Bill added successfully");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateBill(@PathVariable Long id, @RequestBody Bill billDetails) {
-        Bill updatedBill = billService.updateBill(id, billDetails);
-        Map<String, Object> response = new HashMap<>();
-        response.put("DT", updatedBill);
-        response.put("EC", 0);
-        response.put("EM", "Bill updated successfully");
-
-        return ResponseEntity.ok(response);
-    }
     @PutMapping("/updateCodeBill/{codeBill}")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> updateBill2(
             @PathVariable String codeBill,
             @RequestBody @Valid BillRequest billRequest,
@@ -297,6 +292,7 @@ public class BillController {
 
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<String> deleteBill(@PathVariable Long id) {
         try {
             billService.deleteBill(id);

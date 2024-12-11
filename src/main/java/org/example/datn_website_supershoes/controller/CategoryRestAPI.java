@@ -10,6 +10,7 @@ import org.example.datn_website_supershoes.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,26 +22,44 @@ import java.util.stream.Collectors;
 public class CategoryRestAPI {
     @Autowired
     CategoryService categoryService;
+
     @GetMapping("/list-category")
-    public List<CategoryResponse> findAllCategory(){
-        return categoryService.findAllCategory();
+    public ResponseEntity<?> findAllCategory() {
+        try {
+            List<CategoryResponse> categoryResponses = categoryService.findAllCategory();
+            return ResponseEntity.ok(categoryResponses);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
     @GetMapping("/list-categoryActive")
-    public List<CategoryResponse> findByStatusActive(){
-        return categoryService.findByStatus();
+    public ResponseEntity<?> findByStatusActive() {
+        try {
+            return ResponseEntity.ok(categoryService.findByStatus());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
     @GetMapping("/list-category-search")
-    public List<CategoryResponse> findByStatusSearch(@RequestParam("search") String search){
-        return categoryService.findByStatus().stream()
-                .filter(CategoryResponse -> CategoryResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> findByStatusSearch(@RequestParam("search") String search) {
+        try {
+            return ResponseEntity.ok(categoryService.findByStatus().stream()
+                    .filter(CategoryResponse -> CategoryResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                    .collect(Collectors.toList()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
     @PutMapping("/update-status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateStatus(
-            @RequestParam(value ="id", required = false) Long id,
-            @RequestParam(value ="aBoolean", required = false) boolean aBoolean
-    ){
-        try{
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "aBoolean", required = false) boolean aBoolean
+    ) {
+        try {
             if (id == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
@@ -51,7 +70,7 @@ public class CategoryRestAPI {
             }
             Category category = categoryService.updateStatus(id, aBoolean);
             return ResponseEntity.ok(category);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Response.builder()
@@ -61,8 +80,10 @@ public class CategoryRestAPI {
                     );
         }
     }
+
     @PostMapping("/create-category")
-    public ResponseEntity<?> createCategory(@RequestBody @Valid CategoryRequest categoryRequest, BindingResult result){
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createCategory(@RequestBody @Valid CategoryRequest categoryRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()

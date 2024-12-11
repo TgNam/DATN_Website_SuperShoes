@@ -9,6 +9,7 @@ import org.example.datn_website_supershoes.service.ColorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,20 +22,33 @@ public class ColorRestAPI {
     @Autowired
     ColorService colorService;
     @GetMapping("/list-color")
-    public List<ColorResponse> findAllColor(){
-        return colorService.findAllColor();
+    public ResponseEntity<?> findAllColor(){
+        try{
+            return ResponseEntity.ok(colorService.findAllColor());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @GetMapping("/listColorACTIVE")
-    public List<ColorResponse> findByStatusActive(){
-        return colorService.findColorByStatusACTIVE();
+    public ResponseEntity<?> findByStatusActive(){
+        try{
+            return ResponseEntity.ok(colorService.findColorByStatusACTIVE());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @GetMapping("/list-color-search")
-    public List<ColorResponse> findByStatusSearch(@RequestParam("search") String search){
-        return colorService.findAllColor().stream()
-                .filter(ColorResponse -> ColorResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> findByStatusSearch(@RequestParam("search") String search){
+        try{
+            return ResponseEntity.ok(colorService.findAllColor().stream()
+                    .filter(ColorResponse -> ColorResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                    .collect(Collectors.toList()));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @PutMapping("/update-status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateStatus(
             @RequestParam(value ="id", required = false) Long id,
             @RequestParam(value ="aBoolean", required = false) boolean aBoolean
@@ -61,6 +75,7 @@ public class ColorRestAPI {
         }
     }
     @PostMapping("/create-color")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createColor(@RequestBody @Valid ColorRequest ColorRequest, BindingResult result){
         try {
             if (result.hasErrors()) {
