@@ -86,7 +86,7 @@ public class PayBillController {
 
 
     // Helper method to parse dates
-    private Date parseDate(String dateStr) {
+    public Date parseDate(String dateStr) {
         if (dateStr == null) return null;
 
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

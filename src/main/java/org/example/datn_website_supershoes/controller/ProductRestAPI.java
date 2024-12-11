@@ -123,7 +123,7 @@ public class ProductRestAPI {
 
     @PutMapping("/update-status")
     @PreAuthorize("hasRole('ADMIN')")
-    private ResponseEntity<?> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
     ) {
@@ -157,7 +157,7 @@ public class ProductRestAPI {
     }
 
     @GetMapping("/listProductSearch")
-    private List<ProductResponse> findSearch(@RequestParam("search") String search) {
+    public List<ProductResponse> findSearch(@RequestParam("search") String search) {
         return productService.findProductRequests().stream()
                 .filter(ProductResponse -> ProductResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
                 .collect(Collectors.toList());
