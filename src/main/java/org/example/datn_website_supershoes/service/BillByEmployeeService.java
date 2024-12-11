@@ -417,10 +417,10 @@ public class BillByEmployeeService {
         BigDecimal totalMerchandise = listBillDetail.stream()
                 .map(billDetail -> billDetail.getPriceDiscount()
                         .multiply(BigDecimal.valueOf(billDetail.getQuantity()))
-                        .setScale(2, RoundingMode.HALF_UP))
+                        .setScale(0, RoundingMode.DOWN))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        bill.setTotalMerchandise(totalMerchandise.setScale(2, RoundingMode.HALF_UP));
+        bill.setTotalMerchandise(totalMerchandise.setScale(0, RoundingMode.DOWN));
 
         BigDecimal priceDiscount = BigDecimal.ZERO;
         BigDecimal totalAmount = totalMerchandise;
@@ -438,11 +438,11 @@ public class BillByEmployeeService {
                 }
 
                 BigDecimal priceSale = totalMerchandise.multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
-                        .setScale(2, RoundingMode.HALF_UP);
+                        .setScale(0, RoundingMode.DOWN);
                 BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
 
                 priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
-                totalAmount = totalMerchandise.subtract(priceDiscount).setScale(2, RoundingMode.HALF_UP);
+                totalAmount = totalMerchandise.subtract(priceDiscount).setScale(0, RoundingMode.DOWN);
 
                 if (voucher.getIsPrivate()) {
                     if (idAccount == null) {
@@ -468,8 +468,8 @@ public class BillByEmployeeService {
             }
         }
 
-        bill.setPriceDiscount(priceDiscount.setScale(2, RoundingMode.HALF_UP));
-        bill.setTotalAmount(totalAmount.setScale(2, RoundingMode.HALF_UP));
+        bill.setPriceDiscount(priceDiscount.setScale(0, RoundingMode.DOWN));
+        bill.setTotalAmount(totalAmount.setScale(0, RoundingMode.DOWN));
 
         BigDecimal totalPaid = payBillRepository.findByCodeBill(codeBill).stream()
                 .map(PayBillOrderResponse::getAmount)
@@ -478,7 +478,7 @@ public class BillByEmployeeService {
         if (postpaid && !delivery) {
             throw new RuntimeException("Chức năng trả sau chỉ áp dụng khi giao hàng");
         } else if (postpaid) {
-            if (totalPaid.setScale(2, RoundingMode.HALF_UP).compareTo(totalAmount.setScale(2, RoundingMode.HALF_UP)) < 0) {
+            if (totalPaid.setScale(0, RoundingMode.DOWN).compareTo(totalAmount.setScale(0, RoundingMode.DOWN)) < 0) {
                 PayBillRequest payBillRequest = PayBillRequest.builder()
                         .amount(totalAmount.subtract(totalPaid))
                         .codeBill(codeBill)
@@ -487,7 +487,7 @@ public class BillByEmployeeService {
                 PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
             }
             bill.setStatus(Status.WAITTING_FOR_SHIPPED.toString());
-        } else if (totalPaid.setScale(2, RoundingMode.HALF_UP).compareTo(totalAmount.setScale(2, RoundingMode.HALF_UP)) < 0) {
+        } else if (totalPaid.setScale(0, RoundingMode.DOWN).compareTo(totalAmount.setScale(0, RoundingMode.DOWN)) < 0) {
             throw new RuntimeException("Vui lòng thanh toán đủ số tiền trước khi thanh toán hóa đơn");
         } else {
             bill.setStatus(delivery ? Status.WAITTING_FOR_SHIPPED.toString() : Status.COMPLETED.toString());
@@ -513,6 +513,8 @@ public class BillByEmployeeService {
             String address,
             String note
     ) {
+        // Ngưỡng tối đa
+        BigDecimal limit = new BigDecimal("100000000");
         //Tạo mã hóa đơn
         UUID uuid = UUID.randomUUID();
         String generatedCode = this.generateRandomCode() + "-" + uuid;
@@ -526,7 +528,9 @@ public class BillByEmployeeService {
 
         List<CartDetailProductDetailResponse> cartDetails = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(idAccount, IdCartDetail);
         BigDecimal totalMerchandise = calculateTotalCartPriceForSelected(cartDetails);
-
+        if (totalMerchandise.compareTo(limit) > 0) {
+            throw new RuntimeException("Tổng giá trị hàng hóa vượt quá giới hạn cho phép (100,000,000).");
+        }
         BigDecimal priceDiscount = BigDecimal.ZERO;
         BigDecimal totalAmount = totalMerchandise;
 
@@ -558,11 +562,11 @@ public class BillByEmployeeService {
                     throw new RuntimeException("Hóa đơn không đủ điều kiện sử dụng phiếu giảm giá");
                 }
                 BigDecimal priceSale = totalMerchandise.multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
-                        .setScale(2, RoundingMode.HALF_UP);
+                        .setScale(0, RoundingMode.DOWN);
                 BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
 
                 priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
-                totalAmount = totalMerchandise.subtract(priceDiscount).setScale(2, RoundingMode.HALF_UP);
+                totalAmount = totalMerchandise.subtract(priceDiscount).setScale(0, RoundingMode.DOWN);
                 if (voucher.getIsPrivate()) {
                     if (idAccount == null) {
                         throw new RuntimeException("Bạn không đủ điều kiện sử dụng voucher: " + voucher.getCodeVoucher());
@@ -585,9 +589,9 @@ public class BillByEmployeeService {
                 bill.setVoucher(voucher);
             }
         }
-        bill.setTotalMerchandise(totalMerchandise.setScale(2, RoundingMode.HALF_UP));
+        bill.setTotalMerchandise(totalMerchandise.setScale(0, RoundingMode.DOWN));
         bill.setPriceDiscount(priceDiscount);
-        bill.setTotalAmount(totalAmount.setScale(2, RoundingMode.HALF_UP));
+        bill.setTotalAmount(totalAmount.setScale(0, RoundingMode.DOWN));
         // Lưu Bill trước
         Bill saveBill = billRepository.save(bill);
 
@@ -624,7 +628,7 @@ public class BillByEmployeeService {
                 //Giá sản phẩm sau khi sale
                 BigDecimal promotionPrice = productPromotionResponse.get().getProductDetailPrice()
                         .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
-                        .setScale(2, RoundingMode.HALF_UP); // Làm tròn đến 2 chữ số thập phân
+                        .setScale(0, RoundingMode.DOWN); // Làm tròn đến 2 chữ số thập phân
                 //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
                 if (request.getQuantityCartDetail() <= quantityProductPromotion) {
                     // Tạo hóa đơn chi tiết mới
