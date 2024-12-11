@@ -61,6 +61,7 @@ public class BillDetailRestAPI {
 
 
     @PostMapping("/updateBillAndCreateBillDetailByIdBill")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> updateBillAndCreateBillDetailByIdBill(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestBody @Valid List<ProductDetailPromoRequest> productDetail, BindingResult result
@@ -95,6 +96,7 @@ public class BillDetailRestAPI {
     }
 
     @GetMapping("/detail")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> getBillByCodeBill(@RequestParam(value ="codeBill", required = false) String codeBill) {
         if (codeBill==null){
             return ResponseEntity.badRequest().body(
@@ -108,6 +110,7 @@ public class BillDetailRestAPI {
         return ResponseEntity.ok(billDetailOrderResponses);
     }
     @PostMapping("/plusBillDetail")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> plusBillDetail(
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
@@ -142,6 +145,7 @@ public class BillDetailRestAPI {
         }
     }
     @PostMapping("/subtractBillDetail")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> subtractBillDetail(
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
@@ -176,6 +180,7 @@ public class BillDetailRestAPI {
         }
     }
     @DeleteMapping("/deleteBillDetail")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> deleteBillDetail(
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
             @RequestParam(value ="idProductDetail", required = false) Long idProductDetail

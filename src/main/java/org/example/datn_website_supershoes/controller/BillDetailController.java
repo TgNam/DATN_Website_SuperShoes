@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,12 +30,18 @@ public class BillDetailController {
     BillDetailService billDetailService;
 
     @GetMapping("/statisticsProduct")
-    public ResponseEntity<List<BillDetailStatisticalProductRespone>> getBillStatistics() {
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
+    public ResponseEntity<?> getBillStatistics() {
+        try{
             List<BillDetailStatisticalProductRespone> statistics = billDetailService.getBillStatistics();
             return ResponseEntity.ok(statistics);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
     }
     @GetMapping("/list-bill-details")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public Page<BillDetailResponse> getAllBillDetails(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "codeBill", required = false) String codeBill,
@@ -83,6 +90,7 @@ public class BillDetailController {
         return billDetailService.getBillDetails(spec, pageable);
     }
     @PostMapping("/plusBillDetail")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> plusBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
@@ -127,6 +135,7 @@ public class BillDetailController {
     }
 
     @PostMapping("/subtractBillDetail")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> subtractBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,
@@ -171,6 +180,7 @@ public class BillDetailController {
     }
 
     @DeleteMapping("/deleteBillDetail")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> deleteBillDetail(
             @RequestParam(value ="codeBill", required = false) String codeBill,
             @RequestParam(value ="idBillDetail", required = false) Long idBillDetail,

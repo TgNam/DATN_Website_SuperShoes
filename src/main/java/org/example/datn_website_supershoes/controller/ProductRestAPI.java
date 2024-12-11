@@ -11,6 +11,7 @@ import org.example.datn_website_supershoes.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +68,7 @@ public class ProductRestAPI {
     }
 
     @PostMapping("/addProduct")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductRequest productRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -89,6 +91,7 @@ public class ProductRestAPI {
     }
 
     @PutMapping("/updateProduct")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequest updateProductRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
@@ -119,6 +122,7 @@ public class ProductRestAPI {
     }
 
     @PutMapping("/update-status")
+    @PreAuthorize("hasRole('ADMIN')")
     private ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean

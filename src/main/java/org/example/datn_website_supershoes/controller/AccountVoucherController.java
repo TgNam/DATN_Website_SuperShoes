@@ -11,6 +11,7 @@ import org.example.datn_website_supershoes.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +36,7 @@ public class AccountVoucherController {
     EmailService emailService;
 
     @PostMapping("/emails")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getEmailsByCustomerIds(@RequestBody Map<String, List<Long>> customerIdsMap) {
         // Check if customerIdsMap contains the key "customerIds"
         if (!customerIdsMap.containsKey("customerIds")) {
@@ -65,6 +67,7 @@ public class AccountVoucherController {
     }
 
     @PostMapping("/send-email")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> sendEmail(@RequestBody EmailRequest emailRequest) {
         try {
             // Handle multiple recipients if the 'to' field contains commas
@@ -98,6 +101,7 @@ public class AccountVoucherController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createAccountVoucher(@RequestBody @NotNull AccountVoucherRequest accountVoucherRequest) {
         try {
             return ResponseEntity.ok(accountVoucherService.createAccountVoucher(accountVoucherRequest));
@@ -113,6 +117,7 @@ public class AccountVoucherController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateAccountVoucher(@PathVariable("id") long id,
                                                   @RequestBody AccountVoucherRequest accountVoucherRequest) {
         try {

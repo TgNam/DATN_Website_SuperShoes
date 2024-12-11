@@ -9,6 +9,7 @@ import org.example.datn_website_supershoes.service.ShoeSoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,23 +24,36 @@ public class ShoeSoleRestAPI {
     ShoeSoleService shoeSoleService;
 
     @GetMapping("/list-shoeSole")
-    public List<ShoeSoleResponse> findAllShoeSole() {
-        return shoeSoleService.findAllShoeSole();
+    public ResponseEntity<?> findAllShoeSole() {
+        try{
+            return ResponseEntity.ok(shoeSoleService.findAllShoeSole());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/list-shoeSoleActive")
-    public List<ShoeSoleResponse> findByStatusActive() {
-        return shoeSoleService.findByStatus();
+    public ResponseEntity<?> findByStatusActive() {
+        try{
+            return ResponseEntity.ok(shoeSoleService.findByStatus());
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/list-shoeSole-search")
-    public List<ShoeSoleResponse> findByStatusSearch(@RequestParam("search") String search) {
-        return shoeSoleService.findByStatus().stream()
-                .filter(ShoeSoleResponse -> ShoeSoleResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> findByStatusSearch(@RequestParam("search") String search) {
+        try{
+            return ResponseEntity.ok(shoeSoleService.findByStatus().stream()
+                    .filter(ShoeSoleResponse -> ShoeSoleResponse.getName().toLowerCase().contains(search.trim().toLowerCase()))
+                    .collect(Collectors.toList()));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update-status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean) {
@@ -66,6 +80,7 @@ public class ShoeSoleRestAPI {
     }
 
     @PostMapping("/create-shoeSole")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createShoeSole(@RequestBody @Valid ShoeSoleRequest shoeSoleRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {

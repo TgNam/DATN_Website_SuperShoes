@@ -652,14 +652,16 @@ public class BillByEmployeeService {
                 } else {
                     // Số lượng bán lẻ khách hàng sẽ mua ngoài số lượng sale
                     int retailQuantity = request.getQuantityCartDetail() - quantityProductPromotion;
-                    BillDetail billDetail = new BillDetail();
-                    billDetail.setProductDetail(productDetailOptional.get());
-                    billDetail.setBill(saveBill);
-                    billDetail.setQuantity(quantityProductPromotion);
-                    billDetail.setStatus(Status.PENDING.toString());
-                    billDetail.setPriceDiscount(promotionPrice);
-                    billDetailRepository.save(billDetail);
+
+                    BillDetail billDetailSale = new BillDetail();
+                    billDetailSale.setProductDetail(productDetailOptional.get());
+                    billDetailSale.setBill(saveBill);
+                    billDetailSale.setQuantity(quantityProductPromotion);
+                    billDetailSale.setStatus(Status.PENDING.toString());
+                    billDetailSale.setPriceDiscount(promotionPrice);
+                    billDetailRepository.save(billDetailSale);
                     if (retailQuantity > 0) {
+                        BillDetail billDetail = new BillDetail();
                         billDetail.setProductDetail(productDetailOptional.get());
                         billDetail.setBill(saveBill);
                         billDetail.setQuantity(retailQuantity);

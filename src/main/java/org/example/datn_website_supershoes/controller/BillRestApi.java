@@ -6,6 +6,7 @@ import org.example.datn_website_supershoes.service.BillByEmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class BillRestApi {
 
 
     @GetMapping("/list-codeBill")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> findListCodeBillWaitingForPayment() {
         try {
             return ResponseEntity.ok(billByEmployeeService.getDisplayAndWaitingBills());
@@ -34,6 +36,7 @@ public class BillRestApi {
     }
 
     @GetMapping("/sortDisplayBills")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> sortDisplayBills(
             @RequestParam(value = "displayBills", required = false) List<String> displayBills,
             @RequestParam(value = "selectills", required = false) List<String> selectills
@@ -53,6 +56,7 @@ public class BillRestApi {
     }
 
     @PostMapping("/create-billByEmployee")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> createBillByEmployee(@RequestParam(value = "displayBills", required = false) List<String> displayBills) {
         try {
             return ResponseEntity
@@ -69,6 +73,7 @@ public class BillRestApi {
     }
 
     @GetMapping("/findBillRequestBycodeBill")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> findBillResponseByCodeBill(@RequestParam(value = "codeBill", required = false) String codeBill) {
         try {
             if (codeBill == null) {
@@ -92,6 +97,7 @@ public class BillRestApi {
     }
 
     @PostMapping("/payBillByEmployee")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> payBillByEmployee(
             @RequestParam(value = "codeBill", required = false) String codeBill,//Mã hóa đơn
             @RequestParam(value = "delivery", required = false) boolean delivery,//Giao hàng
