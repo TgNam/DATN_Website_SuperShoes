@@ -442,7 +442,7 @@ public class BillByEmployeeService {
                 BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
 
                 priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
-                totalAmount = totalMerchandise.subtract(priceDiscount);
+                totalAmount = totalMerchandise.subtract(priceDiscount).setScale(2, RoundingMode.HALF_UP);
 
                 if (voucher.getIsPrivate()) {
                     if (idAccount == null) {
@@ -468,7 +468,7 @@ public class BillByEmployeeService {
             }
         }
 
-        bill.setPriceDiscount(priceDiscount);
+        bill.setPriceDiscount(priceDiscount.setScale(2, RoundingMode.HALF_UP));
         bill.setTotalAmount(totalAmount.setScale(2, RoundingMode.HALF_UP));
 
         BigDecimal totalPaid = payBillRepository.findByCodeBill(codeBill).stream()
@@ -478,7 +478,7 @@ public class BillByEmployeeService {
         if (postpaid && !delivery) {
             throw new RuntimeException("Chức năng trả sau chỉ áp dụng khi giao hàng");
         } else if (postpaid) {
-            if (totalPaid.compareTo(totalAmount) < 0) {
+            if (totalPaid.setScale(2, RoundingMode.HALF_UP).compareTo(totalAmount.setScale(2, RoundingMode.HALF_UP)) < 0) {
                 PayBillRequest payBillRequest = PayBillRequest.builder()
                         .amount(totalAmount.subtract(totalPaid))
                         .codeBill(codeBill)
@@ -487,7 +487,7 @@ public class BillByEmployeeService {
                 PayBillService.createPayBill(payBillRequest, 2, Status.WAITING_FOR_PAYMENT.toString());
             }
             bill.setStatus(Status.WAITTING_FOR_SHIPPED.toString());
-        } else if (totalPaid.compareTo(totalAmount) < 0) {
+        } else if (totalPaid.setScale(2, RoundingMode.HALF_UP).compareTo(totalAmount.setScale(2, RoundingMode.HALF_UP)) < 0) {
             throw new RuntimeException("Vui lòng thanh toán đủ số tiền trước khi thanh toán hóa đơn");
         } else {
             bill.setStatus(delivery ? Status.WAITTING_FOR_SHIPPED.toString() : Status.COMPLETED.toString());
@@ -562,7 +562,7 @@ public class BillByEmployeeService {
                 BigDecimal maximumDiscount = voucher.getMaximumDiscount().max(BigDecimal.ZERO);
 
                 priceDiscount = priceSale.compareTo(maximumDiscount) <= 0 ? priceSale : maximumDiscount;
-                totalAmount = totalMerchandise.subtract(priceDiscount);
+                totalAmount = totalMerchandise.subtract(priceDiscount).setScale(2, RoundingMode.HALF_UP);
                 if (voucher.getIsPrivate()) {
                     if (idAccount == null) {
                         throw new RuntimeException("Bạn không đủ điều kiện sử dụng voucher: " + voucher.getCodeVoucher());
