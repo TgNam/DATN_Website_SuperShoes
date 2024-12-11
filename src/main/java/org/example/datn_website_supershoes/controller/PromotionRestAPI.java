@@ -119,7 +119,7 @@ public class PromotionRestAPI {
                     String codePromotion = promotion.getCodePromotion().toLowerCase();
                     return promotionName.contains(searchLower) || codePromotion.contains(searchLower);
                 })
-                .filter(promotion -> promotion.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
+                .filter(promotion -> promotion.getStatus().equalsIgnoreCase(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
     }
 

@@ -207,7 +207,7 @@ public class AccountRestAPI {
                     String accountPhone = account.getPhoneNumber().toLowerCase();
                     return accountName.contains(searchLower) || accountPhone.contains(searchLower);
                 })
-                .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
+                .filter(account -> account.getStatus().equalsIgnoreCase(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(accountResponses);
         }catch (RuntimeException e){
@@ -263,7 +263,7 @@ public class AccountRestAPI {
                     String accountPhone = account.getPhoneNumber().toLowerCase();
                     return accountName.contains(searchLower) || accountPhone.contains(searchLower);
                 })
-                .filter(account -> account.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
+                .filter(account -> account.getStatus().equalsIgnoreCase(status.trim().toLowerCase()))
                 .collect(Collectors.toList());
             return ResponseEntity.ok(accountResponses);
         }catch (RuntimeException e){
