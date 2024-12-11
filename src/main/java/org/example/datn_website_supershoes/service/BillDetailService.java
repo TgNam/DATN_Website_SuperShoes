@@ -581,29 +581,26 @@ public class BillDetailService {
         if (billDetailOptional.isEmpty()) {
             throw new RuntimeException("Hóa đơn không tồn tại!");
         }
+        BillDetail billDetail = billDetailOptional.get();
 
-        Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(idProductDetail);
-
-        if (optionalProductDetail.isEmpty()) {
-            throw new RuntimeException("Sản phẩm không tồn tại!");
-        }
-        Integer newQuantity = billDetailOptional.get().getQuantity() - 1;
+        Integer newQuantity = billDetail.getQuantity() - 1;
 
         if (newQuantity <= 0) {
             throw new RuntimeException("Tối thiểu phải có 1 sản phẩm");
         }
-        billDetailOptional.get().setQuantity(newQuantity);
 
-//        optionalProductDetail.get().setQuantity(optionalProductDetail.get().getQuantity() + 1);
-//
-//        productDetailRepository.save(optionalProductDetail.get());
+        billDetail.setQuantity(newQuantity);
 
-        bill.setTotalMerchandise(
-                bill.getTotalMerchandise().subtract(optionalProductDetail.get().getPrice())
-        );
+        BigDecimal priceProductDetail = billDetail.getPriceDiscount();
+
+        BigDecimal priceBillTotalMerchandise = bill.getTotalMerchandise();
+
+        BigDecimal newPriceBillTotalMerchandise = priceBillTotalMerchandise.subtract(priceProductDetail);
+
+        bill.setTotalMerchandise(newPriceBillTotalMerchandise);
 
         BigDecimal priceDiscount = BigDecimal.ZERO;
-        BigDecimal totalAmount = bill.getTotalMerchandise();
+        BigDecimal totalAmount = newPriceBillTotalMerchandise;
 
         if (bill.getVoucher() != null) {
             Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
@@ -626,9 +623,9 @@ public class BillDetailService {
             optionalPayBill.get().setAmount(totalAmount);
         }
         payBillRepository.save(optionalPayBill.get());
-        BillDetail billDetail = billDetailRepository.save(billDetailOptional.get());
+        BillDetail updateBillDetail = billDetailRepository.save(billDetailOptional.get());
         notificationController.sendNotification();
-        return billDetail;
+        return updateBillDetail;
     }
 
     public void deleteBillDetail(String codeBill, Long idBillDetail, Long idProductDetail) {
