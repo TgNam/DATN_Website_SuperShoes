@@ -93,51 +93,62 @@ public class CartDetailService {
         return cartRepository.save(cart);
     }
 
+    @Transactional
     public List<CartDetailProductDetailResponse> getCartDetailByAccountId(long accountId) {
-        Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
-        if (cartOptional.isPresent()) {
-            List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccount(accountId);
-            return cartDetailProductDetailResponse;
-        }
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found!"));
-        cartRepository.save(Cart.builder()
-                .account(account)
-                .build());
-        List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccount(accountId);
-        return cartDetailProductDetailResponse;
+        ensureCartExistsForAccount(accountId);
+        List<CartDetailProductDetailResponse> cartDetailResponses = cartDetailRepository.findCartDetailByIdAccount(accountId);
+        // Kiểm tra và cập nhật số lượng nếu cần
+        boolean isUpdated = updateCartDetails(cartDetailResponses);
+        System.out.println("isUpdated"+isUpdated);
+        return isUpdated ? cartDetailRepository.findCartDetailByIdAccount(accountId) : cartDetailResponses;
     }
+
     @Transactional
     public List<CartDetailProductDetailResponse> getCartDetailByAccountIdAndIdCartDetail(long accountId, List<Long> idCartDetail) {
-        Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
-        if (cartOptional.isPresent()) {
-            List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
-            return cartDetailProductDetailResponse;
-        }
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found!"));
-        cartRepository.save(Cart.builder()
-                .account(account)
-                .build());
-        List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
-        boolean checkUpdate = false;
-        for(CartDetailProductDetailResponse response : cartDetailProductDetailResponse){
-            if (response.getQuantityCartDetail()>response.getQuantityProductDetail()){
-                Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(response.getIdCart());
-                if(response.getQuantityProductDetail()>0){
-                    optionalCartDetail.get().setQuantity(response.getQuantityProductDetail());
-                    cartDetailRepository.save(optionalCartDetail.get());
-                }else{
-                    cartDetailRepository.delete(optionalCartDetail.get());
-                }
-                checkUpdate=true;
+        ensureCartExistsForAccount(accountId);
+        List<CartDetailProductDetailResponse> cartDetailResponses = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
+
+        // Kiểm tra và cập nhật số lượng nếu cần
+        boolean isUpdated = updateCartDetails(cartDetailResponses);
+        System.out.println("isUpdated"+isUpdated);
+        return isUpdated ? cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail) : cartDetailResponses;
+    }
+
+    private void ensureCartExistsForAccount(long accountId) {
+        cartRepository.findByAccount_Id(accountId).orElseGet(() -> {
+            Account account = accountRepository.findById(accountId)
+                    .orElseThrow(() -> new RuntimeException("Account not found!"));
+            return cartRepository.save(Cart.builder().account(account).build());
+        });
+    }
+
+    private boolean updateCartDetails(List<CartDetailProductDetailResponse> cartDetailResponses) {
+        boolean isUpdated = false;
+
+        for (CartDetailProductDetailResponse response : cartDetailResponses) {
+            if (response.getQuantityCartDetail() > response.getQuantityProductDetail()) {
+                System.out.println("response.getQuantityCartDetail() > response.getQuantityProductDetail()");
+                Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(response.getIdCartDetail());
+
+                optionalCartDetail.ifPresent(cartDetail -> {
+                    if (response.getQuantityProductDetail() > 0) {
+                        System.out.println("response.getQuantityProductDetail() > 0");
+                        cartDetail.setQuantity(response.getQuantityProductDetail());
+                        cartDetailRepository.save(cartDetail);
+                    } else {
+                        System.out.println("response.getQuantityProductDetail() <= 0");
+                        cartDetailRepository.delete(cartDetail);
+                    }
+                });
+
+                isUpdated = true;
             }
         }
-        if (checkUpdate){
-            cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
-        }
-        return cartDetailProductDetailResponse;
+
+        return isUpdated;
     }
+
+
     @Transactional
     public CartDetail plusCartDetail(Long idCartDetail, Long idProductDetail) {
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);

@@ -21,7 +21,9 @@ public class NotificationController {
         sink.tryEmitNext("UPDATE_PAYMENT");
         sink.tryEmitNext("UPDATE_PROMOTION");
         sink.tryEmitNext("UPDATE_VOUCHER");
-        sink.tryEmitNext("PAYBILL_SUCCESS");
+    }
+    public void sendEvent(String messages){
+        sink.tryEmitNext(messages);
     }
 }
 
