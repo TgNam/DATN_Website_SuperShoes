@@ -497,7 +497,7 @@ public class BillByEmployeeService {
             accountVoucherRepository.save(accountVoucher);
         }
         billRepository.save(bill);
-        notificationController.sendNotification();
+        notificationController.sendEvent("PAYBILL_SUCCESS");
     }
 
     @Transactional
@@ -525,9 +525,7 @@ public class BillByEmployeeService {
 
         List<CartDetailProductDetailResponse> cartDetails = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(idAccount, IdCartDetail);
         BigDecimal totalMerchandise = calculateTotalCartPriceForSelected(cartDetails);
-        if (totalMerchandise.compareTo(limit) > 0) {
-            throw new RuntimeException("Tổng giá trị hàng hóa vượt quá giới hạn cho phép (100,000,000).");
-        }
+
         BigDecimal priceDiscount = BigDecimal.ZERO;
         BigDecimal totalAmount = totalMerchandise;
 
@@ -589,6 +587,10 @@ public class BillByEmployeeService {
         bill.setTotalMerchandise(totalMerchandise.setScale(0, RoundingMode.DOWN));
         bill.setPriceDiscount(priceDiscount);
         bill.setTotalAmount(totalAmount.setScale(0, RoundingMode.DOWN));
+
+        if (totalAmount.compareTo(limit) > 0) {
+            throw new RuntimeException("Tổng giá trị hàng hóa vượt quá giới hạn cho phép (100,000,000).");
+        }
         // Lưu Bill trước
         Bill saveBill = billRepository.save(bill);
 
@@ -844,9 +846,7 @@ public class BillByEmployeeService {
             }
 
         }
-        if (totalMerchandise.compareTo(limit) > 0) {
-            throw new RuntimeException("Tổng giá trị hàng hóa vượt quá giới hạn cho phép (100,000,000).");
-        }
+
         BigDecimal priceDiscount = BigDecimal.ZERO;
         BigDecimal totalAmount = totalMerchandise;
 
@@ -892,6 +892,9 @@ public class BillByEmployeeService {
         bill.setTotalMerchandise(totalMerchandise.setScale(0, RoundingMode.DOWN));
         bill.setPriceDiscount(priceDiscount);
         bill.setTotalAmount(totalAmount.setScale(0, RoundingMode.DOWN));
+        if (totalAmount.compareTo(limit) > 0) {
+            throw new RuntimeException("Tổng giá trị hàng hóa vượt quá giới hạn cho phép (100,000,000).");
+        }
         //Cập nhật lại Bill
         Bill updateBill = billRepository.save(saveBill);
         bill.setTotalAmount(totalAmount.setScale(0, RoundingMode.DOWN));
