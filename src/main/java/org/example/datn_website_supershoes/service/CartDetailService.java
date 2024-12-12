@@ -1,6 +1,5 @@
 package org.example.datn_website_supershoes.service;
 
-import jakarta.transaction.Transactional;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.CartDetailRequest;
 import org.example.datn_website_supershoes.dto.response.CartDetailProductDetailResponse;
@@ -16,6 +15,8 @@ import org.example.datn_website_supershoes.repository.ProductDetailRepository;
 import org.example.datn_website_supershoes.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +107,7 @@ public class CartDetailService {
         List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccount(accountId);
         return cartDetailProductDetailResponse;
     }
-
+    @Transactional
     public List<CartDetailProductDetailResponse> getCartDetailByAccountIdAndIdCartDetail(long accountId, List<Long> idCartDetail) {
         Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
         if (cartOptional.isPresent()) {
@@ -119,10 +120,25 @@ public class CartDetailService {
                 .account(account)
                 .build());
         List<CartDetailProductDetailResponse> cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
-        ;
+        boolean checkUpdate = false;
+        for(CartDetailProductDetailResponse response : cartDetailProductDetailResponse){
+            if (response.getQuantityCartDetail()>response.getQuantityProductDetail()){
+                Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(response.getIdCart());
+                if(response.getQuantityProductDetail()>0){
+                    optionalCartDetail.get().setQuantity(response.getQuantityProductDetail());
+                    cartDetailRepository.save(optionalCartDetail.get());
+                }else{
+                    cartDetailRepository.delete(optionalCartDetail.get());
+                }
+                checkUpdate=true;
+            }
+        }
+        if (checkUpdate){
+            cartDetailProductDetailResponse = cartDetailRepository.findCartDetailByIdAccountAndIdCartDetail(accountId, idCartDetail);
+        }
         return cartDetailProductDetailResponse;
     }
-
+    @Transactional
     public CartDetail plusCartDetail(Long idCartDetail, Long idProductDetail) {
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
         if (optionalCartDetail.isEmpty()) {
@@ -146,7 +162,7 @@ public class CartDetailService {
         notificationController.sendNotification();
         return detail;
     }
-
+    @Transactional
     public CartDetail subtractCartDetail(Long idCartDetail) {
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
         if (optionalCartDetail.isEmpty()) {
@@ -161,7 +177,7 @@ public class CartDetailService {
         notificationController.sendNotification();
         return detail;
     }
-
+    @Transactional
     public void deleteCartDetail(Long idCartDetail) {
         Optional<CartDetail> optionalCartDetail = cartDetailRepository.findById(idCartDetail);
         if (optionalCartDetail.isEmpty()) {

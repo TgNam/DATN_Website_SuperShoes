@@ -1,5 +1,7 @@
 package org.example.datn_website_supershoes.controller;
 
+import jakarta.validation.Valid;
+import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.repository.BillRepository;
 import org.example.datn_website_supershoes.service.BillByEmployeeService;
@@ -7,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/billByEmployee")
@@ -134,7 +138,7 @@ public class BillRestApi {
 
     @PostMapping("/payBillOnline")
     public ResponseEntity<?> payBillOnline(
-            @RequestParam(value = "IdCartDetail", required = false) List<Long> IdCartDetail,//Mã phiếu giảm giá
+            @RequestParam(value = "IdCartDetail", required = false) List<Long> IdCartDetail,
             @RequestParam(value = "codeVoucher", required = false) String codeVoucher,//Mã phiếu giảm giá
             @RequestParam(value = "idAccount", required = false) Long idAccount,//id tài khoản mua hàng
             @RequestParam(value = "name", required = false) String name,//Tên người nhận hàng
@@ -185,6 +189,76 @@ public class BillRestApi {
                 );
             }
             billByEmployeeService.payBillOnline(IdCartDetail, codeVoucher, idAccount, name, phoneNumber, address, note);
+            return ResponseEntity.ok("Thanh toán thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PostMapping("/payBillOnlinev2")
+    public ResponseEntity<?> payBillOnlinev2(
+            @RequestParam(value = "codeVoucher", required = false) String codeVoucher,//Mã phiếu giảm giá
+            @RequestParam(value = "idAccount", required = false) Long idAccount,//id tài khoản mua hàng
+            @RequestParam(value = "name", required = false) String name,//Tên người nhận hàng
+            @RequestParam(value = "phoneNumber", required = false) String phoneNumber,//Số điện thoại người nhận hàng
+            @RequestParam(value = "address", required = false) String address,
+            @RequestParam(value = "note", required = false) String note,//Thông tin cần lưu ý
+            @RequestBody List<@Valid ProductDetailPromoRequest> productDetailRequest,
+            BindingResult result
+    ) {
+        try {
+            if (productDetailRequest == null || productDetailRequest.isEmpty()) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Danh sách sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Vui lòng đăng nhập lại giỏ hàng!")
+                                .build()
+                );
+            }
+            if (name == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Tên của người nhận hàng không được để trống!")
+                                .build()
+                );
+            }
+            if (phoneNumber == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Số điện thoại của người nhận hàng không được để trống!")
+                                .build()
+                );
+            }
+            if (address == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Địa chỉ của người nhận hàng không được để trống!")
+                                .build()
+                );
+            }
+            billByEmployeeService.payBillOnlinev2(productDetailRequest, codeVoucher, idAccount, name, phoneNumber, address, note);
             return ResponseEntity.ok("Thanh toán thành công");
         } catch (RuntimeException e) {
             return ResponseEntity

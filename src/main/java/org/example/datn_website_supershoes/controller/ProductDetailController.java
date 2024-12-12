@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.request.ProductDetailRequest;
 import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.Color;
@@ -281,6 +282,36 @@ public class ProductDetailController {
             ProductPromotionResponse productPromotionResponse = productDetailService.findProductPromotionByIdProcuctAndIdColorAndIdSize(idProduct, idColor, idSize);
             return ResponseEntity.ok(productPromotionResponse);
 
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+    @PostMapping("/listPayProductDetail")
+    public ResponseEntity<?> listPayProductDetail(
+            @RequestBody List<@Valid ProductDetailPromoRequest> productDetailRequest,
+            BindingResult result) {
+        try {
+            if (productDetailRequest == null || productDetailRequest.isEmpty()) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Danh sách sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            if (result.hasErrors()) {
+                List<String> errors = result.getAllErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errors);
+            }
+            return ResponseEntity.ok(productDetailService.findPayProductDetailByIdProductDetail(productDetailRequest));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
