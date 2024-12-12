@@ -52,22 +52,7 @@ public class VoucherController {
                 .orElseThrow(() -> new RuntimeException("Lỗi liên quan đến đăng nhập vui lòng thử lại"));
         return user;
     }
-    @PutMapping("/update-statuses")
-    public ResponseEntity<?> updateVoucherStatusesManually() {
-        try {
-            voucherService.updateVoucherStatuses();
-            return ResponseEntity.ok(Response.builder()
-                    .status(HttpStatus.OK.toString())
-                    .mess("Voucher statuses updated successfully.")
-                    .build());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Response.builder()
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
-                            .mess(e.getMessage())
-                            .build());
-        }
-    }
+//
 
     @GetMapping("/list-voucher")
     public ResponseEntity<Map<String, Object>> getAllVouchers(
