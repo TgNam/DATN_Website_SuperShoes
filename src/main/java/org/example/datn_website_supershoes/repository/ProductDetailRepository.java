@@ -1,9 +1,6 @@
 package org.example.datn_website_supershoes.repository;
 
-import org.example.datn_website_supershoes.dto.response.ProductDetailResponseByNam;
-import org.example.datn_website_supershoes.dto.response.ProductPromotionResponse;
-import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponse;
-import org.example.datn_website_supershoes.dto.response.ProductViewCustomerReponseByQuang;
+import org.example.datn_website_supershoes.dto.response.*;
 import org.example.datn_website_supershoes.model.BillDetail;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.springframework.data.domain.Page;
@@ -201,5 +198,15 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE' AND pd.id IN (:idProductDetail)")
     List<ProductPromotionResponse> findProductPromotionByLitsIdProductDetail(@Param("idProductDetail") List<Long> idProductDetail);
 
-    Optional<ProductDetail> findByIdAndAndStatusAndPrice(Long id, String status, BigDecimal price);
+    @Query("SELECT NEW org.example.datn_website_supershoes.dto.response.PayProductDetailResponse(" +
+            "p.id, p.name, c.id, c.name, s.id, s.name, pd.id, pd.quantity, pd.price, " +
+            "pro.id, pro.codePromotion,pro.value, pro.endAt, prod.id, prod.quantity) " +
+            "FROM ProductDetail pd " +
+            "INNER JOIN pd.product p " +
+            "INNER JOIN pd.color c " +
+            "INNER JOIN pd.size s " +
+            "LEFT JOIN pd.promotionDetail prod ON prod.status = 'ONGOING' " +
+            "LEFT JOIN prod.promotion pro " +
+            "WHERE p.status = 'ACTIVE' AND pd.status = 'ACTIVE' AND pd.id=:idProductDetail")
+    Optional<PayProductDetailResponse> findPayProductDetailByIdProductDetail(@Param("idProductDetail") Long idProductDetail);
 }

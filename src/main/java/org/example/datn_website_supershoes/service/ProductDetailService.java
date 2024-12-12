@@ -3,6 +3,7 @@ package org.example.datn_website_supershoes.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
 import org.example.datn_website_supershoes.dto.request.ProductDetailRequest;
 import org.example.datn_website_supershoes.dto.request.updateProduct.UpdateProductDetailRequest;
 import org.example.datn_website_supershoes.dto.response.*;
@@ -187,5 +188,26 @@ public class ProductDetailService {
         return productPromotionResponse.get();
     }
 
-
+    public List<PayProductDetailResponse> findPayProductDetailByIdProductDetail(List<ProductDetailPromoRequest> productDetailPromoRequests){
+        List<PayProductDetailResponse> list = new ArrayList<>();
+        for (ProductDetailPromoRequest request : productDetailPromoRequests){
+            PayProductDetailResponse payProductDetailResponse = productDetailRepository.findPayProductDetailByIdProductDetail(request.getIdProductDetail())
+                    .orElse(null);
+            if (payProductDetailResponse == null) {
+                // Trả về sản phẩm không hợp lệ
+                list.add(new PayProductDetailResponse(
+                        request.getIdProductDetail(),request.getQuantity(),"Không tìm thấy tài nguyên sản phẩm!"));
+                continue;
+            }
+            if (payProductDetailResponse.getQuantityProductDetail() < request.getQuantity()) {
+                // Trả về thông báo số lượng không đủ
+                list.add(new PayProductDetailResponse(
+                        request.getIdProductDetail(),request.getQuantity(),("Sản phẩm "+payProductDetailResponse.getNameProduct()+" không đủ số lượng!")));
+                continue;
+            }
+            payProductDetailResponse.setQuantityBuy(request.getQuantity());
+            list.add(payProductDetailResponse);
+        }
+        return list;
+    }
 }

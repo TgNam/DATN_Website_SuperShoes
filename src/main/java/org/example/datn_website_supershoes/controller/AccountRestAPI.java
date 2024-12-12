@@ -272,7 +272,6 @@ public class AccountRestAPI {
     }
 
     @GetMapping("/get-account-login")
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public Account getAccountLogin(){
         return accountService.getUseLogin();
     }

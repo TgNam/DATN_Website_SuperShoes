@@ -7,12 +7,14 @@ import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.security.auth.login.AccountLockedException;
 import java.util.Optional;
 
 
@@ -35,19 +37,27 @@ public class AuthenticationService {
     @Autowired
     JWTService jwtService;
 
-    public TokenResponse authentication(LoginRequest loginRequest){
+    public TokenResponse authenticate(LoginRequest loginRequest) throws AccountLockedException {
         Account account = accountRepository
                 .findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("Not found account!"));
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getPassword())
-        );
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản!"));
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Mật khẩu không đúng.");
+        }
+
+        if (!account.getStatus().equals(Status.ACTIVE.toString())) {
+            throw new AccountLockedException("Tài khoản của bạn bị khóa.");
+        }
 
         return TokenResponse.builder()
                 .accessToken(jwtService.generateToken(account))
                 .resfreshToken("1234")
                 .build();
-
     }
     @Transactional
     public  Account register(Account account){

@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -229,11 +230,14 @@ public class AccountService {
         return accountRepository.findEmailsByCustomerIds(customerIds);
     }
 
-    public Account getUseLogin(){
+    public Account getUseLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println( authentication.getName());
-        Account user = accountRepository.findByEmail(authentication.getName()).get();
-        return  user;
+        System.out.println(authentication.getName());
+
+        // Tìm kiếm tài khoản bằng email và xử lý nếu không tìm thấy
+        return accountRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new NoSuchElementException("No account found with email: " + authentication.getName()));
     }
+
 }
 
