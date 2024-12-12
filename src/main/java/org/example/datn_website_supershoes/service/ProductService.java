@@ -191,7 +191,7 @@ public class ProductService {
                 .filter(response ->
                         status == null ||
                                 status.isEmpty() ||
-                                (response.getStatus() != null && response.getStatus().toLowerCase().contains(status.trim().toLowerCase()))
+                                (response.getStatus() != null && response.getStatus().equalsIgnoreCase(status.trim().toLowerCase()))
                 )
                 .collect(Collectors.toList());
     }
