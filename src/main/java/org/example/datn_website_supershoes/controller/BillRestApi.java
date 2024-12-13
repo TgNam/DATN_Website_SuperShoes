@@ -226,14 +226,6 @@ public class BillRestApi {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            if (idAccount == null) {
-                return ResponseEntity.badRequest().body(
-                        Response.builder()
-                                .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: Vui lòng đăng nhập lại giỏ hàng!")
-                                .build()
-                );
-            }
             if (name == null) {
                 return ResponseEntity.badRequest().body(
                         Response.builder()
