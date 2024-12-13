@@ -67,7 +67,7 @@ public class BillByEmployeeService {
                     Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(billDetail.getProductDetail().getId());
                     // Kiểm tra sản phẩm có tồn tại không
                     if (!productDetailOptional.isPresent()) {
-                        throw new RuntimeException("Id " + billDetail.getProductDetail().getId() + " của sản phẩm không tồn tại trong hệ thống.");
+                        throw new RuntimeException("Tài nguyên sản phẩm không tồn tại trong hệ thống.");
                     }
                     ProductDetail productDetail = productDetailOptional.get();
                     //Số lượng sản phẩm của sản phẩm chi tiết
@@ -95,7 +95,7 @@ public class BillByEmployeeService {
                         Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(billDetail.getProductDetail().getId());
                         // Kiểm tra sản phẩm có tồn tại không
                         if (!productDetailOptional.isPresent()) {
-                            throw new RuntimeException("Id " + billDetail.getProductDetail().getId() + " của sản phẩm không tồn tại trong hệ thống.");
+                            throw new RuntimeException("Tài nguyên sản phẩm không tồn tại trong hệ thống.");
                         }
                         ProductDetail productDetail = productDetailOptional.get();
                         //Số lượng sản phẩm của sản phẩm chi tiết

@@ -35,6 +35,21 @@ public class CartDetailRestApi {
                     );
         }
     }
+    @PostMapping("/add-cartlocal-to-cart/{idUser}")
+    public ResponseEntity<?> createCartDetailByCartLocal(@RequestBody CartDetailRequest cartDetailRequest,
+                                              @PathVariable("idUser") long id) {
+        try {
+            return ResponseEntity.ok(cartDetailService.addCartLocalToCart(cartDetailRequest, id));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
     @GetMapping("/get-cartDetail-by-account/{accountId}")
     public ResponseEntity<?> getCart(@PathVariable("accountId") long accountId){
         try {
@@ -68,8 +83,7 @@ public class CartDetailRestApi {
 
     @PostMapping("/plusCartDetail")
     public ResponseEntity<?> plusCartDetail (
-            @RequestParam(value ="idCartDetail", required = false) Long idCartDetail,
-            @RequestParam(value ="idProductDetail", required = false) Long idProductDetail
+            @RequestParam(value ="idCartDetail", required = false) Long idCartDetail
     ){
         try {
             if (idCartDetail == null) {
@@ -80,16 +94,8 @@ public class CartDetailRestApi {
                                 .build()
                 );
             }
-            if (idProductDetail == null) {
-                return ResponseEntity.badRequest().body(
-                        Response.builder()
-                                .status(HttpStatus.BAD_REQUEST.toString())
-                                .mess("Lỗi: ID sản phẩm chi tiết không được để trống!")
-                                .build()
-                );
-            }
             return ResponseEntity
-                    .ok(cartDetailService.plusCartDetail(idCartDetail,idProductDetail));
+                    .ok(cartDetailService.plusCartDetail(idCartDetail));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

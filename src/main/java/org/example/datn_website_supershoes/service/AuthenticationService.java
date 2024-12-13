@@ -50,7 +50,7 @@ public class AuthenticationService {
             throw new BadCredentialsException("Mật khẩu không đúng.");
         }
 
-        if (!account.getStatus().equals(Status.ACTIVE.toString())) {
+        if (account.getStatus().equals(Status.INACTIVE.toString())) {
             throw new AccountLockedException("Tài khoản của bạn bị khóa.");
         }
 
