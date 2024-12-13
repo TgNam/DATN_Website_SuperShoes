@@ -45,8 +45,6 @@ public class CartService {
     }
 
     public Cart getCartByAccountId(long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found!"));
         Optional<Cart> cartOptional = cartRepository.findByAccount_Id(accountId);
         if (cartOptional.isEmpty()) {
             CartRequest cartRequest = new CartRequest();
@@ -61,7 +59,7 @@ public class CartService {
         if (cartRepository.existsById(id)) {
             cartRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Cart với id " + id + " không tồn tại.");
+            throw new RuntimeException("Tài nguyên giỏ hàng không tồn tại trong hệ thống.");
         }
     }
 

@@ -36,7 +36,7 @@ public class CategoryService {
     public Category updateStatus(Long id, boolean aBoolean) {
         Optional<Category> category = categoryRepository.findById(id);
         if (!category.isPresent()) {
-            throw new RuntimeException("Id " + category.get().getId() + " của danh mục không tồn tại");
+            throw new RuntimeException("Tài nguyên doanh mục không tồn tại trong hệ thống");
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         category.get().setStatus(newStatus);

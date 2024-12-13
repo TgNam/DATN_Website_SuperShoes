@@ -42,7 +42,7 @@ public class BillDetailByEmployeeService {
         BillDetail billDetail = validateAndGetBillDetail(idBillDetail);
         validateAndGetBill(billDetail, Status.WAITING_FOR_PAYMENT);
         ProductPromotionResponse productPromotionResponse = productDetailRepository.findProductDetailByIdProductDetail(idProductDetail)
-                .orElseThrow(() -> new RuntimeException("Sản phẩm với ID " + idProductDetail + " không tồn tại!"));
+                .orElseThrow(() -> new RuntimeException("Tài nguyên sản phẩm không tồn tại trong hệ thống!"));
         BigDecimal productPrice = calculateDiscountedPrice(productPromotionResponse);
         if (productPromotionResponse.getQuantityProductDetail() <= 0) {
             throw new RuntimeException("Sản phẩm " + productPromotionResponse.getNameProduct() + " đã hết hàng");
@@ -77,7 +77,7 @@ public class BillDetailByEmployeeService {
         BillDetail billDetail = validateAndGetBillDetail(idBillDetail);
         validateAndGetBill(billDetail, Status.WAITING_FOR_PAYMENT);
         ProductDetail productDetail = productDetailRepository.findById(idProductDetail)
-                .orElseThrow(() -> new RuntimeException("Sản phẩm với ID " + idProductDetail + " không tồn tại!"));
+                .orElseThrow(() -> new RuntimeException("Tài nguyên sản phẩm không tồn tại trong hệ thống!"));
 
         int newQuantity = billDetail.getQuantity() - 1;
 
@@ -99,7 +99,7 @@ public class BillDetailByEmployeeService {
         validateAndGetBill(billDetail, Status.WAITING_FOR_PAYMENT);
 
         ProductDetail productDetail = productDetailRepository.findById(idProductDetail)
-                .orElseThrow(() -> new RuntimeException("Sản phẩm với ID " + idProductDetail + " không tồn tại!"));
+                .orElseThrow(() -> new RuntimeException("Tài nguyên sản phẩm không tồn tại trong hệ thống!"));
         Integer newQuantity = billDetail.getQuantity() + productDetail.getQuantity();
 
         productDetail.setQuantity(newQuantity);

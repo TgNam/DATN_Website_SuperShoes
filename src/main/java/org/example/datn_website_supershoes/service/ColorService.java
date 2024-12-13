@@ -36,7 +36,7 @@ public class ColorService {
     public Color updateStatus(Long id, boolean aBoolean) {
         Optional<Color> color = colorRepository.findById(id);
         if (!color.isPresent()) {
-            throw new RuntimeException("Id " + color.get().getId() + " của màu sắc không tồn tại");
+            throw new RuntimeException("Tài nguyên màu sắc không tồn tại trong hệ thống");
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         color.get().setStatus(newStatus);
