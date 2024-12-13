@@ -232,11 +232,10 @@ public class AccountService {
 
     public Account getUseLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication.getName());
 
         // Tìm kiếm tài khoản bằng email và xử lý nếu không tìm thấy
         return accountRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new NoSuchElementException("No account found with email: " + authentication.getName()));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ Email: " + authentication.getName()));
     }
 
 }

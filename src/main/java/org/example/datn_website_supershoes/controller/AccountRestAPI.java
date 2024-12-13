@@ -272,8 +272,19 @@ public class AccountRestAPI {
     }
 
     @GetMapping("/get-account-login")
-    public Account getAccountLogin(){
-        return accountService.getUseLogin();
+    public ResponseEntity<?> getAccountLogin(){
+        try {
+            return ResponseEntity.ok().body(accountService.getUseLogin());
+        }catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
     }
+
 
 }
