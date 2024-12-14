@@ -33,7 +33,7 @@ public class BrandService {
     public Brand updateStatus(Long id, boolean aBoolean){
             Optional<Brand> brand = brandRepository.findById(id);
             if(!brand.isPresent()){
-                throw new RuntimeException("Id "+brand.get().getId()+" của hãng không tồn tại");
+                throw new RuntimeException("Tài nguyên hãng không tồn tại trong hệ thống");
             }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
             brand.get().setStatus(newStatus);

@@ -35,7 +35,7 @@ public class MaterialService {
     public Material updateStatus(Long id, boolean aBoolean) {
         Optional<Material> material = materialRepository.findById(id);
         if (!material.isPresent()) {
-            throw new RuntimeException("Id " + material.get().getId() + " của chất liệu không tồn tại");
+            throw new RuntimeException("Tài nguyên chất liệu không tồn tại trong hệ thống");
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         material.get().setStatus(newStatus);

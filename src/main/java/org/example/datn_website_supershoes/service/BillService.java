@@ -215,7 +215,7 @@ public class BillService {
             Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(billDetail.getProductDetail().getId());
             // Kiểm tra sản phẩm có tồn tại không
             if (!productDetailOptional.isPresent()) {
-                throw new RuntimeException("Sản phẩm với Id  " + billDetail.getProductDetail().getId() + " không tồn tại trong hệ thống.");
+                throw new RuntimeException("Tài nguyên sản phẩm không tồn tại trong hệ thống.");
             }
             ProductDetail productDetail = productDetailOptional.get();
             //Số lượng sản phẩm của sản phẩm chi tiết
