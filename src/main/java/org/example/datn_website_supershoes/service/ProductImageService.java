@@ -1,6 +1,6 @@
 package org.example.datn_website_supershoes.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.example.datn_website_supershoes.dto.request.ProductImageRequest;
 import org.example.datn_website_supershoes.dto.response.ProductImageResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;

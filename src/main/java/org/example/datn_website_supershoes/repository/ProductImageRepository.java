@@ -1,7 +1,7 @@
 package org.example.datn_website_supershoes.repository;
 
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.example.datn_website_supershoes.dto.response.ProductImageResponse;
 import org.example.datn_website_supershoes.model.ProductDetail;
 import org.example.datn_website_supershoes.model.ProductImage;

@@ -36,7 +36,7 @@ public class ShoeSoleService {
     public ShoeSole updateStatus(Long id, boolean aBoolean) {
         Optional<ShoeSole> shoeSole = shoeSoleRepository.findById(id);
         if (!shoeSole.isPresent()) {
-            throw new RuntimeException("Id " + shoeSole.get().getId() + " của loại đế giày không tồn tại");
+            throw new RuntimeException("Không tìm thấy tài nguyên đế giày trong hệ thống!");
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         shoeSole.get().setStatus(newStatus);

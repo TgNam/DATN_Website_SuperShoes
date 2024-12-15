@@ -1,6 +1,6 @@
 package org.example.datn_website_supershoes.repository;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.example.datn_website_supershoes.dto.response.AccountVoucherResponse;
 import org.example.datn_website_supershoes.model.AccountVoucher;
 import org.springframework.data.jpa.repository.JpaRepository;
