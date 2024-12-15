@@ -75,7 +75,7 @@ public class BillController {
     }
 
     @GetMapping("/detail/{codeBill}")
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
+//    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> getBillByCodeBill(@PathVariable String codeBill) {
         try {
             Optional<BillResponse> billResponse = billService.getBillByCodeBill(codeBill);
