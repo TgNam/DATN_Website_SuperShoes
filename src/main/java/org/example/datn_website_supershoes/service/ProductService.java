@@ -1,6 +1,6 @@
 package org.example.datn_website_supershoes.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ProductRequest;
 import org.example.datn_website_supershoes.dto.request.updateProduct.UpdateProductRequest;
@@ -63,29 +63,33 @@ public class ProductService {
 
     @Transactional
     public void addProduct(ProductRequest productRequest) {
-        Optional<Brand> optionalBrand = brandRepository.findByIdAndStatus(productRequest.getIdBrand(), Status.ACTIVE.toString());
-        Optional<Category> optionalCategory = categoryRepository.findByIdAndStatus(productRequest.getIdCategory(), Status.ACTIVE.toString());
-        Optional<Material> optionalMaterial = materialRepository.findByIdAndStatus(productRequest.getIdMaterial(), Status.ACTIVE.toString());
-        Optional<ShoeSole> optionalShoeSole = shoeSoleRepository.findByIdAndStatus(productRequest.getIdShoeSole(), Status.ACTIVE.toString());
-        if (optionalBrand.isEmpty()) {
-            throw new RuntimeException("Thương hiệu với Id là: " + productRequest.getIdBrand() + " không tồn tại trong hệ thống");
+        Brand brand = brandRepository.findById(productRequest.getIdBrand())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên hãng trong hệ thống!"));
+        if (brand.getStatus().equals(Status.INACTIVE.toString())) {
+            throw new RuntimeException("Thương hiệu " + brand.getName() + " không còn hoạt động");
         }
-        if (optionalCategory.isEmpty()) {
-            throw new RuntimeException("Danh mục với Id là: " + productRequest.getIdCategory() + " không tồn tại trong hệ thống");
+        Category category = categoryRepository.findById(productRequest.getIdCategory())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên danh mục trong hệ thống!"));
+        if (category.getStatus().equals(Status.INACTIVE.toString())) {
+            throw new RuntimeException("Danh mục " + category.getName() + " không còn hoạt động");
         }
-        if (optionalMaterial.isEmpty()) {
-            throw new RuntimeException("Chất liệu với Id là: " + productRequest.getIdMaterial() + " không tồn tại trong hệ thống");
+        Material material = materialRepository.findById(productRequest.getIdMaterial())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên chất liệu trong hệ thống!"));
+        if (material.getStatus().equals(Status.INACTIVE.toString())) {
+            throw new RuntimeException("Chất liệu " + material.getName() + " không còn hoạt động");
         }
-        if (optionalShoeSole.isEmpty()) {
-            throw new RuntimeException("Đế giày với Id là: " + productRequest.getIdShoeSole() + " không tồn tại trong hệ thống");
+        ShoeSole shoeSole = shoeSoleRepository.findById(productRequest.getIdShoeSole())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên đế giày trong hệ thống!"));
+        if (shoeSole.getStatus().equals(Status.INACTIVE.toString())) {
+            throw new RuntimeException("Đế giày " + shoeSole.getName() + " không còn hoạt động");
         }
         Product product = Product.builder()
                 .productCode(generatePromotionCode())
                 .name(productRequest.getName())
-                .brand(optionalBrand.get())
-                .category(optionalCategory.get())
-                .material(optionalMaterial.get())
-                .shoeSole(optionalShoeSole.get())
+                .brand(brand)
+                .category(category)
+                .material(material)
+                .shoeSole(shoeSole)
                 .gender(productRequest.isGender())
                 .imageByte(productRequest.getImage())
                 .build();
@@ -99,51 +103,40 @@ public class ProductService {
 
     @Transactional
     public void updateProduct(UpdateProductRequest updateProductRequest) {
-        Optional<Product> optionalProduct = productRepository.findById(updateProductRequest.getId());
-        Optional<Brand> optionalBrand = brandRepository.findById(updateProductRequest.getIdBrand());
-        Optional<Category> optionalCategory = categoryRepository.findById(updateProductRequest.getIdCategory());
-        Optional<Material> optionalMaterial = materialRepository.findById(updateProductRequest.getIdMaterial());
-        Optional<ShoeSole> optionalShoeSole = shoeSoleRepository.findById(updateProductRequest.getIdShoeSole());
-        if (optionalProduct.isEmpty()) {
-            throw new RuntimeException("Sản phẩm với Id là:  " + updateProductRequest.getId() + " không tồn tại trong hệ thống");
-        }
-        if (optionalBrand.isEmpty()) {
-            throw new RuntimeException("Thương hiệu với Id là: " + updateProductRequest.getIdBrand() + " không tồn tại trong hệ thống");
-        }
-        if (optionalCategory.isEmpty()) {
-            throw new RuntimeException("Danh mục với Id là: " + updateProductRequest.getIdCategory() + " không tồn tại trong hệ thống");
-        }
-        if (optionalMaterial.isEmpty()) {
-            throw new RuntimeException("Chất liệu với Id là: " + updateProductRequest.getIdMaterial() + " không tồn tại trong hệ thống");
-        }
-        if (optionalShoeSole.isEmpty()) {
-            throw new RuntimeException("Đế giày với Id là: " + updateProductRequest.getIdShoeSole() + " không tồn tại trong hệ thống");
-        }
-        Product product = optionalProduct.get();
+        Product product = productRepository.findById(updateProductRequest.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên sản phẩm trong hệ thống!"));
+        Brand brand = brandRepository.findById(updateProductRequest.getIdBrand())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên hãng trong hệ thống!"));
+        Category category = categoryRepository.findById(updateProductRequest.getIdCategory())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên danh mục trong hệ thống!"));
+        Material material = materialRepository.findById(updateProductRequest.getIdMaterial())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên chất liệu trong hệ thống!"));
+        ShoeSole shoeSole = shoeSoleRepository.findById(updateProductRequest.getIdShoeSole())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên đế giày trong hệ thống!"));
         product.setStatus(Status.ACTIVE.toString());
-        if (!product.getBrand().getId().equals(optionalBrand.get().getId())) {
-            if (optionalBrand.get().getStatus().equals(Status.INACTIVE.toString())) {
-                throw new RuntimeException("Thương hiệu " + optionalBrand.get().getName() + " không còn hoạt động");
+        if (!product.getBrand().getId().equals(brand.getId())) {
+            if (brand.getStatus().equals(Status.INACTIVE.toString())) {
+                throw new RuntimeException("Thương hiệu " + brand.getName() + " không còn hoạt động");
             }
-            product.setBrand(optionalBrand.get());
+            product.setBrand(brand);
         }
-        if (!product.getCategory().getId().equals(optionalCategory.get().getId())) {
-            if (optionalCategory.get().getStatus().equals(Status.INACTIVE.toString())) {
-                throw new RuntimeException("Danh mục " + optionalCategory.get().getName() + " không còn hoạt động");
+        if (!product.getCategory().getId().equals(category.getId())) {
+            if (category.getStatus().equals(Status.INACTIVE.toString())) {
+                throw new RuntimeException("Danh mục " + category.getName() + " không còn hoạt động");
             }
-            product.setCategory(optionalCategory.get());
+            product.setCategory(category);
         }
-        if (!product.getMaterial().getId().equals(optionalMaterial.get().getId())) {
-            if (optionalMaterial.get().getStatus().equals(Status.INACTIVE.toString())) {
-                throw new RuntimeException("Chất liệu " + optionalMaterial.get().getName() + " không còn hoạt động");
+        if (!product.getMaterial().getId().equals(material.getId())) {
+            if (material.getStatus().equals(Status.INACTIVE.toString())) {
+                throw new RuntimeException("Chất liệu " + material.getName() + " không còn hoạt động");
             }
-            product.setMaterial(optionalMaterial.get());
+            product.setMaterial(material);
         }
-        if (!product.getShoeSole().getId().equals(optionalShoeSole.get().getId())) {
-            if (optionalShoeSole.get().getStatus().equals(Status.INACTIVE.toString())) {
-                throw new RuntimeException("Đế giày " + optionalShoeSole.get().getName() + " không còn hoạt động");
+        if (!product.getShoeSole().getId().equals(shoeSole.getId())) {
+            if (shoeSole.getStatus().equals(Status.INACTIVE.toString())) {
+                throw new RuntimeException("Đế giày " + shoeSole.getName() + " không còn hoạt động");
             }
-            product.setShoeSole(optionalShoeSole.get());
+            product.setShoeSole(shoeSole);
         }
         product.setName(updateProductRequest.getName());
         product.setGender(updateProductRequest.isGender());
@@ -152,7 +145,6 @@ public class ProductService {
         }
         productRepository.save(product);
         if (!updateProductRequest.getProductDetailRequest().isEmpty()) {
-            System.out.println("Cap nhat san pham chi tiet");
             productDetailService.updateProduct(updateProductRequest.getProductDetailRequest());
         }
         notificationController.sendNotification();
@@ -161,7 +153,7 @@ public class ProductService {
     public ProductResponse findProductById(Long id) {
         Optional<ProductResponse> optional = productRepository.findProductRequestsById(id);
         if (optional.isEmpty()) {
-            throw new RuntimeException("Sản phẩm với Id: " + id + " không tồn tại");
+            throw new RuntimeException("Không tìm thấy tài nguyên sản phẩm trong hệ thống!");
         }
         return optional.get();
     }
@@ -205,7 +197,7 @@ public class ProductService {
     public Product updateStatus(Long id, boolean aBoolean) {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (!optionalProduct.isPresent()) {
-            throw new RuntimeException("Id: " + id + " của sản phẩm không tồn tại");
+            throw new RuntimeException("Không tìm thấy tài nguyên sản phẩm trong hệ thống!");
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         optionalProduct.get().setStatus(newStatus);
@@ -237,7 +229,7 @@ public class ProductService {
     public ProductViewCustomerReponse getFindProductPriceRangeWithPromotionByIdProduct(Long idProduct) {
         Optional<ProductViewCustomerReponse> productViewCustomerReponse = productDetailRepository.findProductPriceRangeWithPromotionByIdProduct(idProduct);
         if (productViewCustomerReponse.isEmpty()) {
-            throw new RuntimeException("Sản phẩm có Id là: " + idProduct + " không tồn tại");
+            throw new RuntimeException("Không tìm thấy tài nguyên sản phẩm trong hệ thống!");
         }
         return productViewCustomerReponse.get();
     }

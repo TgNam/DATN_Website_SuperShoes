@@ -1,6 +1,6 @@
 package org.example.datn_website_supershoes.service;
 
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.example.datn_website_supershoes.Enum.Status;
 import org.example.datn_website_supershoes.dto.request.ProductDetailPromoRequest;
@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
@@ -43,20 +44,19 @@ public class ProductDetailService {
     @Transactional
     public boolean createProductDetail(Product product, List<ProductDetailRequest> productDetailRequest) {
         for (ProductDetailRequest request : productDetailRequest) {
-            Optional<Size> optionalSize = sizeRepository.findByIdAndStatus(request.getIdSize(), Status.ACTIVE.toString());
-            Optional<Color> optionalColor = colorRepository.findByIdAndStatus(request.getIdColor(), Status.ACTIVE.toString());
-            if (optionalSize.isEmpty()) {
-                throw new RuntimeException("Kích cỡ với Id là:  " + request.getIdSize() + " không tồn tại trong hệ thống");
+            Size size = sizeRepository.findById(request.getIdSize())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên kích cỡ trong hệ thống!"));
+            if(size.getStatus().equals(Status.INACTIVE.toString())){
+                throw new RuntimeException("Kích cỡ với " + size.getName() + " đã ngừng hoạt động!");
             }
-            if (optionalColor.isEmpty()) {
-                throw new RuntimeException("Màu sắc với Id là:  " + request.getIdColor() + " không tồn tại trong hệ thống");
-            }
+            Color color = colorRepository.findById(request.getIdColor())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên màu sắc trong hệ thống!"));
             ProductDetail productDetail = ProductDetail.builder()
                     .quantity(request.getQuantity())
                     .price(request.getPrice())
                     .product(product)
-                    .color(optionalColor.get())
-                    .size(optionalSize.get())
+                    .color(color)
+                    .size(size)
                     .build();
             productDetail.setStatus(Status.ACTIVE.toString());
             ProductDetail saveProductDetail = productDetailRepository.save(productDetail);
@@ -67,7 +67,7 @@ public class ProductDetailService {
         }
         return true;
     }
-
+    @Transactional
     public void updateProduct(List<UpdateProductDetailRequest> productDetailRequests) {
         for (UpdateProductDetailRequest request : productDetailRequests) {
             Optional<ProductDetail> optionalProductDetail = productDetailRepository.findById(request.getId());

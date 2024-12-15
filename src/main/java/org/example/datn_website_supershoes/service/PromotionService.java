@@ -78,7 +78,7 @@ public class PromotionService {
 
         // Kiểm tra nếu promotion không tồn tại
         if (!promotionOptional.isPresent()) {
-            throw new RuntimeException("Id " + id + " của đợt giảm giá không nằm trong trạng thái đang sắp diễn ra, đang diễn ra, kết thúc sớm");
+            throw new RuntimeException("Đợt giảm giá không nằm trong trạng thái đang sắp diễn ra, đang diễn ra, kết thúc sớm");
         }
 
         String newStatus;
@@ -104,7 +104,7 @@ public class PromotionService {
     public List<PromotionResponse> getAllPromotion() {
         return promotionRepository.listPromotionResponse();
     }
-
+@Transactional
     public Promotion createPromotion(PromotionCreationRequest promotionCreationRequest) {
         promotionCreationRequest.getPromotionRequest().validateEndDates();
         Promotion promotion = promotionRepository.save(convertPromotionRequestDTO(promotionCreationRequest.getPromotionRequest()));
@@ -113,9 +113,8 @@ public class PromotionService {
         }
         return promotion;
     }
-
+@Transactional
     public Promotion updatePromotion(PromotionUpdatesRequest promotionUpdatesRequest) {
-        try {
             Optional<Promotion> promotionOptional = promotionRepository.findById(promotionUpdatesRequest.getPromotionRequest().getId());
             if (!promotionOptional.isPresent()) {
                 throw new RuntimeException("Đợt giảm giá không tồn tại!");
@@ -142,10 +141,6 @@ public class PromotionService {
             }
             notificationController.sendNotification();
             return promotion;
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
     }
 
     private Promotion convertPromotionRequestDTO(PromotionRequest promotionRequest) {
@@ -169,7 +164,7 @@ public class PromotionService {
 
     public PromotionDetailResponse getPromotionDetailResponse(Long idPromotion) {
         Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
-        if (!promotion.isPresent()) {
+        if (promotion.isEmpty()) {
             throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
         }
         List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.findProductPromotionResponseByIdPromotion(promotion.get().getId());
@@ -179,7 +174,7 @@ public class PromotionService {
 
     public PromotionDetailResponseByQuang getPromotionDetailResponseByQuang(Long idPromotion) {
         Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
-        if (!promotion.isPresent()) {
+        if (promotion.isEmpty()) {
             throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
         }
         List<ProductPromotionResponseByQuang> productPromotionResponseByQuangs = promotionDetailService.findProductPromotionResponseByIdPromotionByQuang(promotion.get().getId());
@@ -190,7 +185,7 @@ public class PromotionService {
 
     public PromotionDetailResponse getSearchPromotionDetailResponse(Long idPromotion, String search, String nameSize, String nameColor, String priceRange) {
         Optional<Promotion> promotion = promotionRepository.findById(idPromotion);
-        if (!promotion.isPresent()) {
+        if (promotion.isEmpty()) {
             throw new RuntimeException("Đối tượng giảm giá sản phẩm không tồn tại");
         }
         List<ProductPromotionResponse> productPromotionResponses = promotionDetailService.filterListProductPromotion(promotion.get().getId(), search, nameSize, nameColor, priceRange);

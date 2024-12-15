@@ -47,7 +47,7 @@ public class BillByEmployeeService {
     NotificationController notificationController;
     //Lấy tối đa 5 phần tử
     private static final int MAX_DISPLAY_BILLS = 5;
-
+    private static final BigDecimal SHIPPING_PRICE = BigDecimal.valueOf(30000);
     public Account getUseLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Account user = accountRepository.findByEmail(authentication.getName())
@@ -382,21 +382,7 @@ public class BillByEmployeeService {
         Voucher voucher = null;
         AccountVoucher accountVoucher = null;
 
-        if (delivery) {
-            if (name == null || name.isBlank()) {
-                throw new RuntimeException("Không được để trống tên người nhận");
-            } else if (phoneNumber == null || phoneNumber.isBlank()) {
-                throw new RuntimeException("Không được để trống số điện thoại người nhận");
-            } else if (address == null || address.isBlank()) {
-                throw new RuntimeException("Không được để trống địa chỉ nhận hàng");
-            }
-            if (note != null && !note.isBlank()) {
-                bill.setNote(note);
-            }
-            bill.setNameCustomer(name);
-            bill.setPhoneNumber(phoneNumber);
-            bill.setAddress(address);
-        }
+
 
         if (idAccount != null) {
             Optional<Account> accountOptional = accountRepository.findByIdAndStatus(idAccount, Status.ACTIVE.toString());
@@ -404,6 +390,8 @@ public class BillByEmployeeService {
                 throw new RuntimeException("Xảy ra lỗi khi tìm kiếm tài khoản");
             }
             bill.setCustomer(accountOptional.get());
+            bill.setNameCustomer(accountOptional.get().getName());
+            bill.setPhoneNumber(accountOptional.get().getPhoneNumber());
         }
 
         List<BillDetail> listBillDetail = billDetailRepository.findByIdBill(bill.getId());
@@ -421,7 +409,22 @@ public class BillByEmployeeService {
 
         BigDecimal priceDiscount = BigDecimal.ZERO;
         BigDecimal totalAmount = totalMerchandise;
-
+        if (delivery) {
+            if (name == null || name.isBlank()) {
+                throw new RuntimeException("Không được để trống tên người nhận");
+            } else if (phoneNumber == null || phoneNumber.isBlank()) {
+                throw new RuntimeException("Không được để trống số điện thoại người nhận");
+            } else if (address == null || address.isBlank()) {
+                throw new RuntimeException("Không được để trống địa chỉ nhận hàng");
+            }
+            if (note != null && !note.isBlank()) {
+                bill.setNote(note);
+            }
+            bill.setNameCustomer(name);
+            bill.setPhoneNumber(phoneNumber);
+            bill.setAddress(address);
+            totalAmount = totalAmount.add(SHIPPING_PRICE);
+        }
         if (codeVoucher != null && !codeVoucher.isBlank()) {
             Optional<Voucher> voucherOptional = voucherRepository.findByCodeVoucher(codeVoucher);
             if (voucherOptional.isPresent()) {
@@ -496,6 +499,7 @@ public class BillByEmployeeService {
         if (checkAccountVoucher) {
             accountVoucherRepository.save(accountVoucher);
         }
+
         billRepository.save(bill);
         notificationController.sendEvent("PAYBILL_SUCCESS");
     }
@@ -527,7 +531,7 @@ public class BillByEmployeeService {
         BigDecimal totalMerchandise = calculateTotalCartPriceForSelected(cartDetails);
 
         BigDecimal priceDiscount = BigDecimal.ZERO;
-        BigDecimal totalAmount = totalMerchandise;
+        BigDecimal totalAmount = totalMerchandise.add(SHIPPING_PRICE);
 
         if (cartDetails == null || cartDetails.isEmpty()) {
             throw new RuntimeException("Chưa có sản phẩm nào trong giỏ hàng");
@@ -848,7 +852,7 @@ public class BillByEmployeeService {
         }
 
         BigDecimal priceDiscount = BigDecimal.ZERO;
-        BigDecimal totalAmount = totalMerchandise;
+        BigDecimal totalAmount = totalMerchandise.add(SHIPPING_PRICE);
 
         if (codeVoucher != null && !codeVoucher.isBlank()) {
             Optional<Voucher> voucherOptional = voucherRepository.findByCodeVoucher(codeVoucher);

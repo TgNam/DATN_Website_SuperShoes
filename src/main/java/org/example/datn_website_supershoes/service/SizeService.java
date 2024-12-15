@@ -41,7 +41,7 @@ public class SizeService {
     public Size updateStatus(Long id, boolean aBoolean) {
         Optional<Size> sizeOt = sizeRepository.findById(id);
         if (!sizeOt.isPresent()) {
-            throw new RuntimeException("Id " + sizeOt.get().getId() + " của kích cỡ không tồn tại");
+            throw new RuntimeException("Không tìm thấy tài nguyên kích cỡ trong hệ thống!");
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         sizeOt.get().setStatus(newStatus);

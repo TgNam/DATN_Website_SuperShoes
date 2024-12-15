@@ -82,7 +82,6 @@ public class AccountService {
     }
 
     public Account createAccountEmployee(EmployeeCreationRequest employeeCreationRequest) {
-        System.out.println(employeeCreationRequest.getAccountRequest().getEmail());
         Optional<Account> accountOP = accountRepository.findByEmail(employeeCreationRequest.getAccountRequest().getEmail());
         if (accountOP.isPresent()) {
             throw new RuntimeException("Email " + employeeCreationRequest.getAccountRequest().getEmail() + " đã tồn tại trong hệ thống. Vui lòng sử dụng email khác.");
