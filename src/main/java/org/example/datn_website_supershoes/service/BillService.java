@@ -145,12 +145,11 @@ public class BillService {
 
     private BillResponse convertToBillResponse(Bill bill) {
         BillResponse response = new BillResponse();
-
-
         response.setId(bill.getId());
         response.setCodeBill(bill.getCodeBill());
-        if (bill.getCustomer() != null) {
-            response.setNameCustomer(bill.getCustomer().getName());
+
+        if (bill.getNameCustomer() != null) {
+            response.setNameCustomer(bill.getNameCustomer());
         }
 
         response.setPhoneNumber(bill.getPhoneNumber());
