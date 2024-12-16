@@ -43,7 +43,7 @@ public class BillDetailService {
     PayBillRepository payBillRepository;
     @Autowired
     NotificationController notificationController;
-
+    private static final BigDecimal SHIPPING_PRICE = BigDecimal.valueOf(30000);
     public Page<BillDetailResponse> getBillDetails(Specification<BillDetail> spec, Pageable pageable) {
         return billDetailRepository.findAll(spec, pageable).map(this::convertToBillDetailResponse);
     }
@@ -69,7 +69,7 @@ public class BillDetailService {
         Optional<Bill> billOptional = billRepository.findByCodeBill(codeBill);
 
         // Kiểm tra hóa đơn theo mã hóa đơn có tồn tại hay không
-        if (!billOptional.isPresent()) {
+        if (billOptional.isEmpty()) {
             throw new RuntimeException("Mã hóa đơn " + codeBill + " không tồn tại trong hệ thống.");
         }
         if (!billOptional.get().getStatus().equals(Status.WAITING_FOR_PAYMENT.toString())) {
@@ -80,23 +80,24 @@ public class BillDetailService {
         // Thực hiện thêm hóa đơn chi tiết
         for (ProductDetailPromoRequest request : listProductDetail) {
             // Tìm kiếm sản phẩm chi tiết theo id và trạng thái
-            Optional<ProductDetail> productDetailOptional = productDetailRepository.findByIdAndAndStatus(request.getIdProductDetail(), Status.ACTIVE.toString());
+            ProductDetail productDetail = productDetailRepository.findById(request.getIdProductDetail())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên sản phẩm trong hệ thống!"));
 
             // Kiểm tra sản phẩm có tồn tại không
-            if (!productDetailOptional.isPresent()) {
-                throw new RuntimeException("Id " + request.getIdProductDetail() + " của sản phẩm không tồn tại trong hệ thống.");
+            if (productDetail.getStatus().equals(Status.INACTIVE.toString())) {
+                throw new RuntimeException("Sản phẩm " + productDetail.getProduct().getName() + " hiện tại đã ngừng bán.");
             }
 
             //Số lượng sản phẩm của sản phẩm chi tiết
-            int quantityProductDetail = productDetailOptional.get().getQuantity();
+            int quantityProductDetail = productDetail.getQuantity();
 
             // Kiểm tra số lượng sản phẩm số lượng mua so với sản phẩm còn lại trong kho
             if (request.getQuantity() > quantityProductDetail || quantityProductDetail <= 0) {
-                throw new RuntimeException("Sản phẩm " + productDetailOptional.get().getProduct().getName() + " không đủ số lượng.");
+                throw new RuntimeException("Sản phẩm " + productDetail.getProduct().getName() + " không đủ số lượng.");
             }
 
             //Giá tiền sản phẩm
-            BigDecimal priceProduct = productDetailOptional.get().getPrice();
+            BigDecimal priceProduct = productDetail.getPrice();
 
             //Tìm kiếm sản phẩm có đang  sale hay không
             Optional<ProductPromotionResponse> productPromotionResponse = productDetailRepository.findProductPromotionByIdProductDetail(request.getIdProductDetail());
@@ -125,7 +126,7 @@ public class BillDetailService {
                         //Chưa tồn tại sẽ tạo hóa đơn chi tiết mới
                         // Tạo hóa đơn chi tiết mới
                         BillDetail billDetail = new BillDetail();
-                        billDetail.setProductDetail(productDetailOptional.get());
+                        billDetail.setProductDetail(productDetail);
                         billDetail.setBill(bill);
                         billDetail.setQuantity(request.getQuantity());
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
@@ -167,7 +168,7 @@ public class BillDetailService {
                     } else {
                         // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá sale
                         BillDetail billDetail = new BillDetail();
-                        billDetail.setProductDetail(productDetailOptional.get());
+                        billDetail.setProductDetail(productDetail);
                         billDetail.setBill(bill);
                         billDetail.setQuantity(quantityProductPromotion);
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
@@ -185,7 +186,7 @@ public class BillDetailService {
                         } else {
                             // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá gốc
                             BillDetail billDetail = new BillDetail();
-                            billDetail.setProductDetail(productDetailOptional.get());
+                            billDetail.setProductDetail(productDetail);
                             billDetail.setBill(bill);
                             billDetail.setQuantity(retailQuantity);
                             billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
@@ -215,25 +216,25 @@ public class BillDetailService {
                     //Nếu không tồn tại sẽ tạo hóa đơn mới
                     // Tạo hóa đơn chi tiết mới
                     BillDetail billDetail = new BillDetail();
-                    billDetail.setProductDetail(productDetailOptional.get());
+                    billDetail.setProductDetail(productDetail);
                     billDetail.setBill(bill);
                     billDetail.setQuantity(request.getQuantity());
                     billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                     //Áp dụng giá gốc của sản phẩm
-                    billDetail.setPriceDiscount(productDetailOptional.get().getPrice());
+                    billDetail.setPriceDiscount(productDetail.getPrice());
                     billDetailRepository.save(billDetail);
                 }
             }
             //Số lượng còn lại của sản phẩm
             Integer newProductQuantity = quantityProductDetail - request.getQuantity();
             //Cập nhật số lượng cho sản phẩm
-            productDetailOptional.get().setQuantity(newProductQuantity);
+            productDetail.setQuantity(newProductQuantity);
             //Nếu số lượng <= 0 thì chuyển productDetail sang trạng thái INACTIVE
             if (newProductQuantity <= 0) {
-                productDetailOptional.get().setStatus(Status.INACTIVE.toString());
+                productDetail.setStatus(Status.INACTIVE.toString());
             }
             //Cập nhật lại sản phẩm chi tiết
-            productDetailRepository.save(productDetailOptional.get());
+            productDetailRepository.save(productDetail);
             notificationController.sendNotification();
         }
     }
@@ -451,6 +452,9 @@ public class BillDetailService {
 
         BigDecimal priceDiscount = BigDecimal.ZERO;
         BigDecimal totalAmount = bill.getTotalMerchandise();
+        if(!billOptional.get().getAddress().isEmpty()){
+            totalAmount = totalAmount.add(SHIPPING_PRICE);
+        }
         if (bill.getVoucher() != null) {
             Optional<Voucher> voucherOptional = voucherRepository.findById(bill.getVoucher().getId());
             if (voucherOptional.isPresent()) {
@@ -629,6 +633,9 @@ public class BillDetailService {
         promotionDetailRepository.save(promotionDetail);
     }
     private BigDecimal applyVoucher(Bill bill, BigDecimal totalMerchandise) {
+        if(!bill.getAddress().isEmpty()){
+            totalMerchandise = totalMerchandise.add(SHIPPING_PRICE);
+        }
         if (bill.getVoucher() == null) return totalMerchandise;
 
         Voucher voucher = voucherRepository.findById(bill.getVoucher().getId())
@@ -636,7 +643,6 @@ public class BillDetailService {
         if (voucher == null || totalMerchandise.compareTo(voucher.getMinBillValue()) < 0) {
             return totalMerchandise;
         }
-
         BigDecimal discount = totalMerchandise.multiply(BigDecimal.valueOf(voucher.getValue() / 100.0))
                 .setScale(0, RoundingMode.DOWN);
         discount = discount.min(voucher.getMaximumDiscount());
