@@ -1,7 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.PastOrPresent;
 import org.example.datn_website_supershoes.dto.request.AccountUpdateRequest;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.EmployeeCreationRequest;
@@ -10,6 +9,7 @@ import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.service.AccountService;
+import org.example.datn_website_supershoes.webconfig.AccountLockedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -272,19 +272,31 @@ public class AccountRestAPI {
     }
 
     @GetMapping("/get-account-login")
-    public ResponseEntity<?> getAccountLogin(){
+    public ResponseEntity<?> getAccountLogin() {
         try {
             return ResponseEntity.ok().body(accountService.getUseLogin());
-        }catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Response.builder()
+        } catch (AccountLockedException e) {
+            return ResponseEntity.status(HttpStatus.LOCKED).body(
+                    Response.builder()
+                            .status(HttpStatus.LOCKED.toString())
+                            .mess(e.getMessage())
+                            .build()
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    Response.builder()
                             .status(HttpStatus.CONFLICT.toString())
                             .mess(e.getMessage())
                             .build()
-                    );
+            );
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                            .mess("Đã xảy ra lỗi không mong muốn: " + e.getMessage())
+                            .build()
+            );
         }
     }
-
 
 }

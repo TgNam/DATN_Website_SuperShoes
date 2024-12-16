@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.security.auth.login.AccountLockedException;
 import java.util.Optional;
 
 
@@ -37,7 +36,7 @@ public class AuthenticationService {
     @Autowired
     JWTService jwtService;
 
-    public TokenResponse authenticate(LoginRequest loginRequest) throws AccountLockedException {
+    public TokenResponse authenticate(LoginRequest loginRequest) {
         Account account = accountRepository
                 .findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản!"));
@@ -49,11 +48,6 @@ public class AuthenticationService {
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Mật khẩu không đúng.");
         }
-
-        if (account.getStatus().equals(Status.INACTIVE.toString())) {
-            throw new AccountLockedException("Tài khoản của bạn bị khóa.");
-        }
-
         return TokenResponse.builder()
                 .accessToken(jwtService.generateToken(account))
                 .resfreshToken("1234")

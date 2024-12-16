@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.datn_website_supershoes.Enum.Status;
+import org.example.datn_website_supershoes.webconfig.AccountLockedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -103,8 +104,12 @@ public class Account extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return super.getStatus().equals(Status.ACTIVE.toString());
+        if (!super.getStatus().equals(Status.ACTIVE.toString())) {
+            throw new AccountLockedException("Tài khoản đã bị khóa!");
+        }
+        return true;
     }
+
 
     @Override
     public boolean isCredentialsNonExpired() {

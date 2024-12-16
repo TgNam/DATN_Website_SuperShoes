@@ -13,6 +13,7 @@ import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
+import org.example.datn_website_supershoes.webconfig.AccountLockedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -232,10 +233,18 @@ public class AccountService {
     public Account getUseLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Tìm kiếm tài khoản bằng email và xử lý nếu không tìm thấy
-        return accountRepository.findByEmail(authentication.getName())
+        // Tìm kiếm tài khoản bằng email
+        Account account = accountRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ Email: " + authentication.getName()));
+
+        // Kiểm tra xem tài khoản có bị khóa không
+        if (!account.isAccountNonLocked()) {
+            throw new AccountLockedException("Tài khoản đã bị khóa!");
+        }
+
+        return account;
     }
+
 
 }
 
