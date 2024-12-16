@@ -26,6 +26,13 @@ public class SecurityConfig {
     @Autowired
     CustomPreFilter preFilter;
 
+    @Autowired
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+    public SecurityConfig(CustomAuthenticationEntryPoint authenticationEntryPoint) {
+        this.authenticationEntryPoint = authenticationEntryPoint;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -57,10 +64,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PRIVATE_URL).authenticated()
                         .anyRequest().permitAll()
+                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(preFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(authenticationEntryPoint)
                 );
-        http.csrf(AbstractHttpConfigurer::disable);
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(preFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
 }

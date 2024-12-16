@@ -20,7 +20,7 @@ public interface BillDetailByEmployeeRepository extends JpaRepository<BillDetail
             "INNER JOIN pd.product p  " +
             "INNER JOIN pd.color c  " +
             "INNER JOIN pd.size s  " +
-            "LEFT JOIN pd.promotionDetail prod ON prod.status = 'FINISHED' " +
+            "LEFT JOIN pd.promotionDetail prod ON prod.status = 'ONGOING' " +
             "LEFT JOIN prod.promotion pro " +
             "WHERE b.codeBill = :codeBill")
     List<BillDetailOrderResponse> getBillDetailsByCodeBill(String codeBill);

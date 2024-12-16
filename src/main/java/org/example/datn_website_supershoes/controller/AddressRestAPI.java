@@ -113,6 +113,29 @@ public class AddressRestAPI {
                     );
         }
     }
+    @GetMapping("/findEmployeeAddress")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
+    public ResponseEntity<?> findEmployeeAddress(@RequestParam(value ="idAccount", required = false) Long idAccount) {
+        try {
+            if (idAccount == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID tài khoản không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(addressService.findAccountAddressResponseIdAccount(idAccount));
+        }catch (RuntimeException e){
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
     @GetMapping("/getAccountAddress")
     @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> getAccountAddresses() {

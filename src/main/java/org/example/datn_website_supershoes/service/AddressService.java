@@ -36,6 +36,11 @@ public class AddressService {
                 .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại!"));
         return address;
     }
+    public  AddressResponse findAccountAddressResponseIdAccount(Long idAccount){
+        AddressResponse address = addressRepository.findAccountAddressResponseByIdAccount(idAccount)
+                .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại!"));
+        return address;
+    }
     // Thêm mới một đối tượng Address
     public AddressResponse createAddress(AddressRequest addressRequest) {
         // Bước 1: Lấy danh sách các địa chỉ hiện tại của tài khoản

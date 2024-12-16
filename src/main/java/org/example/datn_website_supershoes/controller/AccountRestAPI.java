@@ -1,7 +1,6 @@
 package org.example.datn_website_supershoes.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.PastOrPresent;
 import org.example.datn_website_supershoes.dto.request.AccountUpdateRequest;
 import org.example.datn_website_supershoes.dto.request.AccountRequest;
 import org.example.datn_website_supershoes.dto.request.EmployeeCreationRequest;
@@ -10,6 +9,7 @@ import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.service.AccountService;
+import org.example.datn_website_supershoes.webconfig.AccountLockedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +37,8 @@ public class AccountRestAPI {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            Account account = accountService.createAccount(accountRequest);
-            return ResponseEntity.ok(account);
+             accountService.createAccount(accountRequest);
+            return ResponseEntity.ok("Thêm người dùng mới thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -61,8 +61,8 @@ public class AccountRestAPI {
                 return ResponseEntity.badRequest().body(errors);
             }
             System.out.println(employeeCreationRequest.getAccountRequest().getEmail());
-            Account account = accountService.createAccountEmployee(employeeCreationRequest);
-            return ResponseEntity.ok(account);
+            accountService.createAccountEmployee(employeeCreationRequest);
+            return ResponseEntity.ok("Thêm nhân viên mới thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -106,8 +106,8 @@ public class AccountRestAPI {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            Account account = accountService.updateAccountEmployee(idAccount, idAddress, employeeUpdateRequest);
-            return ResponseEntity.ok(account);
+             accountService.updateAccountEmployee(idAccount, idAddress, employeeUpdateRequest);
+            return ResponseEntity.ok("Cập nhật người dùng thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -142,8 +142,8 @@ public class AccountRestAPI {
                         .collect(Collectors.toList());
                 return ResponseEntity.badRequest().body(errors);
             }
-            Account account = accountService.updateAccount(idAccount, accountRequest);
-            return ResponseEntity.ok(account);
+             accountService.updateAccount(idAccount, accountRequest);
+            return ResponseEntity.ok("Cập nhật nhân viên thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -156,7 +156,7 @@ public class AccountRestAPI {
     }
 
     @PutMapping("/updateStatus")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<?> updateStatus(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam(value = "aBoolean", required = false) boolean aBoolean
@@ -170,8 +170,8 @@ public class AccountRestAPI {
                                 .build()
                 );
             }
-            Account account = accountService.updateStatus(id, aBoolean);
-            return ResponseEntity.ok(account);
+             accountService.updateStatus(id, aBoolean);
+            return ResponseEntity.ok("Cập nhật trạng tài khoản thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
@@ -272,19 +272,31 @@ public class AccountRestAPI {
     }
 
     @GetMapping("/get-account-login")
-    public ResponseEntity<?> getAccountLogin(){
+    public ResponseEntity<?> getAccountLogin() {
         try {
             return ResponseEntity.ok().body(accountService.getUseLogin());
-        }catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Response.builder()
+        } catch (AccountLockedException e) {
+            return ResponseEntity.status(HttpStatus.LOCKED).body(
+                    Response.builder()
+                            .status(HttpStatus.LOCKED.toString())
+                            .mess(e.getMessage())
+                            .build()
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    Response.builder()
                             .status(HttpStatus.CONFLICT.toString())
                             .mess(e.getMessage())
                             .build()
-                    );
+            );
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                            .mess("Đã xảy ra lỗi không mong muốn: " + e.getMessage())
+                            .build()
+            );
         }
     }
-
 
 }

@@ -6,6 +6,7 @@ import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.token.TokenResponse;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.service.AuthenticationService;
+import org.example.datn_website_supershoes.webconfig.AccountLockedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.security.auth.login.AccountLockedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,14 +53,14 @@ public class AuthenticationRestAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     Response.builder()
                             .status(HttpStatus.UNAUTHORIZED.toString())
-                            .mess("Thông tin đăng nhập không hợp lệ. Vui lòng kiểm tra mật khẩu của bạn.")
+                            .mess(e.getMessage())
                             .build()
             );
         } catch (AccountLockedException e) {
             return ResponseEntity.status(HttpStatus.LOCKED).body(
                     Response.builder()
                             .status(HttpStatus.LOCKED.toString())
-                            .mess("Tài khoản đã bị khóa. Vui lòng liên hệ bộ phận hỗ trợ.")
+                            .mess(e.getMessage())
                             .build()
             );
         } catch (Exception e) {

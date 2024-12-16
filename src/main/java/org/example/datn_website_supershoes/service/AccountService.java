@@ -13,6 +13,7 @@ import org.example.datn_website_supershoes.dto.response.AccountResponse;
 import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.repository.AccountVoucherRepository;
+import org.example.datn_website_supershoes.webconfig.AccountLockedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,15 +41,13 @@ public class AccountService {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
-    public Account createAccount(AccountRequest accountRequest) {
+    public void createAccount(AccountRequest accountRequest) {
         Optional<Account> accountOP = accountRepository.findByEmail(accountRequest.getEmail());
         if (accountOP.isPresent()) {
             throw new RuntimeException("Email " + accountRequest.getEmail() + " đã tồn tại trong hệ thống. Vui lòng sử dụng email khác.");
         }
-
         AccountWithPassword accountWithPassword = convertAccountRequestDTO(accountRequest);
         Account account = accountRepository.save(accountWithPassword.getAccount());
-
         if (account != null) {
             String password = accountWithPassword.getPassword();
             String email = account.getEmail();
@@ -74,14 +73,12 @@ public class AccountService {
                     "Chào mừng bạn đến với SuperShoes!",
                     emailContent
             );
-
-            return account;
         } else {
             throw new RuntimeException("Lỗi thêm tài khoản mới!");
         }
     }
 
-    public Account createAccountEmployee(EmployeeCreationRequest employeeCreationRequest) {
+    public void createAccountEmployee(EmployeeCreationRequest employeeCreationRequest) {
         Optional<Account> accountOP = accountRepository.findByEmail(employeeCreationRequest.getAccountRequest().getEmail());
         if (accountOP.isPresent()) {
             throw new RuntimeException("Email " + employeeCreationRequest.getAccountRequest().getEmail() + " đã tồn tại trong hệ thống. Vui lòng sử dụng email khác.");
@@ -125,14 +122,13 @@ public class AccountService {
                     .build();
             addressService.createAddress(addressRequest);
 
-            return account;
         } else {
             throw new RuntimeException("Lỗi thêm tài khoản mới!");
         }
     }
 
 
-    public Account updateAccountEmployee(Long idAccount, Long idAddress, EmployeeUpdateRequest employeeUpdateRequest) {
+    public void updateAccountEmployee(Long idAccount, Long idAddress, EmployeeUpdateRequest employeeUpdateRequest) {
         Account account = accountRepository.findById(idAccount).orElseGet(() -> {
             throw new RuntimeException("Tài khoản không tồn tại");
         });
@@ -150,13 +146,12 @@ public class AccountService {
                     .address(employeeUpdateRequest.getAddressRequest().getAddress())
                     .build();
             addressService.updateAddress(idAddress, addressRequest);
-            return UpdateAccount;
         } else {
-            throw new RuntimeException("Lỗi thêm tài khoản mới !");
+            throw new RuntimeException("Lỗi cập nhật tài khoản !");
         }
     }
 
-    public Account updateAccount(Long idAccount, AccountUpdateRequest accountRequest) {
+    public void updateAccount(Long idAccount, AccountUpdateRequest accountRequest) {
         Account account = accountRepository.findById(idAccount).orElseGet(() -> {
             throw new RuntimeException("Tài khoản không tồn tại");
         });
@@ -164,19 +159,17 @@ public class AccountService {
         account.setPhoneNumber(accountRequest.getPhoneNumber());
         account.setGender(accountRequest.getGender());
         account.setBirthday(accountRequest.getBirthday());
-        return accountRepository.save(account);
+        accountRepository.save(account);
     }
 
-    public Account updateStatus(Long idAccount, boolean aBoolean) {
+    public void updateStatus(Long idAccount, boolean aBoolean) {
         Optional<Account> accountOt = accountRepository.findById(idAccount);
         if (!accountOt.isPresent()) {
             throw new RuntimeException("Id " + accountOt.get().getId() + " của tài khoản không tồn tại");
         }
         String newStatus = aBoolean ? Status.ACTIVE.toString() : Status.INACTIVE.toString();
         accountOt.get().setStatus(newStatus);
-        Account account = accountRepository.save(accountOt.get());
-        return account;
-
+        accountRepository.save(accountOt.get());
     }
 
     public List<AccountResponse> getAllAccountCustomerActive() {
@@ -232,10 +225,18 @@ public class AccountService {
     public Account getUseLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Tìm kiếm tài khoản bằng email và xử lý nếu không tìm thấy
-        return accountRepository.findByEmail(authentication.getName())
+        // Tìm kiếm tài khoản bằng email
+        Account account = accountRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ Email: " + authentication.getName()));
+
+        // Kiểm tra xem tài khoản có bị khóa không
+        if (!account.isAccountNonLocked()) {
+            throw new AccountLockedException("Tài khoản đã bị khóa!");
+        }
+
+        return account;
     }
+
 
 }
 
