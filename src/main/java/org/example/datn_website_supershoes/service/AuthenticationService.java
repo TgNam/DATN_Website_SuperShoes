@@ -37,6 +37,7 @@ public class AuthenticationService {
     @Autowired
     JWTService jwtService;
 
+
     public TokenResponse authenticate(LoginRequest loginRequest) throws AccountLockedException {
         Account account = accountRepository
                 .findByEmail(loginRequest.getEmail())
@@ -59,37 +60,39 @@ public class AuthenticationService {
                 .resfreshToken("1234")
                 .build();
     }
+
     @Transactional
-    public  Account register(Account account){
+    public Account register(Account account) {
         Optional<Account> checkAccount = accountRepository.findByEmail(account.getEmail());
-        if(checkAccount.isPresent()){
-            throw  new RuntimeException("Email đã được đăng ký!");
+        if (checkAccount.isPresent()) {
+            throw new RuntimeException("Email đã được đăng ký!");
         }
         account.setRole("USER");
         account.setStatus(Status.ACTIVE.toString());
         account.setPassword(passwordEncoderService.encodedPassword(account.getPassword()));
-        return  accountRepository.save(account);
+        return accountRepository.save(account);
     }
 
 
-    public void resetPassword(String email){
+    public void resetPassword(String email) {
         Account account = accountRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Not Found Emaill!"));
-        if(!account.getRole().equals("ADMIN")){
+        if (!account.getRole().equals("ADMIN")) {
             String token = jwtService.generateToken(account);
             String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-            String urlSend = baseUrl + "/api/v1/auth/reset" +token + "/" + account.getId();
-            emailService.sendEmail(email,"Khôi Phục Mật Khẩu", urlSend);
+            String urlSend = baseUrl + "/api/v1/auth/reset" + token + "/" + account.getId();
+            emailService.sendEmail(email, "Khôi Phục Mật Khẩu", urlSend);
         }
 
     }
-    public void verify(String token,Long id){
+
+    public void verify(String token, Long id) {
         Account account = accountRepository
                 .findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Not Found Emaill!"));
-        if(jwtService.isValid(token,account)){
-            emailService.sendEmail(account.getEmail(), "New Pass", "888888" );
+        if (jwtService.isValid(token, account)) {
+            emailService.sendEmail(account.getEmail(), "New Pass", "888888");
             account.setPassword(passwordEncoderService.encodedPassword("888888"));
         }
     }
