@@ -13,7 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.security.auth.login.AccountLockedException;
 import java.util.List;
@@ -69,19 +74,20 @@ public class AuthenticationRestAPI {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Account account){
+    public ResponseEntity<?> register(@RequestBody Account account) {
         try {
             return ResponseEntity.ok(authenticationService.register(account));
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getMessage());
         }
     }
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Param("email") String email) {
         try {

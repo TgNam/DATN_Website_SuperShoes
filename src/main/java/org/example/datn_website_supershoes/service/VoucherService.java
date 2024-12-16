@@ -21,9 +21,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -44,8 +45,17 @@ public class VoucherService {
 
     @Autowired
     AccountVoucherRepository accountVoucherRepository;
+
     @Autowired
     NotificationController notificationController;
+
+    public Account getUseLogin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Account user = accountRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Lỗi liên quan đến đăng nhập vui lòng thử lại"));
+        return user;
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(VoucherService.class);
 
     private String generateVoucherCode() {
@@ -74,7 +84,7 @@ public class VoucherService {
 
             if (!oldStatus.equals(voucher.getStatus())) {
                 logger.info("Voucher {} status changed from {} to {}", voucher.getCodeVoucher(), oldStatus, voucher.getStatus());
-                voucherRepository.save(voucher); // Chỉ lưu nếu trạng thái thay đổi
+                voucherRepository.save(voucher);
                 notificationController.sendNotification();
             }
         }
@@ -84,7 +94,7 @@ public class VoucherService {
         return voucherRepository.count(spec);
     }
 
-    public Voucher createVoucher(VoucherRequest voucherRequest, Long userId) {
+    public Voucher createVoucher(VoucherRequest voucherRequest) {
         if (voucherRequest.getIsPrivate() && (voucherRequest.getAccountIds() == null || voucherRequest.getAccountIds().isEmpty())) {
             throw new IllegalArgumentException("For private vouchers, account IDs must be provided.");
         }
@@ -96,13 +106,12 @@ public class VoucherService {
         voucher.setStartAt(convertToUTC(voucherRequest.getStartAt()));
         voucher.setEndAt(convertToUTC(voucherRequest.getEndAt()));
 
-        Account creator = accountRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        Account creator = getUseLogin(); // Lấy thông tin người đăng nhập
         voucher.setCreatedBy(creator.getName());
         updateVoucherStatus(voucher, currentDate);
         Voucher savedVoucher = voucherRepository.save(voucher);
 
+        // voucher riêng tư
         if (voucher.getIsPrivate()) {
             List<AccountVoucher> accountVouchers = voucherRequest.getAccountIds().stream()
                     .filter(Objects::nonNull)
@@ -125,7 +134,7 @@ public class VoucherService {
         return savedVoucher;
     }
 
-    public Voucher updateVoucher(Long id, VoucherRequest voucherRequest, Long userId) {
+    public Voucher updateVoucher(Long id, VoucherRequest voucherRequest) {
 
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
@@ -134,8 +143,7 @@ public class VoucherService {
             throw new RuntimeException("Cannot update an expired voucher.");
         }
 
-        Account updater = accountRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Account updater = getUseLogin();
 
         voucher.setStartAt(convertToUTC(voucherRequest.getStartAt()));
         voucher.setEndAt(convertToUTC(voucherRequest.getEndAt()));
@@ -190,12 +198,11 @@ public class VoucherService {
         return voucherRepository.save(voucher);
     }
 
-    public Voucher endVoucherEarly(Long id, Long userId) {
+    public Voucher endVoucherEarly(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
-        Account updater = accountRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Account updater = getUseLogin();
 
         voucher.setStatus(Status.ENDED_EARLY.toString());
         voucher.setUpdatedBy(updater.getName());
@@ -203,7 +210,7 @@ public class VoucherService {
         return voucherRepository.save(voucher);
     }
 
-    public Voucher reactivateVoucher(Long id, Long userId) {
+    public Voucher reactivateVoucher(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
@@ -211,14 +218,12 @@ public class VoucherService {
             throw new RuntimeException("Only vouchers with 'Ended Early' status can be reactivated.");
         }
 
-        Account updater = accountRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Account updater = getUseLogin();
+        voucher.setUpdatedBy(updater.getName());
 
         Date currentDate = new Date();
         updateVoucherStatus(voucher, currentDate);
-        voucher.setUpdatedBy(updater.getName());
         accountVoucherRepository.updateStatusByVoucherId(id, "ACTIVE");
-
         return voucherRepository.save(voucher);
     }
 

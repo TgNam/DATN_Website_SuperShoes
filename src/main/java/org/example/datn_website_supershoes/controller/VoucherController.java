@@ -6,9 +6,7 @@ import org.example.datn_website_supershoes.dto.request.VoucherRequest;
 import org.example.datn_website_supershoes.dto.response.Response;
 import org.example.datn_website_supershoes.dto.response.VoucherBillResponse;
 import org.example.datn_website_supershoes.dto.response.VoucherResponse;
-import org.example.datn_website_supershoes.model.Account;
 import org.example.datn_website_supershoes.model.Voucher;
-import org.example.datn_website_supershoes.repository.AccountRepository;
 import org.example.datn_website_supershoes.service.VoucherService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,16 +40,24 @@ import java.util.stream.Collectors;
 public class VoucherController {
 
     @Autowired
-     VoucherService voucherService;
-    @Autowired
-     AccountRepository accountRepository;
-    public Account getUseLogin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Account user = accountRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Lỗi liên quan đến đăng nhập vui lòng thử lại"));
-        return user;
+    VoucherService voucherService;
+
+    @PutMapping("/update-statuses")
+    public ResponseEntity<?> updateVoucherStatusesManually() {
+        try {
+            voucherService.updateVoucherStatuses();
+            return ResponseEntity.ok(Response.builder()
+                    .status(HttpStatus.OK.toString())
+                    .mess("Voucher statuses updated successfully.")
+                    .build());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                            .mess(e.getMessage())
+                            .build());
+        }
     }
-//
 
     @GetMapping("/list-voucher")
     public ResponseEntity<Map<String, Object>> getAllVouchers(
@@ -97,15 +102,6 @@ public class VoucherController {
                 p = criteriaBuilder.and(p, endAtPredicate);
             }
 
-//            // Thêm thứ tự ưu tiên theo CASE WHEN
-//            query.orderBy(
-//                    criteriaBuilder.asc(criteriaBuilder.selectCase()
-//                            .when(criteriaBuilder.equal(root.get("status"), "UPCOMING"), 1)
-//                            .when(criteriaBuilder.equal(root.get("status"), "ONGOING"), 2)
-//                            .otherwise(3)),
-//                    criteriaBuilder.desc(root.get("startAt")) // Thêm sắp xếp phụ (nếu cần)
-//            );
-
             query.orderBy(criteriaBuilder.desc(root.get("id")));
 
             return p;
@@ -127,9 +123,9 @@ public class VoucherController {
 
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createVoucher(@RequestBody @Valid VoucherRequest voucherRequest,
-                                           BindingResult result,
-                                           @RequestParam(required = false) Long userId) {
+                                           BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errors = result.getAllErrors().stream()
@@ -138,8 +134,7 @@ public class VoucherController {
                 return ResponseEntity.badRequest().body(errors);
             }
 
-            Long creatorId = Optional.ofNullable(userId).orElse(1L);
-            Voucher createdVoucher = voucherService.createVoucher(voucherRequest, creatorId);
+            Voucher createdVoucher = voucherService.createVoucher(voucherRequest);
             VoucherResponse response = convertToVoucherResponse(createdVoucher);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
@@ -151,13 +146,13 @@ public class VoucherController {
         }
     }
 
+
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateVoucher(@PathVariable("id") long id,
-                                           @RequestBody VoucherRequest voucherRequest,
-                                           @RequestParam(required = false) Long userId) {
+                                           @RequestBody VoucherRequest voucherRequest) {
         try {
-            Long updaterId = Optional.ofNullable(userId).orElse(1L);
-            Voucher updatedVoucher = voucherService.updateVoucher(id, voucherRequest, updaterId);
+            Voucher updatedVoucher = voucherService.updateVoucher(id, voucherRequest);
             VoucherResponse response = convertToVoucherResponse(updatedVoucher);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -184,6 +179,7 @@ public class VoucherController {
     }
 
     @PutMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteVoucher(@PathVariable("id") Long id) {
         try {
             Voucher updatedVoucher = voucherService.deleteVoucher(id);
@@ -199,10 +195,10 @@ public class VoucherController {
     }
 
     @PutMapping("/end-early/{id}")
-    public ResponseEntity<?> endVoucherEarly(@PathVariable("id") Long id,
-                                             @RequestParam(value = "userId", required = false) Long userId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> endVoucherEarly(@PathVariable("id") Long id) {
         try {
-            Voucher updatedVoucher = voucherService.endVoucherEarly(id, Optional.ofNullable(userId).orElse(1L));
+            Voucher updatedVoucher = voucherService.endVoucherEarly(id);
             VoucherResponse response = convertToVoucherResponse(updatedVoucher);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -215,10 +211,10 @@ public class VoucherController {
     }
 
     @PutMapping("/reactivate/{id}")
-    public ResponseEntity<?> reactivateVoucher(@PathVariable("id") Long id,
-                                               @RequestParam(value = "userId", required = false) Long userId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> reactivateVoucher(@PathVariable("id") Long id) {
         try {
-            Voucher updatedVoucher = voucherService.reactivateVoucher(id, Optional.ofNullable(userId).orElse(1L));
+            Voucher updatedVoucher = voucherService.reactivateVoucher(id);
             VoucherResponse response = convertToVoucherResponse(updatedVoucher);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -288,7 +284,7 @@ public class VoucherController {
     }
 
     @GetMapping("/findVoucherByCodeVoucher")
-    public ResponseEntity<?> getVoucherBycodeVoucher (@RequestParam(value = "codeVoucher", required = false) String codeVoucher){
+    public ResponseEntity<?> getVoucherBycodeVoucher(@RequestParam(value = "codeVoucher", required = false) String codeVoucher) {
         try {
             if (codeVoucher == null) {
                 return ResponseEntity.badRequest().body(
