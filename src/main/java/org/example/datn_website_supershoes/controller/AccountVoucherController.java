@@ -70,17 +70,13 @@ public class AccountVoucherController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> sendEmail(@RequestBody EmailRequest emailRequest) {
         try {
-            // Handle multiple recipients if the 'to' field contains commas
             List<String> recipients;
             if (emailRequest.getTo().contains(",")) {
-                // Split by commas and convert to a list
                 recipients = Arrays.asList(emailRequest.getTo().split(","));
             } else {
-                // Single recipient case
                 recipients = Collections.singletonList(emailRequest.getTo());
             }
 
-            // Send email
             emailService.sendEmailVoucher(recipients, emailRequest.getSubject(), emailRequest.getBody());
             return ResponseEntity.ok("Email sent successfully.");
         } catch (Exception e) {
@@ -88,7 +84,6 @@ public class AccountVoucherController {
                     .body("Failed to send email: " + e.getMessage());
         }
     }
-
 
     @GetMapping()
     public ResponseEntity<Map<String, Object>> getAllAccountVouchers() {

@@ -139,10 +139,6 @@ public class VoucherService {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
-        if (voucher.getStatus().equals(Status.EXPIRED.toString())) {
-            throw new RuntimeException("Cannot update an expired voucher.");
-        }
-
         Account updater = getUseLogin();
 
         voucher.setStartAt(convertToUTC(voucherRequest.getStartAt()));

@@ -156,9 +156,9 @@ public class VoucherController {
             VoucherResponse response = convertToVoucherResponse(updatedVoucher);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Response.builder()
-                            .status(HttpStatus.NOT_FOUND.toString())
+                            .status(HttpStatus.BAD_REQUEST.toString())
                             .mess(e.getMessage())
                             .build());
         }
