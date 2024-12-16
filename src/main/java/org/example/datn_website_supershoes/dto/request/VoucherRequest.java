@@ -38,23 +38,23 @@ public class VoucherRequest {
     private String note;
 
     @NotNull(message = "Giá trị là bắt buộc")
-    @DecimalMin(value = "1", inclusive = true, message = "Giá trị phải lớn hơn 0")
-    @DecimalMax(value = "100", inclusive = true, message = "Giá trị không được quá 100")
+    @DecimalMin(value = "1", inclusive = true, message = "Giá trị tối thiểu 1%")
+    @DecimalMax(value = "100", inclusive = false, message = "Giá trị tối đa 99%")
     private Double value;
 
     @NotNull(message = "Số lượng là bắt buộc")
-    @Min(value = 1, message = "Số lượng phải là số nguyên dương và lớn hơn 0")
-    @Max(value = 1000, message = "Số lượng không được vượt quá 1,000")
+    @Min(value = 1, message = "Số lượng tối thiểu là 1")
+    @Max(value = 1000, message = "Số lượng tối đa là 1,000")
     private Integer quantity;
 
-    @DecimalMin(value = "1000", inclusive = false, message = "Giảm giá tối đa phải lớn hơn 1,000")
-    @DecimalMax(value = "2000000", inclusive = true, message = "Giảm giá tối đa không được vượt quá 2,000,000")
+    @DecimalMin(value = "1000", inclusive = false, message = "Giảm giá tối đa phải lớn hơn 1,000 VND")
+    @DecimalMax(value = "2000000", inclusive = true, message = "Giảm giá tối đa không được vượt quá 2,000,000 VND")
     private BigDecimal maximumDiscount;
 
     private Integer type;
 
-    @DecimalMin(value = "1000", inclusive = false, message = "Giá trị đơn hàng tối thiểu phải lớn hơn 1,000")
-    @DecimalMax(value = "10000000", inclusive = true, message = "Giá trị đơn hàng tối thiểu không được vượt quá 10,000,000")
+    @DecimalMin(value = "1000", inclusive = false, message = "Giá trị đơn hàng tối thiểu phải lớn hơn 1,000 VND")
+    @DecimalMax(value = "10000000", inclusive = true, message = "Giá trị đơn hàng tối thiểu không được vượt quá 10,000,000 VND")
     private BigDecimal minBillValue;
 
     @NotNull(message = "Ngày bắt đầu là bắt buộc")
