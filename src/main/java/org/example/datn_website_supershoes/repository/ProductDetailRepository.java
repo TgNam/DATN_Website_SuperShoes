@@ -85,8 +85,8 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "p.id, p.name, p.imageByte, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, " +
             "MIN(pd.price), " +
             "MAX(pd.price), " +
-            "MIN(CAST(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal)), " +
-            "MAX(CAST(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal))" +
+            "MIN(CAST(CASE WHEN prod.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal)), " +
+            "MAX(CAST(CASE WHEN prod.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal))" +
             ") " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
@@ -110,8 +110,8 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "ss.id, ss.name, " +
             "MIN(pd.price) AS minPrice, " +
             "MAX(pd.price) AS maxPrice, " +
-            "MIN(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END) AS minPromoPrice, " +
-            "MAX(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END) AS maxPromoPrice, " +
+            "MIN(CASE WHEN prod.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END) AS minPromoPrice, " +
+            "MAX(CASE WHEN prod.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END) AS maxPromoPrice, " +
             "si.id, si.name, " +
             "cl.id, cl.name, " +
             "p.gender" +
@@ -156,8 +156,8 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, Lo
             "p.id, p.name,p.imageByte, b.id, b.name, c.id, c.name, m.id, m.name, ss.id, ss.name, " +
             "MIN(pd.price), " +
             "MAX(pd.price), " +
-            "MIN(CAST(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal)), " +
-            "MAX(CAST(CASE WHEN pro.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal))" +
+            "MIN(CAST(CASE WHEN prod.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal)), " +
+            "MAX(CAST(CASE WHEN prod.status = 'ONGOING' THEN (pd.price * (1 - pro.value / 100)) ELSE pd.price END AS BigDecimal))" +
             ") " +
             "FROM ProductDetail pd " +
             "INNER JOIN pd.product p " +
