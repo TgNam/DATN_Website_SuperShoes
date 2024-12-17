@@ -102,8 +102,8 @@ public class PromotionDetailService {
                         Arrays.asList(Status.ONGOING.toString(), Status.UPCOMING.toString(), Status.ENDING_SOON.toString()));
                 //Nếu tìm thấy đợt giảm giá bởi id sản phẩm chi tiết và trạng thái thì trạng thái chuyển sang FINISHED
                 if (promotionDetailOptional.isPresent()) {
-                    promotionDetail.setStatus(Status.FINISHED.toString());
-                    promotionDetailRepository.save(promotionDetail);
+                    promotionDetailOptional.get().setStatus(Status.FINISHED.toString());
+                    promotionDetailRepository.save(promotionDetailOptional.get());
                 }
                 promotionDetail.setQuantity(request.getQuantity());
                 if (request.getQuantity() == 0) {
