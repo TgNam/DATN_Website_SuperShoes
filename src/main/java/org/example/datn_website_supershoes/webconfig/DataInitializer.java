@@ -38,9 +38,9 @@ public class DataInitializer implements ApplicationListener<ContextRefreshedEven
         Date birthday = calendar.getTime();
         addPaymentMethodIfNotExist("QR payment", "Thanh toán QR", 1);
         addPaymentMethodIfNotExist("Cash payment", "Thanh toán tiền mặt", 2);
-        addAccountAdminIfNotExist("Nguyễn Trường Nam","admin@gmail.com","0983729351","1",birthday,Role.ADMIN.toString());
-        addAccountAdminIfNotExist("Nguyễn Trường Nam","employee@gmail.com","0983729351","1",birthday,Role.EMPLOYEE.toString());
-        addAccountAdminIfNotExist("Nguyễn Trường Nam","customer@gmail.com","0983729351","1",birthday,Role.CUSTOMER.toString());
+        addAccountAdminIfNotExist("Nguyễn Văn A","admin@gmail.com","0983729351","1",birthday,Role.ADMIN.toString());
+        addAccountAdminIfNotExist("Nguyễn Văn E","employee@gmail.com","0983729351","1",birthday,Role.EMPLOYEE.toString());
+        addAccountAdminIfNotExist("Nguyễn Văn C","customer@gmail.com","0983729351","1",birthday,Role.CUSTOMER.toString());
     }
 
     private void addPaymentMethodIfNotExist(String methodName, String note, Integer type) {
